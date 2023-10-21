@@ -2,7 +2,7 @@
 #include "linker_language.h"
 
 Ref<Script> LinkerScript::get_base_script() const {
-    if (_base) {
+	if (_base) {
 		return Ref<Script>(_base); // Try to inherit from any script not only LinkScript or GDScript (delete this comment if inheritnace works)
 	} else {
 		return Ref<Script>();
@@ -10,7 +10,7 @@ Ref<Script> LinkerScript::get_base_script() const {
 }
 
 StringName LinkerScript::get_global_name() const {
-    return global_name;
+	return global_name;
 }
 
 bool LinkerScript::inherits_script(const Ref<Script> &p_script) const {
@@ -31,9 +31,9 @@ bool LinkerScript::inherits_script(const Ref<Script> &p_script) const {
 }
 
 StringName LinkerScript::get_instance_base_type() const {
-/*	if (native.is_valid()) {               // ToDo: implement `Ref<LinkerScriptNativeClass> native;`
-		return native->get_name();
-	} */
+	/*	if (native.is_valid()) {               // ToDo: implement `Ref<LinkerScriptNativeClass> native;`
+			return native->get_name();
+		} */
 	if (base.is_valid() && base->is_valid()) {
 		return base->get_instance_base_type();
 	}
@@ -42,7 +42,7 @@ StringName LinkerScript::get_instance_base_type() const {
 
 ScriptInstance *LinkerScript::instance_create(Object *p_this) {
 	// ToDo
-    return nullptr;
+	return nullptr;
 }
 
 bool LinkerScript::instance_has(const Object *p_this) const {
@@ -78,13 +78,13 @@ Error LinkerScript::reload(bool p_keep_state) {
 
 PropertyInfo LinkerScript::get_class_category() const {
 	StringName scr_name;
-    if (get_name().is_empty()) {
-        scr_name = path.get_file();
-    } else {
-        scr_name = get_name();
-    }
-	
-	return PropertyInfo(Variant::NIL, scr_name, PROPERTY_HINT_NONE, path, PROPERTY_USAGE_CATEGORY, global_name);    
+	if (get_name().is_empty()) {
+		scr_name = path.get_file();
+	} else {
+		scr_name = get_name();
+	}
+
+	return PropertyInfo(Variant::NIL, scr_name, PROPERTY_HINT_NONE, path, PROPERTY_USAGE_CATEGORY, global_name);
 }
 
 bool LinkerScript::has_method(const StringName &p_method) const {
@@ -100,17 +100,16 @@ MethodInfo LinkerScript::get_method_info(const StringName &p_method) const {
 		return MethodInfo();
 	}
 
-
 	return member_functions.get(p_method);
 	//return static_cast<MethodInfo>(member_functions.get(p_method));
 }
 
-ScriptLanguage *LinkerScript::get_language() const  {
+ScriptLanguage *LinkerScript::get_language() const {
 	return LinkerLanguage::get_singleton();
 }
 
 bool LinkerScript::has_script_signal(const StringName &p_signal) const {
-    if (signals.has(p_signal)) {
+	if (signals.has(p_signal)) {
 		return true;
 	}
 	if (base.is_valid()) {
@@ -144,7 +143,7 @@ void LinkerScript::get_script_method_list(List<MethodInfo> *p_list) const {
 	}
 }
 
-void LinkerScript::get_script_property_list(List<PropertyInfo>* p_list) const {
+void LinkerScript::get_script_property_list(List<PropertyInfo> *p_list) const {
 	for (const KeyValue<StringName, PropertyInfo> &E : member_properties) {
 		p_list->push_back(E.value);
 	}
