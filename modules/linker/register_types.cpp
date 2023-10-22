@@ -3,6 +3,7 @@
 #include "core/config/engine.h"
 #include "core/object/class_db.h"
 
+#include "editor/linker_editor.h"
 #include "language/linker_language.h"
 #include "language/linker_loader.h"
 #include "language/linker_saver.h"
@@ -33,8 +34,8 @@ void initialize_linker_module(ModuleInitializationLevel p_level) {
 	if (p_level == GDEXTENSION_INITIALIZATION_SCENE) {
 	}
 	if (p_level == GDEXTENSION_INITIALIZATION_EDITOR) {
-	}
-	if (p_level == GDEXTENSION_MAX_INITIALIZATION_LEVEL) {
+		GDREGISTER_CLASS(LinkerEditor);
+		LinkerEditor::register_editor();
 	}
 }
 
@@ -47,16 +48,7 @@ void uninitialize_linker_module(ModuleInitializationLevel p_level) {
 		if (linker_language) {
 			memdelete(linker_language);
 		}
-		if (linker_saver) {
-			memdelete(linker_saver);
-		}
-		if (linker_loader) {
-			memdelete(linker_loader);
-		}
 	}
 	if (p_level == GDEXTENSION_INITIALIZATION_EDITOR) {
-	}
-	if (p_level == GDEXTENSION_MAX_INITIALIZATION_LEVEL) {
-		//ERR_PRINT("this never prints");
 	}
 }
