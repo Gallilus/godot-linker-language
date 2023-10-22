@@ -141,8 +141,8 @@ void LinkerScript::get_script_method_list(List<MethodInfo> *p_list) const {
 }
 
 void LinkerScript::get_script_property_list(List<PropertyInfo> *p_list) const {
-	for (const KeyValue<StringName, PropertyInfo> &E : member_properties) {
-		p_list->push_back(E.value);
+	for (const KeyValue<StringName, VariableInfo> &E : member_properties) {
+		p_list->push_back(E.value.info);
 	}
 }
 
@@ -160,4 +160,16 @@ void LinkerScript::get_members(HashSet<StringName> *p_members) {
 			p_members->insert(E);
 		}
 	}
+}
+
+void LinkerScript::set_member_variable(const StringName &p_name, const PropertyInfo &p_info, Variant *p_default_value) {
+	if (member_properties.has(p_name)) {
+		member_properties[p_name] = VariableInfo(p_info, &p_default_value);
+		return;
+	} else if (!members.has(p_name)) {
+		members.insert(p_name);
+		member_properties.insert(p_name, VariableInfo(p_info, &p_default_value));
+		return;
+	}
+	ERR_PRINT("Duplicate member variable: " + p_name);
 }

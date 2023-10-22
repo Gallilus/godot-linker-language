@@ -4,6 +4,7 @@
 #include "core/object/script_language.h"
 #include "core/templates/hash_map.h"
 #include "core/templates/rb_set.h"
+#include "core/variant/variant.h"
 
 class LinkerScript : public Script {
 	GDCLASS(LinkerScript, Script);
@@ -17,10 +18,32 @@ class LinkerScript : public Script {
 	Ref<Script> base;
 	Script *_base = nullptr; //fast pointer access
 
+	struct VariableInfo {
+		int index = 0;
+		PropertyInfo info;
+		Variant default_value;
+		StringName setter;
+		StringName getter;
+		bool is_export = false;
+		bool is_constant = false;
+		bool is_private = false; // variables are private properties are public
+
+		VariableInfo() {}
+
+		VariableInfo(const PropertyInfo &p_info) :
+				info(p_info) {}
+
+		VariableInfo(const PropertyInfo &p_info, const Variant &p_default_value) :
+				info(p_info), default_value(p_default_value) {}
+
+		VariableInfo(const PropertyInfo &p_info, const Variant &p_default_value, const StringName &p_setter, const StringName &p_getter, bool p_is_export, bool p_is_constant, bool p_is_private) :
+				info(p_info), default_value(p_default_value), setter(p_setter), getter(p_getter), is_export(p_is_export), is_constant(p_is_constant), is_private(p_is_private) {}
+	};
+
 	HashSet<StringName> members;
 
 	HashMap<StringName, MethodInfo> member_functions;
-	HashMap<StringName, PropertyInfo> member_properties;
+	HashMap<StringName, VariableInfo> member_properties;
 	HashMap<StringName, Variant> constants;
 	HashMap<StringName, MethodInfo> signals;
 	Dictionary rpc_config;
@@ -96,6 +119,8 @@ public:
 	virtual bool is_placeholder_fallback_enabled() const { return false; }
 
 	virtual const Variant get_rpc_config() const override { return rpc_config; }
+
+	void set_member_variable(const StringName &p_name, const PropertyInfo &p_value, Variant *p_default_value = nullptr);
 
 	LinkerScript() {}
 	~LinkerScript() {}
