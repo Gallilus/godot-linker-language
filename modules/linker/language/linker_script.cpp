@@ -55,17 +55,14 @@ bool LinkerScript::has_source_code() const {
 }
 
 String LinkerScript::get_source_code() const {
+	// Create or get source code
 	return source;
 }
 
 void LinkerScript::set_source_code(const String &p_code) {
-	if (source == p_code) {
-		return;
+	if (source != p_code) {
+		source = p_code;
 	}
-	source = p_code;
-#ifdef TOOLS_ENABLED
-	source_changed_cache = true;
-#endif
 }
 
 Error LinkerScript::reload(bool p_keep_state) {

@@ -26,7 +26,7 @@ class LinkerScript : public Script {
 	Dictionary rpc_config;
 
 #ifdef TOOLS_ENABLED
-	bool source_changed_cache = false;
+	bool is_saved = false;
 	Vector<DocData::ClassDoc> docs;
 #endif // TOOLS_ENABLED
 
@@ -63,6 +63,8 @@ public:
 	virtual Vector<DocData::ClassDoc> get_documentation() const override { return docs; }
 	virtual String get_class_icon_path() const override { return simplified_icon_path; }
 	virtual PropertyInfo get_class_category() const override;
+	void set_saved(bool p_saved) { is_saved = p_saved; }
+	bool is_unsaved() const { return !is_saved; }
 #endif // TOOLS_ENABLED
 
 	// TODO: In the next compat breakage rename to `*_script_*` to disambiguate from `Object::has_method()`.

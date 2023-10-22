@@ -28,6 +28,9 @@ Ref<Resource> LinkerLoader::load(const String &p_path, const String &p_original_
 		*r_error = scr.is_valid() ? OK : err;
 	}
 
+#ifdef TOOLS_ENABLED
+	scr->set_saved(true);
+#endif
 	return scr;
 }
 

@@ -18,6 +18,10 @@ Error LinkerSaver::save(const Ref<Resource> &p_resource, const String &p_path, u
 		}
 	}
 	// ToDo if reload on save is enabled, reload the script
+
+#ifdef TOOLS_ENABLED
+	sqscr->set_saved(true);
+#endif
 	return OK;
 }
 

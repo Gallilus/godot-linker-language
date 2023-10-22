@@ -57,7 +57,7 @@ String LinkerEditor::get_name() {
 	String name = "";
 	if (script.is_valid()) {
 		name = script->get_path().get_file();
-		if (is_unsaved()){
+		if (is_unsaved()) {
 			name += " (*)";
 		}
 	}
@@ -69,10 +69,11 @@ Ref<Texture2D> LinkerEditor::get_theme_icon() {
 }
 
 bool LinkerEditor::is_unsaved() {
-	// Compare editor with Save
-	const bool unsaved = script->get_path().is_empty(); // In memory.
-	// Scriptname += (*)
-	return unsaved;
+	bool r = true;
+#ifdef TOOLS_ENABLED
+	r = script->is_unsaved();
+#endif
+	return r;
 }
 
 Control *LinkerEditor::get_edit_menu() {
