@@ -47,10 +47,9 @@ public:
 	virtual void trim_trailing_whitespace() override {}
 	virtual void insert_final_newline() override {}
 	virtual void convert_indent() override {}
-	virtual void ensure_focus() override { /*subeditor()->grab_focus()*/
-	}
+	virtual void ensure_focus() override { base_editor->grab_focus(); }
 	virtual void tag_saved_version() override {}
-	virtual void reload(bool p_soft) {}
+	virtual void reload(bool p_soft) { ERR_PRINT("reload " + itos(p_soft)); }
 	virtual PackedInt32Array get_breakpoints() override { return PackedInt32Array(); }
 	virtual void set_breakpoint(int p_line, bool p_enabled) override {}
 	virtual void clear_breakpoints() override {}
@@ -72,8 +71,9 @@ public:
 	virtual Control *get_base_editor() const override;
 	virtual void validate() override {}
 
-	static ScriptEditorBase *create_editor(const Ref<Resource> &p_resource);
 	static void register_editor();
+
+	void test();
 
 	LinkerEditor();
 	~LinkerEditor();

@@ -163,11 +163,24 @@ void LinkerScript::get_members(HashSet<StringName> *p_members) {
 }
 
 void LinkerScript::set_member_variable(const StringName &p_name, const PropertyInfo &p_info, Variant *p_default_value) {
+	ERR_PRINT("test");
+#ifdef TOOLS_ENABLED
+	is_saved = false;
+#endif // TOOLS_ENABLED
+
 	if (member_properties.has(p_name)) {
+		if (p_default_value == nullptr) {
+			member_properties[p_name] = VariableInfo(p_info);
+			return;
+		}
 		member_properties[p_name] = VariableInfo(p_info, &p_default_value);
 		return;
 	} else if (!members.has(p_name)) {
 		members.insert(p_name);
+		if (p_default_value == nullptr) {
+			member_properties[p_name] = VariableInfo(p_info);
+			return;
+		}
 		member_properties.insert(p_name, VariableInfo(p_info, &p_default_value));
 		return;
 	}
