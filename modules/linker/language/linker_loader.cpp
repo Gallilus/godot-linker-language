@@ -1,37 +1,25 @@
 #include "linker_loader.h"
 
-#include "core/config/engine.h"
-#include "core/io/file_access.h"
-
 Ref<Resource> LinkerLoader::load(const String &p_path, const String &p_original_path, Error *r_error, bool p_use_sub_threads, float *r_progress, CacheMode p_cache_mode) {
 	if (p_use_sub_threads) {
 		ERR_PRINT("sub threads not supported");
 	}
 
+	ConfigFile confif_file = ConfigFile();
+
 	Error err;
-	Ref<LinkerScript> scr = LinkerLanguage::get_singleton()->create_script();
+	err = confif_file.load(p_path);
+	ERR_FAIL_COND_V_MSG(err, Ref<Resource>(), "Cannot load LinkerScript file '" + p_path + "'.");
 
-	{
-		Ref<FileAccess> file = FileAccess::open(p_path, FileAccess::READ, &err);
+	Ref<LinkerScript> linker_script = memnew(LinkerScript);
 
-		scr->set_path(p_path);
-		scr->set_source_code(file->get_as_utf8_string());
-	}
-
-	if (err && scr.is_valid()) {
-		// If !scr.is_valid(), the error was likely from scr->load_source_code(), which already generates an error.
-		ERR_PRINT_ED(vformat(R"(Failed to load script "%s" with error "%s".)", p_path, error_names[err]));
-	}
-
-	if (r_error) {
-		// Don't fail loading because of parsing error.
-		*r_error = scr.is_valid() ? OK : err;
-	}
+	read_script_settings(linker_script, confif_file);
+	read_script_values(linker_script, confif_file);
 
 #ifdef TOOLS_ENABLED
-	scr->set_saved(true);
+	linker_script->set_saved(true);
 #endif
-	return scr;
+	return linker_script;
 }
 
 void LinkerLoader::get_recognized_extensions(List<String> *p_extensions) const {
@@ -40,4 +28,22 @@ void LinkerLoader::get_recognized_extensions(List<String> *p_extensions) const {
 
 bool LinkerLoader::handles_type(const String &p_type) const {
 	return p_type == LinkerLanguage::get_singleton()->get_type() || p_type == "Script";
+}
+
+void LinkerLoader::read_script_settings(const Ref<LinkerScript> &p_script, ConfigFile &p_config_file) {
+	String section = "script_settings";
+#ifdef TOOLS_ENABLED
+	p_script->tool = p_config_file.get_value(section, "tool", p_script->tool);
+#endif
+	p_script->valid = p_config_file.get_value(section, "valid", p_script->valid);
+	p_script->abstract = p_config_file.get_value(section, "abstract", p_script->abstract);
+	p_script->reloading = p_config_file.get_value(section, "reloading", p_script->reloading);
+}
+
+void LinkerLoader::read_script_values(const Ref<LinkerScript> &p_script, ConfigFile &p_config_file) {
+	String section = "script_values";
+	p_script->set_method_list(p_config_file.get_value(section, "methods", p_script->get_method_list()));
+	p_script->set_property_list(p_config_file.get_value(section, "properties", p_script->get_property_list()));
+	p_script->set_constants(p_config_file.get_value(section, "constants", p_script->get_constants()));
+	p_script->set_signal_list(p_config_file.get_value(section, "signals", p_script->get_signal_list()));
 }

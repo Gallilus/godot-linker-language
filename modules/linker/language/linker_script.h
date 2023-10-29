@@ -8,12 +8,17 @@
 
 class LinkerScript : public Script {
 	GDCLASS(LinkerScript, Script);
+
+	//RES_BASE_EXTENSION("ls");
+
+	friend class LinkerLanguage;
+	friend class LinkerSaver;
+	friend class LinkerLoader;
+
 	bool tool = false;
 	bool valid = false;
 	bool abstract = false;
 	bool reloading = false;
-
-	friend class LinkerLanguage;
 
 	Ref<Script> base;
 	Script *_base = nullptr; //fast pointer access
@@ -38,6 +43,31 @@ class LinkerScript : public Script {
 
 		VariableInfo(const PropertyInfo &p_info, const Variant &p_default_value, const StringName &p_setter, const StringName &p_getter, bool p_is_export, bool p_is_constant, bool p_is_private) :
 				info(p_info), default_value(p_default_value), setter(p_setter), getter(p_getter), is_export(p_is_export), is_constant(p_is_constant), is_private(p_is_private) {}
+
+		operator Dictionary() const {
+			Dictionary d;
+			d["index"] = index;
+			d["info"] = Dictionary(info);
+			d["default_value"] = default_value;
+			d["setter"] = setter;
+			d["getter"] = getter;
+			d["is_export"] = is_export;
+			d["is_constant"] = is_constant;
+			d["is_private"] = is_private;
+			return d;
+		}
+		static VariableInfo from_dict(const Dictionary &p_dict) {
+			VariableInfo vi;
+			vi.index = p_dict["index"];
+			vi.info = PropertyInfo(p_dict["info"]);
+			vi.default_value = p_dict["default_value"];
+			vi.setter = p_dict["setter"];
+			vi.getter = p_dict["getter"];
+			vi.is_export = p_dict["is_export"];
+			vi.is_constant = p_dict["is_constant"];
+			vi.is_private = p_dict["is_private"];
+			return vi;
+		}
 	};
 
 	HashSet<StringName> members;
@@ -120,7 +150,24 @@ public:
 
 	virtual const Variant get_rpc_config() const override { return rpc_config; }
 
-	void set_member_variable(const StringName &p_name, const PropertyInfo &p_value, Variant *p_default_value = nullptr);
+	TypedArray<StringName> get_members() const;
+
+	Dictionary get_method_list() const;
+	void set_method_list(const Dictionary &p_methods);
+	void set_method(const MethodInfo &p_info);
+
+	Dictionary get_property_list() const;
+	void set_property_list(const Dictionary &p_properties);
+	void set_member_variable(const StringName &p_name, const PropertyInfo &p_value, Variant *p_default_value = nullptr); // /!!!!!!!!
+	void set_property(const VariableInfo &p_info);
+
+	Dictionary get_constants() const;
+	void set_constants(const Dictionary &p_constants);
+	void set_constant(const StringName &p_name, const Variant &p_value);
+
+	Dictionary get_signal_list() const;
+	void set_signal_list(const Dictionary &p_signals);
+	void set_signal(const MethodInfo &p_info);
 
 	LinkerScript() {}
 	~LinkerScript() {}

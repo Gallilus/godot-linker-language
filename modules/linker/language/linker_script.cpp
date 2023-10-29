@@ -162,8 +162,60 @@ void LinkerScript::get_members(HashSet<StringName> *p_members) {
 	}
 }
 
+TypedArray<StringName> LinkerScript::get_members() const {
+	TypedArray<StringName> names;
+	for (const StringName &E : members) {
+		names.push_back(E);
+	}
+	return names;
+}
+
+Dictionary LinkerScript::get_method_list() const {
+	Dictionary methods;
+	for (const KeyValue<StringName, MethodInfo> &E : member_functions) {
+		methods[E.key] = Dictionary(E.value);
+	}
+	return methods;
+}
+
+void LinkerScript::set_method_list(const Dictionary &p_methods) {
+	for (int i = 0; i < p_methods.keys().size(); i++) {
+		StringName key = p_methods.keys()[i];
+		set_method(MethodInfo(p_methods[key]));
+	};
+}
+
+void LinkerScript::set_method(const MethodInfo &p_info) {
+	if (members.has(p_info.name)) {
+		if (member_functions.has(p_info.name)) {
+			member_functions[p_info.name] = p_info;
+			return;
+		}
+		ERR_PRINT("Duplicate member name: " + p_info.name);
+		return;
+	} else {
+		members.insert(p_info.name);
+		member_functions.insert(p_info.name, p_info);
+		return;
+	}
+}
+
+Dictionary LinkerScript::get_property_list() const {
+	Dictionary properties;
+	for (const KeyValue<StringName, VariableInfo> &E : member_properties) {
+		properties[E.key] = Dictionary(E.value);
+	}
+	return properties;
+}
+
+void LinkerScript::set_property_list(const Dictionary &p_properties) {
+	for (int i = 0; i < p_properties.keys().size(); i++) {
+		StringName key = p_properties.keys()[i];
+		set_property(VariableInfo::from_dict(p_properties[key]));
+	};
+}
+
 void LinkerScript::set_member_variable(const StringName &p_name, const PropertyInfo &p_info, Variant *p_default_value) {
-	ERR_PRINT("test");
 #ifdef TOOLS_ENABLED
 	is_saved = false;
 #endif // TOOLS_ENABLED
@@ -185,4 +237,79 @@ void LinkerScript::set_member_variable(const StringName &p_name, const PropertyI
 		return;
 	}
 	ERR_PRINT("Duplicate member variable: " + p_name);
+}
+
+void LinkerScript::set_property(const VariableInfo &p_info) {
+	if (members.has(p_info.info.name)) {
+		if (member_properties.has(p_info.info.name)) {
+			member_properties[p_info.info.name] = p_info;
+			return;
+		}
+		ERR_PRINT("Duplicate member name: " + p_info.info.name);
+		return;
+	} else {
+		members.insert(p_info.info.name);
+		member_properties.insert(p_info.info.name, p_info);
+		return;
+	}
+}
+
+Dictionary LinkerScript::get_constants() const {
+	Dictionary consts;
+	for (const KeyValue<StringName, Variant> &E : constants) {
+		consts[E.key] = E.value;
+	}
+	return consts;
+}
+
+void LinkerScript::set_constants(const Dictionary &p_constants) {
+	for (int i = 0; i < p_constants.keys().size(); i++) {
+		StringName key = p_constants.keys()[i];
+		set_constant(key, p_constants[key]);
+	};
+}
+
+void LinkerScript::set_constant(const StringName &p_name, const Variant &p_value) {
+	if (members.has(p_name)) {
+		if (constants.has(p_name)) {
+			constants[p_name] = p_value;
+			return;
+		}
+		ERR_PRINT("Duplicate member name: " + p_name);
+		return;
+	} else {
+		members.insert(p_name);
+		constants.insert(p_name, p_value);
+		return;
+	}
+}
+
+Dictionary LinkerScript::get_signal_list() const {
+	Dictionary signal_list;
+	for (const KeyValue<StringName, MethodInfo> &E : signals) {
+		signal_list[E.key] = Dictionary(E.value);
+	}
+	return signal_list;
+}
+
+void LinkerScript::set_signal_list(const Dictionary &p_signals) {
+	for (int i = 0; i < p_signals.keys().size(); i++) {
+		StringName key = p_signals.keys()[i];
+		set_signal(MethodInfo(p_signals[key]));
+	};
+}
+
+void LinkerScript::set_signal(const MethodInfo &p_info) {
+	if (members.has(p_info.name)) {
+		if (signals.has(p_info.name)) {
+			signals[p_info.name] = p_info;
+			return;
+		}
+		ERR_PRINT("Duplicate member name: " + p_info.name);
+		return;
+	} else {
+		members.insert(p_info.name);
+		signals.insert(p_info.name, p_info);
+		return;
+	}
 }

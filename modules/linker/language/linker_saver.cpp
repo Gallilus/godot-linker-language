@@ -1,28 +1,22 @@
 #include "linker_saver.h"
 
 Error LinkerSaver::save(const Ref<Resource> &p_resource, const String &p_path, uint32_t p_flags) {
-	Ref<LinkerScript> sqscr = p_resource;
-	ERR_FAIL_COND_V(sqscr.is_null(), ERR_INVALID_PARAMETER);
+	Ref<LinkerScript> linker_script = p_resource;
+	ERR_FAIL_COND_V(linker_script.is_null(), ERR_INVALID_PARAMETER);
 
-	String source = sqscr->get_source_code();
+	ConfigFile confif_file = ConfigFile();
 
-	{
-		Error err;
-		Ref<FileAccess> file = FileAccess::open(p_path, FileAccess::WRITE, &err);
+	write_script_settings(linker_script, confif_file);
+	write_script_values(linker_script, confif_file);
 
-		ERR_FAIL_COND_V_MSG(err, err, "Cannot save LinkerScript file '" + p_path + "'.");
-
-		file->store_string(source);
-		if (file->get_error() != OK && file->get_error() != ERR_FILE_EOF) {
-			return ERR_CANT_CREATE;
-		}
-	}
-	// ToDo if reload on save is enabled, reload the script
+	Error err = confif_file.save(p_path);
+	ERR_FAIL_COND_V_MSG(err, err, "Cannot save LinkerScript file '" + p_path + "'.");
 
 #ifdef TOOLS_ENABLED
-	sqscr->set_saved(true);
+	linker_script->set_saved(true);
 #endif
-	return OK;
+	// refresh editor
+	return err;
 }
 
 bool LinkerSaver::recognize(const Ref<Resource> &p_resource) const {
@@ -31,4 +25,23 @@ bool LinkerSaver::recognize(const Ref<Resource> &p_resource) const {
 
 void LinkerSaver::get_recognized_extensions(const Ref<Resource> &p_resource, List<String> *p_extensions) const {
 	LinkerLanguage::get_singleton()->get_recognized_extensions(p_extensions);
+}
+
+void LinkerSaver::write_script_settings(const Ref<LinkerScript> &p_script, ConfigFile &p_config_file) {
+	String section = "script_settings";
+#ifdef TOOLS_ENABLED
+	p_config_file.set_value(section, "tool", p_script->tool);
+#endif
+	p_config_file.set_value(section, "valid", p_script->valid);
+	p_config_file.set_value(section, "abstract", p_script->abstract);
+	p_config_file.set_value(section, "reloading", p_script->reloading);
+}
+
+void LinkerSaver::write_script_values(const Ref<LinkerScript> &p_script, ConfigFile &p_config_file) {
+	String section = "script_values";
+	p_config_file.set_value(section, "members", p_script->get_members());
+	p_config_file.set_value(section, "methods", p_script->get_method_list());
+	p_config_file.set_value(section, "properties", p_script->get_property_list());
+	p_config_file.set_value(section, "constants", p_script->get_constants());
+	p_config_file.set_value(section, "signals", p_script->get_signal_list());
 }
