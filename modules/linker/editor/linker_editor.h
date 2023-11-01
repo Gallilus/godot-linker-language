@@ -3,11 +3,9 @@
 
 #include "core/object/ref_counted.h"
 #include "editor/code_editor.h"
-#include "editor/editor_inspector.h"
 #include "editor/editor_node.h"
-#include "editor/editor_properties.h"
-#include "editor/editor_properties_array_dict.h"
 #include "editor/editor_string_names.h"
+#include "editor/plugins/script_editor_plugin.h"
 #include "scene/gui/control.h"
 
 #include "../language/linker_language.h"
@@ -23,9 +21,6 @@ class LinkerEditor : public ScriptEditorBase {
 	Control *edit_menu = nullptr;
 	FindReplaceBar *find_replace_bar = nullptr;
 	Control *base_editor = nullptr;
-
-	//Variant test_variant = Color(1, .5, .3);
-	Variant test_variant = Array();
 
 protected:
 	static void _bind_methods() {}

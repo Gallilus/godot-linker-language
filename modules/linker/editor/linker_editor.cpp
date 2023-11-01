@@ -60,39 +60,8 @@ void LinkerEditor::enable_editor(Control *p_shortcut_context) {
 
 	Panel *background = memnew(Panel);
 	background->set_anchors_and_offsets_preset(Control::PRESET_FULL_RECT);
-	//background->set_modulate(Color(0.1, 1.0, 0.1));
+	background->set_modulate(Color(0.1, 1.0, 0.1));
 	base_editor->add_child(background);
-
-	//	ERR_PRINT(String(test_variant));
-	EditorProperty *test_editor_property = EditorInspector::instantiate_property_editor(
-			test_variant,
-			test_variant.get_type(),
-			"",
-			PropertyHint::PROPERTY_HINT_NONE,
-			"",
-			PropertyUsageFlags::PROPERTY_USAGE_NONE);
-
-	base_editor->add_child(test_editor_property);
-
-	test_editor_property->set_label("test_variant");
-	test_editor_property->set_object_and_property(this, "test_variant");
-
-	test_editor_property->update_property();
-	test_editor_property->update_editor_property_status();
-	//test_editor_property->set_name("test_variant_prop editor node");
-
-	//Size2 min_size = test_editor_property->get_combined_minimum_size();
-	//ERR_PRINT(String(test_editor_property->get_combined_minimum_size()));
-	//ERR_PRINT(String(test_editor_property->get_child(0)->to_string()));
-	Control *test_editor_property_control = Object::cast_to<Control>(test_editor_property->get_child(0));
-	//Control *test_editor_property_control = Object::cast_to<EditorPropertyArray>(test_editor_property->ini(0));
-	Size2 min_size;
-	if (test_editor_property_control) {
-		//		ERR_PRINT(String(test_editor_property_control->get_transform()));
-		min_size = test_editor_property_control->get_size();
-	}
-	test_editor_property->set_custom_minimum_size(Size2(200, 400));
-	//test_editor_property->set_custom_minimum_size(min_size);
 
 	// ToDo set shortcut context
 
@@ -156,16 +125,12 @@ void LinkerEditor::register_editor() {
 
 void LinkerEditor::test() {
 	script->set_member_variable("test", PropertyInfo(Variant::STRING, "test"), nullptr);
-	ERR_PRINT(String(test_variant));
 }
 
 LinkerEditor::LinkerEditor() {
 	base_editor = memnew(Control);
 	edit_menu = memnew(Control);
 	find_replace_bar = memnew(FindReplaceBar);
-
-	//cast to arry
-	Array(test_variant).append("tstgsdds");
 }
 
 LinkerEditor::~LinkerEditor() {
