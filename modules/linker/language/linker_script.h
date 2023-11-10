@@ -28,6 +28,33 @@ class LinkerScript : public Script {
 	Ref<Script> base;
 	LinkerScript *_base = nullptr; //fast pointer access
 	LinkerScript *_owner = nullptr; //for subclasses
+public:
+	struct NodeInfo {
+		StringName node_class_name;
+		StringName node_name;
+		String node_script_file_path;
+		NodePath node_scene_path;
+		StringName node_scene_relative_path;
+
+		operator Dictionary() const {
+			Dictionary d;
+			d["node_class_name"] = node_class_name;
+			d["node_name"] = node_name;
+			d["node_script_file_path"] = node_script_file_path;
+			d["node_scene_path"] = node_scene_path;
+			d["node_scene_relative_path"] = node_scene_relative_path;
+			return d;
+		}
+		static NodeInfo from_dict(const Dictionary &p_dict) {
+			NodeInfo node_info;
+			node_info.node_class_name = StringName(p_dict["node_class_name"]);
+			node_info.node_name = StringName(p_dict["node_name"]);
+			node_info.node_script_file_path = String(p_dict["node_script_file_path"]);
+			node_info.node_scene_path = NodePath(p_dict["node_scene_path"]);
+			node_info.node_scene_relative_path = StringName(p_dict["node_scene_relative_path"]);
+			return node_info;
+		}
+	};
 
 	struct VariableInfo {
 		int index = 0;
@@ -76,12 +103,14 @@ class LinkerScript : public Script {
 		}
 	};
 
+private:
 	HashSet<StringName> members;
 
 	HashMap<StringName, MethodInfo> member_functions;
 	HashMap<StringName, VariableInfo> member_properties;
 	HashMap<StringName, Variant> constants;
 	HashMap<StringName, MethodInfo> signals;
+	HashMap<StringName, NodeInfo> scene_refrences;
 	Dictionary rpc_config;
 
 #ifdef TOOLS_ENABLED
@@ -178,7 +207,11 @@ public:
 	void set_signal_list(const Dictionary &p_signals);
 	void set_signal(const MethodInfo &p_info);
 
-	static String get_relative_path(Object &source);
+	Dictionary get_scene_refrences() const;
+	void set_scene_refrences(const Dictionary &p_scene_refrences);
+	void add_scene_refrence(const NodeInfo &p_node_info);
+	void overwrite_scene_refrence(const NodeInfo &p_node_info);
+	void remove_scene_refrence(StringName relative_path);
 
 	LinkerScript();
 	~LinkerScript() {}

@@ -44,4 +44,5 @@ void LinkerSaver::write_script_values(const Ref<LinkerScript> &p_script, ConfigF
 	p_config_file.set_value(section, "properties", p_script->get_property_list());
 	p_config_file.set_value(section, "constants", p_script->get_constants());
 	p_config_file.set_value(section, "signals", p_script->get_signal_list());
+	p_config_file.set_value(section, "scene_refrences", p_script->get_scene_refrences());
 }

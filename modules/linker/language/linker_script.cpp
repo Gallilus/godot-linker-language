@@ -339,6 +339,42 @@ void LinkerScript::set_signal(const MethodInfo &p_info) {
 	}
 }
 
+Dictionary LinkerScript::get_scene_refrences() const {
+	Dictionary refrence_list;
+	for (const KeyValue<StringName, NodeInfo> &E : scene_refrences) {
+		refrence_list[E.key] = Dictionary(E.value);
+	}
+	return refrence_list;
+}
+
+void LinkerScript::set_scene_refrences(const Dictionary &p_scene_refrences) {
+	for (int i = 0; i < p_scene_refrences.keys().size(); i++) {
+		NodePath key = p_scene_refrences.keys()[i];
+		add_scene_refrence(NodeInfo::from_dict(p_scene_refrences[key]));
+	};
+}
+
+void LinkerScript::add_scene_refrence(const NodeInfo &p_node_info) {
+	if (!scene_refrences.has(p_node_info.node_scene_relative_path)) {
+		scene_refrences.insert(p_node_info.node_scene_relative_path, p_node_info);
+	}
+	emit_changed();
+}
+
+void LinkerScript::overwrite_scene_refrence(const NodeInfo &p_node_info) {
+	if (scene_refrences.has(p_node_info.node_scene_relative_path)) {
+		scene_refrences.insert(p_node_info.node_scene_relative_path, p_node_info);
+	}
+	emit_changed();
+}
+
+void LinkerScript::remove_scene_refrence(StringName relative_path) {
+	if (scene_refrences.has(relative_path)) {
+		scene_refrences.erase(relative_path);
+	}
+	emit_changed();
+}
+
 LinkerScript::LinkerScript() :
 		script_list(this) {
 	{

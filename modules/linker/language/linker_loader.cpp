@@ -46,4 +46,5 @@ void LinkerLoader::read_script_values(const Ref<LinkerScript> &p_script, ConfigF
 	p_script->set_property_list(p_config_file.get_value(section, "properties", p_script->get_property_list()));
 	p_script->set_constants(p_config_file.get_value(section, "constants", p_script->get_constants()));
 	p_script->set_signal_list(p_config_file.get_value(section, "signals", p_script->get_signal_list()));
+	p_script->set_scene_refrences(p_config_file.get_value(section, "scene_refrences", p_script->get_scene_refrences()));
 }

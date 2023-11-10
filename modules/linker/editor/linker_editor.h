@@ -5,11 +5,14 @@
 #include "editor/code_editor.h"
 #include "editor/editor_node.h"
 #include "editor/editor_string_names.h"
+#include "editor/editor_undo_redo_manager.h"
 #include "editor/plugins/script_editor_plugin.h"
 #include "scene/gui/control.h"
+#include "scene/main/node.h"
 
 #include "../language/linker_language.h"
 #include "../language/linker_script.h"
+#include "linker_graph.h"
 
 class LinkerEditor : public ScriptEditorBase {
 	GDCLASS(LinkerEditor, ScriptEditorBase);
@@ -20,10 +23,15 @@ class LinkerEditor : public ScriptEditorBase {
 
 	Control *edit_menu = nullptr;
 	FindReplaceBar *find_replace_bar = nullptr;
-	Control *base_editor = nullptr;
+	LinkerGraph *base_editor = nullptr;
+
+	//	Ref<EditorUndoRedoManager> undo_redo;
+	bool is_updating = false;
+	bool changed = false;
+	void _update_graph();
 
 protected:
-	static void _bind_methods() {}
+	static void _bind_methods();
 
 public:
 	virtual void add_syntax_highlighter(Ref<EditorSyntaxHighlighter> p_highlighter) override {}
@@ -74,6 +82,8 @@ public:
 	static void register_editor();
 
 	void test();
+
+	void script_changed();
 
 	LinkerEditor();
 	~LinkerEditor();

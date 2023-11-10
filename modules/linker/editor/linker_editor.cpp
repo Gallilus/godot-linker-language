@@ -1,5 +1,21 @@
 #include "linker_editor.h"
 
+void LinkerEditor::_update_graph() {
+	if (is_updating) {
+		return;
+	}
+	if (script.is_null()) {
+		return;
+	}
+	is_updating = true;
+	base_editor->update_graph();
+	is_updating = false;
+}
+
+void LinkerEditor::_bind_methods() {
+	//ClassDB::bind_method(D_METHOD("script_changed"), &LinkerEditor::script_changed);
+}
+
 void LinkerEditor::apply_code() {
 	// runs on save
 	if (script.is_null()) {
@@ -31,6 +47,9 @@ void LinkerEditor::set_edited_resource(const Ref<Resource> &p_res) {
 	ERR_FAIL_COND(script.is_valid());
 	ERR_FAIL_COND(p_res.is_null());
 	script = p_res;
+	script->connect("changed", callable_mp(this, &LinkerEditor::script_changed));
+	script->emit_changed();
+	base_editor->set_script(p_res);
 
 	// set script refrence for sub editors heare
 
@@ -44,31 +63,32 @@ void LinkerEditor::enable_editor(Control *p_shortcut_context) {
 	}
 	editor_enabled = true;
 
-	set_anchors_and_offsets_preset(Control::PRESET_FULL_RECT);
+	set_focus_mode(Control::FOCUS_ALL);
+	set_v_size_flags(SIZE_EXPAND_FILL);
+	set_h_size_flags(SIZE_EXPAND_FILL);
 
 	HBoxContainer *top_menu = memnew(HBoxContainer);
-	top_menu->set_anchors_and_offsets_preset(Control::PRESET_FULL_RECT);
 	add_child(top_menu);
 	Button *test_button = memnew(Button);
-	test_button->set_text("test");
 	top_menu->add_child(test_button);
+	test_button->set_text("test");
 	test_button->connect("pressed", callable_mp(this, &LinkerEditor::test));
+	Button *_update_graph_button = memnew(Button);
+	top_menu->add_child(_update_graph_button);
+	_update_graph_button->set_text("update_graph");
+	_update_graph_button->connect("pressed", callable_mp(this, &LinkerEditor::_update_graph));
 
 	add_child(base_editor);
-	base_editor->set_focus_mode(Control::FOCUS_ALL);
-	base_editor->set_v_size_flags(SIZE_EXPAND_FILL);
 
 	Panel *background = memnew(Panel);
 	background->set_anchors_and_offsets_preset(Control::PRESET_FULL_RECT);
-	background->set_modulate(Color(0.1, 1.0, 0.1));
-	base_editor->add_child(background);
+	background->set_modulate(Color(0.5, 0.5, 1.0));
+	background->set_focus_mode(Control::FOCUS_ALL);
+	background->set_v_size_flags(SIZE_EXPAND_FILL);
+	background->set_h_size_flags(SIZE_EXPAND_FILL);
+	add_child(background);
 
-	// ToDo set shortcut context
-
-	// initialize sub editors heare
-
-	// emit signal to update all sub editors
-	// same signal as after reload
+	_update_graph();
 }
 
 String LinkerEditor::get_name() {
@@ -124,11 +144,19 @@ void LinkerEditor::register_editor() {
 }
 
 void LinkerEditor::test() {
+	ERR_PRINT("test button pressed");
 	script->set_member_variable("test", PropertyInfo(Variant::STRING, "test"), nullptr);
 }
 
+void LinkerEditor::script_changed() {
+	if (is_updating) {
+		return;
+	}
+	_update_graph();
+}
+
 LinkerEditor::LinkerEditor() {
-	base_editor = memnew(Control);
+	base_editor = memnew(LinkerGraph);
 	edit_menu = memnew(Control);
 	find_replace_bar = memnew(FindReplaceBar);
 }
