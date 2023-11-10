@@ -1,5 +1,25 @@
 #include "linker_script.h"
-#include "linker_language.h"
+#include "linker_script_instance.h"
+
+ScriptInstance *LinkerScript::_create_instance(const Variant **p_args, int p_argcount, Object *p_owner, bool p_is_ref_counted, Callable::CallError &r_error) {
+	// TODO suport creating scripts with initialization arguments
+	/* STEP 1, CREATE */
+	LinkerScriptInstance *instance = memnew(LinkerScriptInstance);
+	instance->base_ref_counted = p_is_ref_counted;
+	instance->members.resize(members.size());
+	instance->script = Ref<Script>(this);
+	instance->owner = p_owner;
+	instance->owner_id = p_owner->get_instance_id();
+
+	instance->owner->set_script_instance(instance);
+	/* STEP 2, INITIALIZE AND CONSTRUCT */
+	{
+		MutexLock lock(LinkerLanguage::singleton->mutex);
+		instances.insert(instance->owner);
+	}
+	instance->initialize();
+	return instance;
+}
 
 Ref<Script> LinkerScript::get_base_script() const {
 	if (_base) {
@@ -41,8 +61,13 @@ StringName LinkerScript::get_instance_base_type() const {
 }
 
 ScriptInstance *LinkerScript::instance_create(Object *p_this) {
-	// ToDo
-	return nullptr;
+	LinkerScript *top = this;
+	while (top->_base) {
+		top = top->_base;
+	}
+
+	Callable::CallError unchecked_error;
+	return _create_instance(nullptr, 0, p_this, Object::cast_to<RefCounted>(p_this) != nullptr, unchecked_error);
 }
 
 bool LinkerScript::instance_has(const Object *p_this) const {
@@ -312,4 +337,13 @@ void LinkerScript::set_signal(const MethodInfo &p_info) {
 		signals.insert(p_info.name, p_info);
 		return;
 	}
+}
+
+LinkerScript::LinkerScript() :
+		script_list(this) {
+	{
+		MutexLock lock(LinkerLanguage::singleton->mutex);
+		LinkerLanguage::get_singleton()->script_list.add(&script_list);
+	}
+	path = vformat("linkerscript://%d.ls", get_instance_id());
 }

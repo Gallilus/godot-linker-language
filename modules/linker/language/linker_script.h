@@ -1,9 +1,13 @@
 #ifndef LINKER_SCRIPT_H
 #define LINKER_SCRIPT_H
 
+#include "linker_language.h"
+
 #include "core/object/script_language.h"
+#include "core/os/mutex.h"
 #include "core/templates/hash_map.h"
 #include "core/templates/rb_set.h"
+#include "core/templates/self_list.h"
 #include "core/variant/variant.h"
 
 class LinkerScript : public Script {
@@ -14,6 +18,7 @@ class LinkerScript : public Script {
 	friend class LinkerLanguage;
 	friend class LinkerSaver;
 	friend class LinkerLoader;
+	friend class LinkerScriptInstance;
 
 	bool tool = false;
 	bool valid = false;
@@ -21,7 +26,8 @@ class LinkerScript : public Script {
 	bool reloading = false;
 
 	Ref<Script> base;
-	Script *_base = nullptr; //fast pointer access
+	LinkerScript *_base = nullptr; //fast pointer access
+	LinkerScript *_owner = nullptr; //for subclasses
 
 	struct VariableInfo {
 		int index = 0;
@@ -89,6 +95,9 @@ class LinkerScript : public Script {
 	String simplified_icon_path;
 
 	RBSet<Object *> instances;
+	SelfList<LinkerScript> script_list;
+
+	ScriptInstance *_create_instance(const Variant **p_args, int p_argcount, Object *p_owner, bool p_is_ref_counted, Callable::CallError &r_error);
 
 protected:
 	virtual bool editor_can_reload_from_file() override { return false; } // this is handled by editor better
@@ -169,7 +178,9 @@ public:
 	void set_signal_list(const Dictionary &p_signals);
 	void set_signal(const MethodInfo &p_info);
 
-	LinkerScript() {}
+	static String get_relative_path(Object &source);
+
+	LinkerScript();
 	~LinkerScript() {}
 };
 

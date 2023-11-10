@@ -1,12 +1,15 @@
 #ifndef LINKER_SCRIPT_LANGUAGE_H
 #define LINKER_SCRIPT_LANGUAGE_H
 
-#include "core/object/script_language.h"
 #include "linker_script.h"
+
+#include "core/object/script_language.h"
+#include "core/templates/self_list.h"
 
 using namespace godot;
 
 class LinkerLanguage : public ScriptLanguage {
+	friend class LinkerScriptInstance;
 	static LinkerLanguage *singleton;
 
 	Mutex mutex;
