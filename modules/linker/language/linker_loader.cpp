@@ -12,13 +12,13 @@ Ref<Resource> LinkerLoader::load(const String &p_path, const String &p_original_
 	ERR_FAIL_COND_V_MSG(err, Ref<Resource>(), "Cannot load LinkerScript file '" + p_path + "'.");
 
 	Ref<LinkerScript> linker_script = memnew(LinkerScript);
+	linker_script->_set_script_loading();
 
 	read_script_settings(linker_script, confif_file);
 	read_script_values(linker_script, confif_file);
+	linker_script->init_links_refrences();
 
-#ifdef TOOLS_ENABLED
-	linker_script->set_saved(true);
-#endif
+	linker_script->_set_script_loaded();
 	return linker_script;
 }
 
@@ -38,6 +38,7 @@ void LinkerLoader::read_script_settings(const Ref<LinkerScript> &p_script, Confi
 	p_script->valid = p_config_file.get_value(section, "valid", p_script->valid);
 	p_script->abstract = p_config_file.get_value(section, "abstract", p_script->abstract);
 	p_script->reloading = p_config_file.get_value(section, "reloading", p_script->reloading);
+	p_script->resize_links(p_config_file.get_value(section, "link_count", p_script->get_link_count()));
 }
 
 void LinkerLoader::read_script_values(const Ref<LinkerScript> &p_script, ConfigFile &p_config_file) {
@@ -46,5 +47,5 @@ void LinkerLoader::read_script_values(const Ref<LinkerScript> &p_script, ConfigF
 	p_script->set_property_list(p_config_file.get_value(section, "properties", p_script->get_property_list()));
 	p_script->set_constants(p_config_file.get_value(section, "constants", p_script->get_constants()));
 	p_script->set_signal_list(p_config_file.get_value(section, "signals", p_script->get_signal_list()));
-	p_script->set_scene_refrences(p_config_file.get_value(section, "scene_refrences", p_script->get_scene_refrences()));
+	p_script->set_links(p_config_file.get_value(section, "links", p_script->get_links()));
 }

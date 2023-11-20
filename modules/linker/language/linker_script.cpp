@@ -1,6 +1,63 @@
 #include "linker_script.h"
 #include "linker_script_instance.h"
 
+TypedArray<LinkerLink> LinkerScript::get_links() const {
+	TypedArray<LinkerLink> link_list;
+	for (int i = 0; i < links.size(); i++) {
+		link_list.push_back(links[i]);
+	}
+	return link_list;
+}
+
+void LinkerScript::set_links(TypedArray<LinkerLink> p_links) {
+	for (int i = 0; i < p_links.size(); i++) {
+		add_link_by_index(Ref<LinkerLink>(p_links[i]));
+	};
+}
+
+void LinkerScript::add_link_by_index(Ref<LinkerLink> p_link) {
+	if (p_link->get_member_name() != StringName() && has_named_link(p_link->get_member_name())) {
+		return;
+	}
+	if (get_link_idx(p_link.ptr()) < 0) {
+		int index = p_link->saved_links_idx;
+		links.set(index, p_link);
+		p_link->set_host(this);
+		emit_changed();
+	}
+	add_member_link(p_link);
+}
+
+void LinkerScript::add_member_link(Ref<LinkerLink> p_link) {
+	if (Object::cast_to<LinkerSceneRefrence>(*p_link)) {
+		add_scene_refrence(Object::cast_to<LinkerSceneRefrence>(*p_link));
+	}
+}
+
+void LinkerScript::remove_member_link(Ref<LinkerLink> p_link) {
+	if (Object::cast_to<LinkerSceneRefrence>(*p_link)) {
+		remove_scene_refrence(Object::cast_to<LinkerSceneRefrence>(*p_link)->get_node_scene_relative_path());
+	}
+}
+
+int LinkerScript::get_link_count() {
+	// ToDo : clean up duplicates and redirect destinations
+	for (int i = links.size() - 1; i >= 0; i--) {
+		if (links[i].is_null()) {
+			links.remove_at(i);
+		}
+	}
+	return links.size();
+}
+
+void LinkerScript::init_links_refrences() {
+	for (int i = 0; i < links.size(); i++) {
+		if (links[i].is_valid()) {
+			links[i]->set_link_refrences();
+		}
+	}
+}
+
 ScriptInstance *LinkerScript::_create_instance(const Variant **p_args, int p_argcount, Object *p_owner, bool p_is_ref_counted, Callable::CallError &r_error) {
 	// TODO suport creating scripts with initialization arguments
 	/* STEP 1, CREATE */
@@ -19,6 +76,15 @@ ScriptInstance *LinkerScript::_create_instance(const Variant **p_args, int p_arg
 	}
 	instance->initialize();
 	return instance;
+}
+
+void LinkerScript::_set_script_loading() {
+	script_loading = true;
+}
+
+void LinkerScript::_set_script_loaded() {
+	script_loading = false;
+	set_saved(true);
 }
 
 Ref<Script> LinkerScript::get_base_script() const {
@@ -241,10 +307,8 @@ void LinkerScript::set_property_list(const Dictionary &p_properties) {
 }
 
 void LinkerScript::set_member_variable(const StringName &p_name, const PropertyInfo &p_info, Variant *p_default_value) {
-#ifdef TOOLS_ENABLED
-	is_saved = false;
-#endif // TOOLS_ENABLED
-
+	emit_changed();
+	ERR_PRINT("Duplicate member variable: " + p_name);
 	if (member_properties.has(p_name)) {
 		if (p_default_value == nullptr) {
 			member_properties[p_name] = VariableInfo(p_info);
@@ -261,7 +325,6 @@ void LinkerScript::set_member_variable(const StringName &p_name, const PropertyI
 		member_properties.insert(p_name, VariableInfo(p_info, &p_default_value));
 		return;
 	}
-	ERR_PRINT("Duplicate member variable: " + p_name);
 }
 
 void LinkerScript::set_property(const VariableInfo &p_info) {
@@ -339,40 +402,79 @@ void LinkerScript::set_signal(const MethodInfo &p_info) {
 	}
 }
 
-Dictionary LinkerScript::get_scene_refrences() const {
-	Dictionary refrence_list;
-	for (const KeyValue<StringName, NodeInfo> &E : scene_refrences) {
-		refrence_list[E.key] = Dictionary(E.value);
+TypedArray<LinkerSceneRefrence> LinkerScript::get_scene_refrences() const {
+	TypedArray<LinkerSceneRefrence> refrence_list;
+	for (const KeyValue<StringName, Ref<LinkerSceneRefrence>> &E : scene_refrences) {
+		refrence_list.push_back(E.value);
 	}
 	return refrence_list;
 }
 
-void LinkerScript::set_scene_refrences(const Dictionary &p_scene_refrences) {
-	for (int i = 0; i < p_scene_refrences.keys().size(); i++) {
-		NodePath key = p_scene_refrences.keys()[i];
-		add_scene_refrence(NodeInfo::from_dict(p_scene_refrences[key]));
+Ref<LinkerSceneRefrence> LinkerScript::get_scene_refrence(const StringName p_relative_path) const {
+	if (scene_refrences.has(p_relative_path)) {
+		return scene_refrences[p_relative_path];
+	}
+	return nullptr;
+}
+
+void LinkerScript::set_scene_refrences(TypedArray<LinkerSceneRefrence> p_scene_refrences) {
+	for (int i = 0; i < p_scene_refrences.size(); i++) {
+		add_scene_refrence(Ref<LinkerSceneRefrence>(p_scene_refrences[i]));
 	};
 }
 
-void LinkerScript::add_scene_refrence(const NodeInfo &p_node_info) {
-	if (!scene_refrences.has(p_node_info.node_scene_relative_path)) {
-		scene_refrences.insert(p_node_info.node_scene_relative_path, p_node_info);
+void LinkerScript::add_scene_refrence(Ref<LinkerSceneRefrence> p_node_info) {
+	if (!scene_refrences.has(p_node_info->get_node_scene_relative_path())) {
+		scene_refrences.insert(p_node_info->get_node_scene_relative_path(), p_node_info);
+		emit_changed();
 	}
-	emit_changed();
-}
-
-void LinkerScript::overwrite_scene_refrence(const NodeInfo &p_node_info) {
-	if (scene_refrences.has(p_node_info.node_scene_relative_path)) {
-		scene_refrences.insert(p_node_info.node_scene_relative_path, p_node_info);
-	}
-	emit_changed();
 }
 
 void LinkerScript::remove_scene_refrence(StringName relative_path) {
 	if (scene_refrences.has(relative_path)) {
+		links.erase(scene_refrences[relative_path]);
 		scene_refrences.erase(relative_path);
+		emit_changed();
 	}
-	emit_changed();
+}
+
+void LinkerScript::add_link(Ref<LinkerLink> p_link) {
+	if (p_link->get_member_name() != StringName() && has_named_link(p_link->get_member_name())) {
+		return;
+	}
+	if (get_link_idx(p_link.ptr()) < 0) {
+		links.append(p_link);
+		p_link->set_host(this);
+		emit_changed();
+	}
+	add_member_link(p_link);
+}
+
+void LinkerScript::remove_link(Ref<LinkerLink> p_link) {
+	remove_member_link(p_link);
+	if (links.has(p_link)) {
+		links.erase(p_link);
+		// do i need to remove from named links?
+		emit_changed();
+	}
+}
+
+bool LinkerScript::has_named_link(const StringName &p_name) const {
+	for (int i = 0; i < links.size(); i++) {
+		if (links[i].is_valid() && links[i]->get_member_name() == p_name) {
+			return true;
+		}
+	}
+	return false;
+}
+
+int LinkerScript::get_link_idx(const LinkerLink *p_link) const {
+	for (int i = 0; i < links.size(); i++) {
+		if (links[i].ptr() == p_link) {
+			return i;
+		}
+	}
+	return -1;
 }
 
 LinkerScript::LinkerScript() :
@@ -382,4 +484,7 @@ LinkerScript::LinkerScript() :
 		LinkerLanguage::get_singleton()->script_list.add(&script_list);
 	}
 	path = vformat("linkerscript://%d.ls", get_instance_id());
+#ifdef TOOLS_ENABLED
+	connect("changed", callable_mp(this, &LinkerScript::set_saved).bind(false));
+#endif // TOOLS_ENABLED
 }

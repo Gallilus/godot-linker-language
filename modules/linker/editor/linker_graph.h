@@ -1,16 +1,23 @@
 #ifndef LINKER_GRAPH_H
 #define LINKER_GRAPH_H
 
+#include "../language/linker_index_get.h"
 #include "../language/linker_language.h"
+#include "../language/linker_scene_refrence.h"
 #include "../language/linker_script.h"
-#include "linker_node.h"
+#include "link_controler.h"
 
 #include "core/object/ref_counted.h"
 #include "editor/editor_interface.h"
 #include "editor/editor_node.h"
+// #include "scene/gui/container.h"
+#include "scene/gui/box_container.h"
 #include "scene/gui/control.h"
 #include "scene/gui/grid_container.h"
 #include "scene/gui/label.h"
+#include "scene/gui/panel.h"
+#include "scene/gui/scroll_container.h"
+#include "scene/gui/split_container.h"
 #include "scene/gui/texture_rect.h"
 #include "scene/main/window.h"
 
@@ -18,7 +25,7 @@ class LinkerGraph : public Control {
 	GDCLASS(LinkerGraph, Control);
 	Ref<LinkerScript> script;
 
-	GridContainer *unsorted_nodes = nullptr;
+	VBoxContainer *unsorted_nodes = nullptr;
 
 protected:
 	static void _bind_methods();
@@ -30,7 +37,7 @@ public:
 		bool shift_drop = false;
 		Variant::Type object_type;
 		StringName object_class_name;
-		Vector<LinkerScript::NodeInfo> nodes;
+		Vector<Ref<LinkerSceneRefrence>> nodes;
 		StringName property_name;
 		Variant value;
 	};

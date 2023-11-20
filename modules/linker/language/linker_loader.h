@@ -18,6 +18,8 @@ public:
 	void read_script_settings(const Ref<LinkerScript> &p_script, ConfigFile &p_config_file);
 	void read_script_values(const Ref<LinkerScript> &p_script, ConfigFile &p_config_file);
 
+	void set_script_loaded();
+
 protected:
 	static void _bind_methods() {}
 };

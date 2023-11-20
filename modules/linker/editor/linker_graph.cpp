@@ -21,12 +21,12 @@ static Node *_find_script_node(Node *p_edited_scene, Node *p_current_node, const
 	return nullptr;
 }
 
-static void _get_node_data(Node *p_node, LinkerScript::NodeInfo &p_node_info, Node *p_scripted_node = nullptr) {
-	p_node_info.node_class_name = p_node->get_class_name();
-	p_node_info.node_name = p_node->get_name();
-	p_node_info.node_scene_path = EditorInterface::get_singleton()->get_edited_scene_root()->get_path_to(p_node);
-	p_node_info.node_script_file_path = p_node->get_scene_file_path();
-	p_node_info.node_scene_relative_path = StringName(p_scripted_node->get_path_to(p_node));
+static void _get_node_data(Node *p_node, Ref<LinkerSceneRefrence> p_node_info, Node *p_scripted_node = nullptr) {
+	p_node_info->set_node_class_name(p_node->get_class_name());
+	p_node_info->set_node_name(p_node->get_name());
+	p_node_info->set_node_scene_path(EditorInterface::get_singleton()->get_edited_scene_root()->get_path_to(p_node));
+	p_node_info->set_node_script_file_path(p_node->get_scene_file_path());
+	p_node_info->set_node_scene_relative_path(StringName(p_scripted_node->get_path_to(p_node)));
 }
 
 void LinkerGraph::_bind_methods() {
@@ -35,7 +35,18 @@ void LinkerGraph::_bind_methods() {
 void LinkerGraph::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_ENTER_TREE: {
-		} break;
+			break;
+		}
+			/*case NOTIFICATION_PRE_SORT_CHILDREN: {
+				// make sure all link controlers are resized
+
+				// and trigger recalculation of Graph positions
+				break;
+			}
+			case NOTIFICATION_SORT_CHILDREN: {
+				// reposiotn all link controlers
+				break;
+			}*/
 	}
 }
 
@@ -91,7 +102,8 @@ void LinkerGraph::drop_data(const Point2 &p_point, const Variant &p_data) {
 			drop_data.object_class_name = obj->get_class_name();
 			Node *node = Object::cast_to<Node>(d["object"]);
 			if (node) {
-				LinkerScript::NodeInfo node_info;
+				Ref<LinkerSceneRefrence> node_info = memnew(LinkerSceneRefrence);
+				node_info->set_host(script.ptr());
 				_get_node_data(node, node_info, scripted_node);
 				drop_data.nodes.append(node_info);
 			}
@@ -112,7 +124,8 @@ void LinkerGraph::drop_data(const Point2 &p_point, const Variant &p_data) {
 			NodePath node_path = nodes[i];
 			Node *node = get_node(node_path);
 			if (node) {
-				LinkerScript::NodeInfo node_info;
+				Ref<LinkerSceneRefrence> node_info = memnew(LinkerSceneRefrence);
+				node_info->set_host(script.ptr());
 				_get_node_data(node, node_info, scripted_node);
 				drop_data.nodes.append(node_info);
 			}
@@ -121,7 +134,14 @@ void LinkerGraph::drop_data(const Point2 &p_point, const Variant &p_data) {
 
 	if (String(d["type"]) == "obj_property") {
 		if (drop_data.nodes.size() == 1) {
-			script->add_scene_refrence(drop_data.nodes[0]);
+			StringName rel_path = drop_data.nodes[0]->get_node_scene_relative_path();
+			Ref<LinkerSceneRefrence> node_info = drop_data.nodes[0];
+			script->add_link(node_info);
+			node_info = script->get_scene_refrence(rel_path);
+			Ref<LinkerIndexGet> index_get = memnew(LinkerIndexGet);
+			index_get->set_index(drop_data.property_name);
+			index_get->set_source(node_info);
+			script->add_link(index_get);
 		}
 
 		// create a property getter
@@ -131,59 +151,43 @@ void LinkerGraph::drop_data(const Point2 &p_point, const Variant &p_data) {
 
 	if (String(d["type"]) == "nodes") {
 		if (drop_data.nodes.size() == 1) {
-			script->add_scene_refrence(drop_data.nodes[0]);
+			script->add_link(drop_data.nodes[0]);
 			// set popup inspector for keyed and or select properties or methods
 			return;
 		}
 		for (int i = 0; i < drop_data.nodes.size(); i++) {
-			script->add_scene_refrence(drop_data.nodes[i]);
+			script->add_link(drop_data.nodes[i]);
 		}
 	}
-
-	//	emit_signal(SNAME("changed"));
-
-	//				List<MethodInfo> methods;
-	//				ClassDB::get_method_list(obj->get_class_name(), &methods, true, true);
-	//				for (List<MethodInfo>::Element *E = methods.front(); E; E = E->next()) {
-
-	/*//	ERR_PRINT("========================================");
-	List<MethodInfo> methods;
-	p_data.get_method_list(&methods);
-	for (List<MethodInfo>::Element *E = methods.front(); E; E = E->next()) {
-		// ERR_PRINT(" " + String(E->get().name));
-	}
-	//	ERR_PRINT("========================================");
-	List<PropertyInfo> properties;
-	p_data.get_property_list(&properties);
-	for (List<PropertyInfo>::Element *E = properties.front(); E; E = E->next()) {
-		//ERR_PRINT(" " + String(E->get().name));
-	}
-	//	ERR_PRINT("***************************************");
-	//List<MethodInfo> signals;*/
 }
 
 void LinkerGraph::update_graph() {
 	if (!script.is_valid()) {
 		return;
 	}
-	if (unsorted_nodes) {
-		remove_child(unsorted_nodes);
-		memdelete(unsorted_nodes);
-		unsorted_nodes = nullptr;
+
+	for (int i = 0; i < unsorted_nodes->get_child_count(); i++) {
+		Node *child = unsorted_nodes->get_child(i);
+		child->queue_free();
 	}
-	unsorted_nodes = memnew(GridContainer);
-	add_child(unsorted_nodes);
+	// if (unsorted_nodes) {
+	// 	unsorted_nodes->queue_free();
+	// 	unsorted_nodes = nullptr;
+	// }
+	// unsorted_nodes = memnew(VBoxContainer);
+	// //unsorted_nodes->set_columns(1);
+	// unsorted_nodes->set_custom_minimum_size(Size2(28, 28));
+	// unsorted_nodes->set_anchors_preset(Control::PRESET_CENTER_LEFT);
+	// add_child(unsorted_nodes);
 
-	Dictionary scene_refs = script->get_scene_refrences();
+	TypedArray<LinkerSceneRefrence> scene_refs = script->get_scene_refrences();
 
-	for (int i = 0; i < scene_refs.keys().size(); i++) {
-		Variant value = scene_refs[scene_refs.keys()[i]];
-		LinkerScript::NodeInfo node_info = LinkerScript::NodeInfo::from_dict(value);
-		LinkerNode *node = memnew(LinkerNode);
-		unsorted_nodes->add_child(node);
-		node->set_tooltip_text(node_info.node_name);
-		node->set_icon(EditorNode::get_singleton()->get_object_icon(this, node_info.node_class_name));
-		node->connect("pressed", callable_mp(script.ptr(), &LinkerScript::remove_scene_refrence).bind(node_info.node_scene_relative_path), CONNECT_DEFERRED);
+	for (int i = 0; i < scene_refs.size(); i++) {
+		Ref<LinkerSceneRefrence> node_info = scene_refs[i];
+
+		LinkControler *controler = memnew(LinkControler);
+		controler->set_link(node_info);
+		unsorted_nodes->add_child(controler);
 	}
 }
 
@@ -191,4 +195,15 @@ LinkerGraph::LinkerGraph() {
 	set_v_size_flags(SIZE_EXPAND_FILL);
 	set_h_size_flags(SIZE_EXPAND_FILL);
 	set_focus_mode(Control::FOCUS_ALL);
+
+	ScrollContainer *scroll = memnew(ScrollContainer);
+	add_child(scroll);
+	scroll->set_custom_minimum_size(Size2(35, 100));
+	scroll->set_anchors_preset(PRESET_CENTER_LEFT);
+	scroll->set_anchor(SIDE_TOP, 1.0 / 3.0);
+	scroll->set_anchor(SIDE_BOTTOM, 1.0 - 1.0 / 3.0);
+	scroll->set_horizontal_scroll_mode(ScrollContainer::SCROLL_MODE_DISABLED);
+
+	unsorted_nodes = memnew(VBoxContainer);
+	scroll->add_child(unsorted_nodes);
 }

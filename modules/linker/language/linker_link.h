@@ -1,0 +1,47 @@
+#ifndef LINKER_LINK_H
+#define LINKER_LINK_H
+
+#include "core/io/resource.h"
+
+class LinkerScript;
+
+class LinkerLink : public Resource {
+	GDCLASS(LinkerLink, Resource);
+	friend class LinkerScript;
+
+private:
+	LinkerScript *host = nullptr;
+	int saved_links_idx = -1; // used temporarily for loading from file
+
+protected:
+	static void _bind_methods();
+
+public:
+	void set_host(LinkerScript *p_host);
+	LinkerScript *get_host() const;
+
+	int get_link_idx() const;
+	void set_to_idx(int p_idx);
+	virtual void set_link_refrences() {} // called when loading file after all links are loaded
+	virtual Vector<Ref<LinkerLink>> get_arg_links() { return Vector<Ref<LinkerLink>>(); } // a list of all links that are represented as arguments
+	virtual StringName get_member_name() const { return StringName(); }
+
+	virtual StringName get_caption() const = 0;
+	virtual StringName get_category() const = 0;
+	virtual StringName get_tooltip() const = 0;
+
+	virtual int get_arg_count() const = 0;
+	virtual PropertyInfo get_arg_info(int p_idx) const = 0;
+	virtual int get_default_arg_count() const = 0;
+	virtual Variant get_default_arg(int p_idx) const = 0;
+	virtual PropertyInfo get_output_info() const = 0;
+
+	void remove_from_script();
+
+	//virtual Variant get_output_refrence() const = 0; // editortime
+
+	//virtual VisualScriptNodeInstance *instantiate(VisualScriptInstance *p_instance) = 0;
+	//virtual Variant get_output() const = 0; // runtime on instance
+};
+
+#endif // LINKER_LINK_H

@@ -4,9 +4,11 @@
 #include "core/object/class_db.h"
 
 #include "editor/linker_editor.h"
+#include "language/linker_index_get.h"
 #include "language/linker_language.h"
 #include "language/linker_loader.h"
 #include "language/linker_saver.h"
+#include "language/linker_scene_refrence.h"
 #include "language/linker_script.h"
 
 using namespace godot;
@@ -21,6 +23,8 @@ void initialize_linker_module(ModuleInitializationLevel p_level) {
 	}
 	if (p_level == GDEXTENSION_INITIALIZATION_SERVERS) {
 		GDREGISTER_CLASS(LinkerScript);
+		GDREGISTER_CLASS(LinkerIndexGet);
+		GDREGISTER_CLASS(LinkerSceneRefrence);
 
 		linker_language = memnew(LinkerLanguage);
 		ScriptServer::register_language(linker_language);

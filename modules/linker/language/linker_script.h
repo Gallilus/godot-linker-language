@@ -2,6 +2,8 @@
 #define LINKER_SCRIPT_H
 
 #include "linker_language.h"
+#include "linker_link.h"
+#include "linker_scene_refrence.h"
 
 #include "core/object/script_language.h"
 #include "core/os/mutex.h"
@@ -19,6 +21,7 @@ class LinkerScript : public Script {
 	friend class LinkerSaver;
 	friend class LinkerLoader;
 	friend class LinkerScriptInstance;
+	friend class LinkerLink;
 
 	bool tool = false;
 	bool valid = false;
@@ -110,7 +113,21 @@ private:
 	HashMap<StringName, VariableInfo> member_properties;
 	HashMap<StringName, Variant> constants;
 	HashMap<StringName, MethodInfo> signals;
-	HashMap<StringName, NodeInfo> scene_refrences;
+	// HashMap for member links (named links)
+	HashMap<StringName, Ref<LinkerSceneRefrence>> scene_refrences;
+	// Vector for all links (named and unnamed)
+	Vector<Ref<LinkerLink>> links;
+
+	TypedArray<LinkerLink> get_links() const;
+	void set_links(TypedArray<LinkerLink> p_links);
+	void add_link_by_index(Ref<LinkerLink> p_link); // only on load from file
+	void add_member_link(Ref<LinkerLink> p_link); // ads the new links to there respective memberlists
+	void remove_member_link(Ref<LinkerLink> p_link); // removes the link from there respective memberlists
+	int get_link_count();
+	void resize_links(int p_size) { links.resize(p_size); }
+	void set_link_to_idx(Ref<LinkerLink> p_link, int p_index) { links.set(p_index, p_link); }
+	void init_links_refrences();
+
 	Dictionary rpc_config;
 
 #ifdef TOOLS_ENABLED
@@ -127,6 +144,9 @@ private:
 	SelfList<LinkerScript> script_list;
 
 	ScriptInstance *_create_instance(const Variant **p_args, int p_argcount, Object *p_owner, bool p_is_ref_counted, Callable::CallError &r_error);
+	bool script_loading = false;
+	void _set_script_loading();
+	void _set_script_loaded();
 
 protected:
 	virtual bool editor_can_reload_from_file() override { return false; } // this is handled by editor better
@@ -154,8 +174,15 @@ public:
 	virtual Vector<DocData::ClassDoc> get_documentation() const override { return docs; }
 	virtual String get_class_icon_path() const override { return simplified_icon_path; }
 	virtual PropertyInfo get_class_category() const override;
-	void set_saved(bool p_saved) { is_saved = p_saved; }
-	bool is_unsaved() const { return !is_saved; }
+	void set_saved(bool p_saved) {
+		if (script_loading) {
+			return;
+		}
+		is_saved = p_saved;
+	}
+	bool is_unsaved() const {
+		return !is_saved;
+	}
 #endif // TOOLS_ENABLED
 
 	// TODO: In the next compat breakage rename to `*_script_*` to disambiguate from `Object::has_method()`.
@@ -208,9 +235,16 @@ public:
 	void set_signal(const MethodInfo &p_info);
 
 	TypedArray<LinkerSceneRefrence> get_scene_refrences() const;
+	Ref<LinkerSceneRefrence> get_scene_refrence(const StringName p_relative_path) const;
 	void set_scene_refrences(TypedArray<LinkerSceneRefrence> p_scene_refrences);
 	void add_scene_refrence(Ref<LinkerSceneRefrence> p_node_info);
 	void remove_scene_refrence(StringName relative_path);
+
+	void add_link(Ref<LinkerLink> p_link);
+	void remove_link(Ref<LinkerLink> p_link);
+	bool has_named_link(const StringName &p_name) const;
+	Ref<LinkerLink> get_link(int p_index) const { return links[p_index]; }
+	int get_link_idx(const LinkerLink *p_link) const;
 
 	LinkerScript();
 	~LinkerScript() {}

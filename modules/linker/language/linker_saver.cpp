@@ -35,6 +35,7 @@ void LinkerSaver::write_script_settings(const Ref<LinkerScript> &p_script, Confi
 	p_config_file.set_value(section, "valid", p_script->valid);
 	p_config_file.set_value(section, "abstract", p_script->abstract);
 	p_config_file.set_value(section, "reloading", p_script->reloading);
+	p_config_file.set_value(section, "link_count", p_script->get_link_count());
 }
 
 void LinkerSaver::write_script_values(const Ref<LinkerScript> &p_script, ConfigFile &p_config_file) {
@@ -44,5 +45,5 @@ void LinkerSaver::write_script_values(const Ref<LinkerScript> &p_script, ConfigF
 	p_config_file.set_value(section, "properties", p_script->get_property_list());
 	p_config_file.set_value(section, "constants", p_script->get_constants());
 	p_config_file.set_value(section, "signals", p_script->get_signal_list());
-	p_config_file.set_value(section, "scene_refrences", p_script->get_scene_refrences());
+	p_config_file.set_value(section, "links", p_script->get_links());
 }
