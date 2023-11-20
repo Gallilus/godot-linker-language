@@ -21,7 +21,8 @@ class LinkerGraph : public Control {
 	GridContainer *unsorted_nodes = nullptr;
 
 protected:
-	static void _bind_methods() {}
+	static void _bind_methods();
+	void _notification(int p_what);
 
 public:
 	struct DropData {

@@ -29,6 +29,16 @@ static void _get_node_data(Node *p_node, LinkerScript::NodeInfo &p_node_info, No
 	p_node_info.node_scene_relative_path = StringName(p_scripted_node->get_path_to(p_node));
 }
 
+void LinkerGraph::_bind_methods() {
+}
+
+void LinkerGraph::_notification(int p_what) {
+	switch (p_what) {
+		case NOTIFICATION_ENTER_TREE: {
+		} break;
+	}
+}
+
 void LinkerGraph::gui_input(const Ref<InputEvent> &p_event) {
 	ERR_FAIL_COND(p_event.is_null());
 }

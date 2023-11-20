@@ -207,10 +207,9 @@ public:
 	void set_signal_list(const Dictionary &p_signals);
 	void set_signal(const MethodInfo &p_info);
 
-	Dictionary get_scene_refrences() const;
-	void set_scene_refrences(const Dictionary &p_scene_refrences);
-	void add_scene_refrence(const NodeInfo &p_node_info);
-	void overwrite_scene_refrence(const NodeInfo &p_node_info);
+	TypedArray<LinkerSceneRefrence> get_scene_refrences() const;
+	void set_scene_refrences(TypedArray<LinkerSceneRefrence> p_scene_refrences);
+	void add_scene_refrence(Ref<LinkerSceneRefrence> p_node_info);
 	void remove_scene_refrence(StringName relative_path);
 
 	LinkerScript();
