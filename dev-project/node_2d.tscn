@@ -1,6 +1,74 @@
-[gd_scene load_steps=2 format=3 uid="uid://dfpcw7vgo0atb"]
+[gd_scene load_steps=2 format=3 uid="uid://bgl0vdmir3svw"]
 
-[ext_resource type="Script" path="res://Node2D.gd" id="1_evhdu"]
+[ext_resource type="Script" path="res://ColorRect.ls" id="1_7tlnk"]
 
 [node name="Node2D" type="Node2D"]
-script = ExtResource("1_evhdu")
+position = Vector2(0, 1)
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+
+[node name="ColorRect" type="ColorRect" parent="Control"]
+layout_mode = 0
+anchor_left = null
+anchor_top = null
+anchor_right = null
+anchor_bottom = null
+offset_left = null
+offset_top = null
+offset_right = null
+offset_bottom = null
+focus_neighbor_left = null
+focus_neighbor_top = null
+focus_neighbor_right = null
+focus_neighbor_bottom = null
+script = ExtResource("1_7tlnk")
+
+[node name="TextureRect" type="TextureRect" parent="Control/ColorRect"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="GridMap" type="GridMap" parent="."]
+
+[node name="Node2222D" type="Node2D" parent="."]
+
+[node name="Control2" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 523.0
+offset_bottom = 556.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control2"]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -20.0
+offset_right = 40.0
+offset_bottom = 20.0
+grow_vertical = 2
+size_flags_horizontal = 2
+
+[node name="Button" type="Button" parent="Control2/VBoxContainer"]
+custom_minimum_size = Vector2(0.865, 22.245)
+layout_mode = 2
+
+[node name="Button2" type="Button" parent="Control2/VBoxContainer"]
+layout_mode = 2
+
+[node name="Button3" type="Button" parent="Control2/VBoxContainer"]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="Control2/VBoxContainer"]
+layout_mode = 2
+
+[node name="Button" type="Button" parent="Control2/VBoxContainer/MarginContainer"]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2

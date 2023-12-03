@@ -1,5 +1,5 @@
-#ifndef LINKER_GRAPH_H
-#define LINKER_GRAPH_H
+#ifndef EDITOR_LAYOUT_H
+#define EDITOR_LAYOUT_H
 
 #include "../language/linker_index_get.h"
 #include "../language/linker_language.h"
@@ -10,6 +10,7 @@
 #include "core/object/ref_counted.h"
 #include "editor/editor_interface.h"
 #include "editor/editor_node.h"
+#include "editor_graph.h"
 // #include "scene/gui/container.h"
 #include "scene/gui/box_container.h"
 #include "scene/gui/control.h"
@@ -21,17 +22,16 @@
 #include "scene/gui/texture_rect.h"
 #include "scene/main/window.h"
 
-class LinkerGraph : public Control {
-	GDCLASS(LinkerGraph, Control);
+class EditorLayout : public Control {
+	GDCLASS(EditorLayout, Control);
 	Ref<LinkerScript> script;
 
-	VBoxContainer *unsorted_nodes = nullptr;
-
-	HashMap<int, LinkControler *> link_controlers; //
+	HashMap<LinkerLink *, LinkControler *> link_contorlers;
 
 protected:
 	static void _bind_methods();
-	void _notification(int p_what);
+
+	LinkControler *get_linker_controler(LinkerLink *p_link);
 
 public:
 	struct DropData {
@@ -46,19 +46,13 @@ public:
 
 	void set_script(Ref<LinkerScript> p_script) { script = p_script; }
 
-	virtual void gui_input(const Ref<InputEvent> &p_event) override;
-
 	virtual bool can_drop_data(const Point2 &p_point, const Variant &p_data) const override;
 	virtual void drop_data(const Point2 &p_point, const Variant &p_data) override;
 
 	void update_graph();
 
-	LinkControler *get_linker_controler(int p_idx) { return link_controlers[p_idx]; }
-
-	// on add child keep refrence to LinkControler by LinkerLink.index
-
-	LinkerGraph();
-	~LinkerGraph() {}
+	EditorLayout();
+	~EditorLayout() {}
 };
 
-#endif // LINKER_GRAPH_H
+#endif // EDITOR_LAYOUT_H

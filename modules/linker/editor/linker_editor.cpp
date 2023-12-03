@@ -66,6 +66,8 @@ void LinkerEditor::enable_editor(Control *p_shortcut_context) {
 	set_focus_mode(Control::FOCUS_ALL);
 	set_v_size_flags(SIZE_EXPAND_FILL);
 	set_h_size_flags(SIZE_EXPAND_FILL);
+	this->connect("ready", callable_mp(this, &LinkerEditor::_update_graph));
+	this->connect("resized", callable_mp(this, &LinkerEditor::_update_graph));
 
 	HBoxContainer *top_menu = memnew(HBoxContainer);
 	add_child(top_menu);
@@ -87,8 +89,6 @@ void LinkerEditor::enable_editor(Control *p_shortcut_context) {
 	background->set_v_size_flags(SIZE_EXPAND_FILL);
 	background->set_h_size_flags(SIZE_EXPAND_FILL);
 	add_child(background);
-
-	_update_graph();
 }
 
 String LinkerEditor::get_name() {
@@ -156,7 +156,7 @@ void LinkerEditor::script_changed() {
 }
 
 LinkerEditor::LinkerEditor() {
-	base_editor = memnew(LinkerGraph);
+	base_editor = memnew(EditorLayout);
 	edit_menu = memnew(Control);
 	find_replace_bar = memnew(FindReplaceBar);
 }

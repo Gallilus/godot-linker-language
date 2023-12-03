@@ -13,6 +13,7 @@
 #include "../language/linker_language.h"
 #include "../language/linker_script.h"
 #include "linker_graph.h"
+#include "editor_layout.h"
 
 class LinkerEditor : public ScriptEditorBase {
 	GDCLASS(LinkerEditor, ScriptEditorBase);
@@ -23,7 +24,7 @@ class LinkerEditor : public ScriptEditorBase {
 
 	Control *edit_menu = nullptr;
 	FindReplaceBar *find_replace_bar = nullptr;
-	LinkerGraph *base_editor = nullptr;
+	EditorLayout *base_editor = nullptr;
 
 	//	Ref<EditorUndoRedoManager> undo_redo;
 	bool is_updating = false;

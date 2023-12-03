@@ -1,14 +1,6 @@
 #include "linker_script.h"
 #include "linker_script_instance.h"
 
-TypedArray<LinkerLink> LinkerScript::get_links() const {
-	TypedArray<LinkerLink> link_list;
-	for (int i = 0; i < links.size(); i++) {
-		link_list.push_back(links[i]);
-	}
-	return link_list;
-}
-
 void LinkerScript::set_links(TypedArray<LinkerLink> p_links) {
 	for (int i = 0; i < p_links.size(); i++) {
 		add_link_by_index(Ref<LinkerLink>(p_links[i]));
@@ -436,6 +428,14 @@ void LinkerScript::remove_scene_refrence(StringName relative_path) {
 		scene_refrences.erase(relative_path);
 		emit_changed();
 	}
+}
+
+TypedArray<LinkerLink> LinkerScript::get_links() const {
+	TypedArray<LinkerLink> link_list;
+	for (int i = 0; i < links.size(); i++) {
+		link_list.push_back(links[i]);
+	}
+	return link_list;
 }
 
 void LinkerScript::add_link(Ref<LinkerLink> p_link) {

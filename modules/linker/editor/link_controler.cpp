@@ -23,7 +23,6 @@ void LinkControler::update_node() {
 
 	button->connect("pressed", callable_mp(link.ptr(), &LinkerLink::remove_from_script), CONNECT_DEFERRED);
 	button->connect("resized", callable_mp(this, &LinkControler::on_size_changed), CONNECT_DEFERRED);
-	// connect on size changed to edit the size of LinkControl
 
 	// ports
 	//      link->get_arg_links().size
@@ -51,6 +50,10 @@ void LinkControler::set_link(Ref<LinkerLink> p_link) {
 	// alt + drag = move
 	// select = Graph_inspector to position to inspect
 	// ctrl + select = add to graph_search_focus
+}
+
+StringName LinkControler::get_category() const {
+	return link->get_category();
 }
 
 LinkControler::LinkControler() {

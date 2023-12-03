@@ -7,3 +7,10 @@ env.add_source_files(env.modules_sources, "*language/*.cpp")
 #if env.editor_build:
 env.add_source_files(env.modules_sources, "./editor/*.cpp")
     # SConscript("editor/script_templates/SCsub")
+
+# Import iGraph 
+# these paths depend on where you installed vcpkg-igraph
+env.Append(CPPPATH=['F:/vcpkg/installed/x64-windows/include'])
+env.Append(CPPPATH=['F:/vcpkg/installed/x64-windows/include/igraph'])
+env.Append(LIBPATH=['F:/vcpkg/installed/x64-windows/lib'])
+env.Append(LIBS=['igraph'])

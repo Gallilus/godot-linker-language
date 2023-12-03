@@ -3,8 +3,10 @@
 
 #include "../language/linker_link.h"
 //#include "../language/linker_script.h"
-#include "linker_graph.h"
+//#include "linker_graph.h"
 
+//#include "core/variant/dictionary.h"
+#include "editor/editor_node.h"
 #include "scene/gui/button.h"
 #include "scene/gui/control.h"
 
@@ -34,6 +36,10 @@ protected:
 
 public:
 	void set_link(Ref<LinkerLink> p_link);
+	LinkerLink *get_link() const { return link.ptr(); }
+	int get_link_idx() const { return link->get_link_idx(); }
+
+	virtual StringName get_category() const;
 
 	LinkControler();
 	~LinkControler() {}

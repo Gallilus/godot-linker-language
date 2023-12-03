@@ -118,7 +118,6 @@ private:
 	// Vector for all links (named and unnamed)
 	Vector<Ref<LinkerLink>> links;
 
-	TypedArray<LinkerLink> get_links() const;
 	void set_links(TypedArray<LinkerLink> p_links);
 	void add_link_by_index(Ref<LinkerLink> p_link); // only on load from file
 	void add_member_link(Ref<LinkerLink> p_link); // ads the new links to there respective memberlists
@@ -240,6 +239,7 @@ public:
 	void add_scene_refrence(Ref<LinkerSceneRefrence> p_node_info);
 	void remove_scene_refrence(StringName relative_path);
 
+	TypedArray<LinkerLink> get_links() const;
 	void add_link(Ref<LinkerLink> p_link);
 	void remove_link(Ref<LinkerLink> p_link);
 	bool has_named_link(const StringName &p_name) const;

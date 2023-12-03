@@ -1,4 +1,4 @@
-#include "linker_graph.h"
+#include "editor_layout.h"
 
 static Node *_find_script_node(Node *p_edited_scene, Node *p_current_node, const Ref<Script> &script) {
 	if (p_edited_scene != p_current_node && p_current_node->get_owner() != p_edited_scene) {
@@ -29,67 +29,47 @@ static void _get_node_data(Node *p_node, Ref<LinkerSceneRefrence> p_node_info, N
 	p_node_info->set_node_scene_relative_path(StringName(p_scripted_node->get_path_to(p_node)));
 }
 
-void LinkerGraph::_bind_methods() {
+void EditorLayout::_bind_methods() {
 }
 
-void LinkerGraph::_notification(int p_what) {
-	switch (p_what) {
-		case NOTIFICATION_ENTER_TREE: {
-			break;
-		}
-			/*case NOTIFICATION_PRE_SORT_CHILDREN: {
-				// make sure all link controlers are resized
-
-				// and trigger recalculation of Graph positions
-				break;
-			}
-			case NOTIFICATION_SORT_CHILDREN: {
-				// reposiotn all link controlers
-				break;
-			}*/
+LinkControler *EditorLayout::get_linker_controler(LinkerLink *p_link) {
+	if (link_contorlers.has(p_link)) {
+		return link_contorlers[p_link];
 	}
+	LinkControler *controler = memnew(LinkControler);
+	controler->set_link(Ref<LinkerLink>(p_link));
+	add_child(controler);
+	link_contorlers[p_link] = controler;
+	return controler;
+	//	LinkerSceneRefrence *scene_ref = Object::cast_to<LinkerSceneRefrence>(*p_link);
+	//	if (scene_ref) {
+	//	}
+	//	return nullptr;
 }
 
-void LinkerGraph::gui_input(const Ref<InputEvent> &p_event) {
-	ERR_FAIL_COND(p_event.is_null());
-}
-
-bool LinkerGraph::can_drop_data(const Point2 &p_point, const Variant &p_data) const {
+bool EditorLayout::can_drop_data(const Point2 &p_point, const Variant &p_data) const {
+	// Check position if it is relevant to you
+	// Otherwise, just check data
 	Dictionary d = p_data;
 	if (d.has("type") &&
 			(String(d["type"]) == "obj_property" ||
 					String(d["type"]) == "resource" ||
 					String(d["type"]) == "files" ||
 					String(d["type"]) == "nodes")) {
-		if (String(d["type"]) == "obj_property") {
-			// optional show hint
-		}
-		if (String(d["type"]) == "nodes") {
-			// optional show hint
-		}
-		if (String(d["type"]) == "visual_script_variable_drag") {
-			// optional show hint
-		}
 		return true;
 	}
 	return false;
 }
 
-void LinkerGraph::drop_data(const Point2 &p_point, const Variant &p_data) {
-	Dictionary d = p_data;
-	if (!d.has("type")) {
-		ERR_PRINT("LinkerGraph can not handle drop data:" + String(p_data));
-		return;
-	}
-	//ERR_PRINT("can_drop_data " + String(p_data));
-
+void EditorLayout::drop_data(const Point2 &p_point, const Variant &p_data) {
 	Node *scripted_node = _find_script_node(get_tree()->get_edited_scene_root(), get_tree()->get_edited_scene_root(), script);
 	String this_script_path = script->get_path();
 
 	DropData drop_data;
-
 	drop_data.ctrl_drop = Input::get_singleton()->is_key_pressed(Key::CTRL);
 	drop_data.shift_drop = Input::get_singleton()->is_key_pressed(Key::SHIFT);
+
+	Dictionary d = p_data;
 
 	if (d.has("object")) {
 		Variant var = d["object"];
@@ -161,71 +141,35 @@ void LinkerGraph::drop_data(const Point2 &p_point, const Variant &p_data) {
 	}
 }
 
-void LinkerGraph::update_graph() {
+void EditorLayout::update_graph() {
+	EditorGraph graph;
 	if (!script.is_valid()) {
 		return;
 	}
 
-	for (int i = 0; i < unsorted_nodes->get_child_count(); i++) {
-		Node *child = unsorted_nodes->get_child(i);
-		child->queue_free();
-	}
-	// if (unsorted_nodes) {
-	// 	unsorted_nodes->queue_free();
-	// 	unsorted_nodes = nullptr;
-	// }
-	// unsorted_nodes = memnew(VBoxContainer);
-	// //unsorted_nodes->set_columns(1);
-	// unsorted_nodes->set_custom_minimum_size(Size2(28, 28));
-	// unsorted_nodes->set_anchors_preset(Control::PRESET_CENTER_LEFT);
-	// add_child(unsorted_nodes);
+	TypedArray<LinkerLink> links = script->get_links();
 
-	TypedArray<LinkerSceneRefrence> scene_refs = script->get_scene_refrences();
-	TypedArray<LinkerLink> unsorted_links = script->get_links();
-
-	// init a new graph
-	// create a edge list
-
-	for (int i = 0; i < unsorted_links.size(); i++) {
-		Ref<LinkerLink> link = unsorted_links[i];
-		if (!link.is_valid()) {
-			continue;
-		}
-		if (link->get_category() == "data") {
-			// data are inputs, and need to be sonnected to an output trigger.
-			// If Graph edit is storing it as WIP it is set to relative position in graph.
-		}
-		if (link->get_category() == "trigger") {
-			// triggers are sequence starters
-		}
-		LinkerSceneRefrence *scene_ref = Object::cast_to<LinkerSceneRefrence>(*link);
-		if (scene_ref) {
-			// all unsorted nodes are apended to the end of the Pined List
-		}
+	for (int i = 0; i < links.size(); i++) {
+		LinkerLink *link = Object::cast_to<LinkerLink>(links[i]);
+		//LinkControler *controler = get_linker_controler(link);
+		graph.add_linker_link(Ref<LinkerLink>(link));
 	}
 
-	for (int i = 0; i < scene_refs.size(); i++) {
-		Ref<LinkerSceneRefrence> node_info = scene_refs[i];
-
-		LinkControler *controler = memnew(LinkControler);
-		controler->set_link(node_info);
-		unsorted_nodes->add_child(controler);
+	for (const KeyValue<LinkerLink *, Vector2> &E : graph.get_linker_link_positions()) {
+		LinkerLink *link = E.key;
+		LinkControler *controler = get_linker_controler(link);
+		Vector2 recalculated_pos = E.value; // pos from graph -1.0->1.0
+		recalculated_pos += Vector2(1.0, 1.0); // move all pos to the pos 0.0->2.0
+		recalculated_pos *= Vector2(0.5, 0.5); // rescale to 0.0->1.0
+		recalculated_pos *= Vector2(this->get_size()); // resize to field
+		controler->set_position(recalculated_pos);
 	}
+
+	ERR_PRINT("String(recalculated_pos)");
 }
 
-LinkerGraph::LinkerGraph() {
+EditorLayout::EditorLayout() {
 	set_v_size_flags(SIZE_EXPAND_FILL);
 	set_h_size_flags(SIZE_EXPAND_FILL);
 	set_focus_mode(Control::FOCUS_ALL);
-
-	ScrollContainer *scroll = memnew(ScrollContainer);
-	add_child(scroll);
-	scroll->set_custom_minimum_size(Size2(35, 100));
-	scroll->set_anchors_preset(PRESET_CENTER_LEFT);
-	scroll->set_anchor(SIDE_TOP, 1.0 / 3.0);
-	scroll->set_anchor(SIDE_BOTTOM, 1.0 - 1.0 / 3.0);
-	scroll->set_horizontal_scroll_mode(ScrollContainer::SCROLL_MODE_DISABLED);
-
-	unsorted_nodes = memnew(VBoxContainer);
-	scroll->add_child(unsorted_nodes);
 }
