@@ -12,7 +12,6 @@
 
 #include "../language/linker_language.h"
 #include "../language/linker_script.h"
-#include "linker_graph.h"
 #include "editor_layout.h"
 
 class LinkerEditor : public ScriptEditorBase {
