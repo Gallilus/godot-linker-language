@@ -1,8 +1,10 @@
 #ifndef LINKER_INDEX_GET_H
 #define LINKER_INDEX_GET_H
 
+#include "editor/editor_node.h"
 #include "linker_link.h"
 #include "linker_script.h"
+
 
 class LinkerIndexGet : public LinkerLink {
 	GDCLASS(LinkerIndexGet, LinkerLink);
@@ -33,6 +35,8 @@ public:
 	virtual int get_default_arg_count() const override;
 	virtual Variant get_default_arg(int p_idx) const override;
 	virtual PropertyInfo get_output_info() const override;
+
+	virtual Ref<Texture2D> get_icon() const override;
 
 	void set_index(const StringName &p_index);
 	StringName get_index() const;

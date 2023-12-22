@@ -11,7 +11,7 @@ void LinkControler::_notification(int p_what) {
 
 void LinkControler::update_node() {
 	PropertyInfo pi = link->get_output_info();
-	Ref<Texture2D> icon = EditorNode::get_singleton()->get_class_icon(pi.class_name, "Variant");
+	Ref<Texture2D> icon = link->get_icon();
 
 	button = memnew(Button);
 	add_child(button);

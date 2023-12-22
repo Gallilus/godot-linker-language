@@ -2,6 +2,7 @@
 #define LINKER_SCENE_REFRENCE_H
 
 #include "editor/editor_interface.h"
+#include "editor/editor_node.h"
 #include "linker_link.h"
 #include "scene/main/node.h"
 
@@ -30,6 +31,8 @@ public:
 	virtual int get_default_arg_count() const override;
 	virtual Variant get_default_arg(int p_idx) const override;
 	virtual PropertyInfo get_output_info() const override;
+
+	virtual Ref<Texture2D> get_icon() const override;
 
 	void set_refrence(Node *p_ref_node, Node *p_scripted_node);
 

@@ -2,6 +2,7 @@
 #define LINKER_LINK_H
 
 #include "core/io/resource.h"
+#include "editor/editor_node.h"
 
 class LinkerScript;
 
@@ -35,6 +36,8 @@ public:
 	virtual int get_default_arg_count() const = 0;
 	virtual Variant get_default_arg(int p_idx) const = 0;
 	virtual PropertyInfo get_output_info() const = 0;
+
+	virtual Ref<Texture2D> get_icon() const = 0;
 
 	void remove_from_script();
 

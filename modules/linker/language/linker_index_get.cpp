@@ -41,7 +41,22 @@ Variant LinkerIndexGet::get_default_arg(int p_idx) const {
 }
 
 PropertyInfo LinkerIndexGet::get_output_info() const {
-	return PropertyInfo();
+	if (!source.is_valid()) {
+		ERR_PRINT("LinkerIndexGet::get_output_info: source is not valid");
+		return PropertyInfo();
+	}
+	PropertyInfo source_info = source->get_output_info();
+	PropertyInfo return_info;
+	ClassDB::get_property_info(source_info.class_name, index, &return_info);
+	return return_info;
+}
+
+Ref<Texture2D> LinkerIndexGet::get_icon() const {
+	PropertyInfo source_info = get_output_info();
+	if (source_info.class_name == "") {
+		return EditorNode::get_singleton()->get_class_icon(Variant::get_type_name(source_info.type));
+	}
+	return EditorNode::get_singleton()->get_class_icon(source_info.class_name);
 }
 
 void LinkerIndexGet::set_index(const StringName &p_index) {

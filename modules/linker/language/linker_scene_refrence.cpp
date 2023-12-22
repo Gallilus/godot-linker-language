@@ -42,6 +42,10 @@ PropertyInfo LinkerSceneRefrence::get_output_info() const {
 	return pi;
 }
 
+Ref<Texture2D> LinkerSceneRefrence::get_icon() const {
+	return EditorNode::get_singleton()->get_class_icon(node_class_name);
+}
+
 void LinkerSceneRefrence::set_refrence(Node *p_ref_node, Node *p_scripted_node) {
 	node_class_name = p_ref_node->get_class_name();
 	node_name = p_ref_node->get_name();
