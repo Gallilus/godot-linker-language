@@ -44,6 +44,7 @@ void LinkControler::on_size_changed() {
 
 void LinkControler::set_link(Ref<LinkerLink> p_link) {
 	link = p_link;
+	link->connect("removed_from_script", Callable(this, "queue_free"));
 	// connect signals, selected, etc.
 	// dragging = gostline
 	// ctrl + drag = copy
