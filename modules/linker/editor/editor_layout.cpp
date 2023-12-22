@@ -158,11 +158,7 @@ void EditorLayout::update_graph() {
 	for (const KeyValue<LinkerLink *, Vector2> &E : graph.get_linker_link_positions()) {
 		LinkerLink *link = E.key;
 		LinkControler *controler = get_linker_controler(link);
-		Vector2 recalculated_pos = E.value; // pos from graph -1.0->1.0
-		recalculated_pos += Vector2(1.0, 1.0); // move all pos to the pos 0.0->2.0
-		recalculated_pos *= Vector2(0.5, 0.5); // rescale to 0.0->1.0
-		recalculated_pos *= Vector2(this->get_size()); // resize to field
-		controler->set_position(recalculated_pos);
+		controler->set_position(E.value);
 	}
 
 	ERR_PRINT("String(recalculated_pos)");
