@@ -42,11 +42,23 @@ HashMap<LinkerLink *, Vector2> EditorGraph::get_linker_link_positions() {
 		igraph_real_t y = igraph_matrix_get(&pos_matrix, i, 0);
 		igraph_real_t x = igraph_matrix_get(&pos_matrix, i, 1);
 		positions[links[i].ptr()] = Vector2(x, y);
-		ERR_PRINT(String(positions[links[i].ptr()]));
 	}
 
 	igraph_matrix_destroy(&pos_matrix);
 	return positions;
+}
+
+void EditorGraph::add_edge(Ref<LinkerLink> p_linker_link_from, Ref<LinkerLink> p_linker_link_to, String p_edge_category) {
+	int from_vertex_id = get_vertex_id(p_linker_link_from);
+	int to_vertex_id = get_vertex_id(p_linker_link_to);
+	if (from_vertex_id == -1 || to_vertex_id == -1) {
+		return;
+	}
+	igraph_add_edge(&graph, from_vertex_id, to_vertex_id);
+
+	igraph_integer_t edge_id = igraph_ecount(&graph) - 1;
+	const char *category = p_edge_category.utf8();
+	SETEAS(&graph, "category", edge_id, category);
 }
 
 EditorGraph::EditorGraph() {

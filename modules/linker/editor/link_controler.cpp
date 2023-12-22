@@ -15,8 +15,13 @@ void LinkControler::update_node() {
 
 	button = memnew(Button);
 	add_child(button);
-	button->set_tooltip_text(String(link->get_tooltip()));
 	button->set_flat(true);
+	button->set_tooltip_text(String(link->get_tooltip()));
+	if (link->get_class() == "LinkerIndexGet") {
+		button->set_text(link->get_tooltip());
+		button->set_icon_alignment(HORIZONTAL_ALIGNMENT_RIGHT);
+	}
+
 	if (icon.is_valid()) {
 		button->set_icon(icon);
 	}

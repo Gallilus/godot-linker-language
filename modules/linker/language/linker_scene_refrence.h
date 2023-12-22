@@ -22,7 +22,7 @@ public:
 	virtual StringName get_member_name() const { return get_node_scene_relative_path(); };
 
 	virtual StringName get_caption() const override { return node_scene_relative_path; };
-	virtual StringName get_category() const override { return "data"; }
+	virtual StringName get_category() const override { return "graph_input"; }
 	virtual StringName get_tooltip() const override { return get_caption(); }
 
 	virtual int get_arg_count() const override;

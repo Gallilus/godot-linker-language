@@ -151,8 +151,27 @@ void EditorLayout::update_graph() {
 
 	for (int i = 0; i < links.size(); i++) {
 		LinkerLink *link = Object::cast_to<LinkerLink>(links[i]);
-		//LinkControler *controler = get_linker_controler(link);
+		if (!link) {
+			continue;
+		}
 		graph.add_linker_link(Ref<LinkerLink>(link));
+	}
+
+	for (int i = 0; i < links.size(); i++) {
+		LinkerLink *link = Object::cast_to<LinkerLink>(links[i]);
+		if (!link) {
+			continue;
+		}
+		StringName category = link->get_category();
+		Vector<Ref<LinkerLink>> args = link->get_arg_links();
+		// link categorys [get, set, call, sequence, graph_input, graph_output]
+		// edge categorys [data, refrence, sequence]
+		if (category == "get") {
+			for (int j = 0; j < args.size(); j++) {
+				Ref<LinkerLink> arg = args[j];
+				graph.add_edge(arg, link, "data");
+			}
+		}
 	}
 
 	for (const KeyValue<LinkerLink *, Vector2> &E : graph.get_linker_link_positions()) {

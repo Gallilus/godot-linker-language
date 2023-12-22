@@ -25,7 +25,7 @@ public:
 	virtual Vector<Ref<LinkerLink>> get_arg_links() override; // a list of all links that are represented as arguments
 
 	virtual StringName get_caption() const override { return "get"; };
-	virtual StringName get_category() const override { return "data"; }
+	virtual StringName get_category() const override { return "get"; }
 	virtual StringName get_tooltip() const override { return "get " + index; }
 
 	virtual int get_arg_count() const override;
