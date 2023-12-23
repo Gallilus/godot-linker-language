@@ -5,7 +5,6 @@
 #include "linker_link.h"
 #include "linker_script.h"
 
-
 class LinkerIndexGet : public LinkerLink {
 	GDCLASS(LinkerIndexGet, LinkerLink);
 
@@ -21,7 +20,7 @@ protected:
 	static void _bind_methods();
 
 public:
-	virtual StringName get_member_name() const { return ""; };
+	virtual StringName get_member_name() const { return ""; }
 
 	virtual void set_link_refrences(); // called when loading file after all links are loaded
 	virtual Vector<Ref<LinkerLink>> get_arg_links() override; // a list of all links that are represented as arguments
