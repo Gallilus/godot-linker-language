@@ -33,7 +33,8 @@ public:
 	virtual PropertyInfo get_arg_info(int p_idx) const override;
 	virtual int get_default_arg_count() const override;
 	virtual Variant get_default_arg(int p_idx) const override;
-	virtual PropertyInfo get_output_info() const override;
+	virtual int get_output_count() const override { return 1; }
+	virtual PropertyInfo get_output_info(int p_idx) const override;
 
 	virtual Ref<Texture2D> get_icon() const override;
 

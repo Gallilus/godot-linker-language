@@ -10,7 +10,7 @@ void LinkControler::_notification(int p_what) {
 }
 
 void LinkControler::update_node() {
-	PropertyInfo pi = link->get_output_info();
+	PropertyInfo pi = link->get_output_info(0);
 	Ref<Texture2D> icon = link->get_icon();
 
 	button = memnew(Button);

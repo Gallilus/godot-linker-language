@@ -35,7 +35,8 @@ public:
 	virtual PropertyInfo get_arg_info(int p_idx) const = 0;
 	virtual int get_default_arg_count() const = 0;
 	virtual Variant get_default_arg(int p_idx) const = 0;
-	virtual PropertyInfo get_output_info() const = 0;
+	virtual int get_output_count() const = 0;
+	virtual PropertyInfo get_output_info(int p_idx) const = 0;
 
 	virtual Ref<Texture2D> get_icon() const = 0;
 

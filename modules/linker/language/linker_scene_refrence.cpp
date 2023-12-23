@@ -34,7 +34,7 @@ Variant LinkerSceneRefrence::get_default_arg(int p_idx) const {
 	return Variant();
 }
 
-PropertyInfo LinkerSceneRefrence::get_output_info() const {
+PropertyInfo LinkerSceneRefrence::get_output_info(int p_idx) const {
 	PropertyInfo pi;
 	pi.type = Variant::OBJECT;
 	pi.name = node_name;
