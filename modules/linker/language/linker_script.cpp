@@ -261,10 +261,21 @@ Dictionary LinkerScript::get_method_list() const {
 	return methods;
 }
 
+List<StringName> LinkerScript::get_method_name_list() const {
+	List<MethodInfo> list;
+	get_script_method_list(&list);
+	List<StringName> r_list;
+
+	for (int i = 0; i < list.size(); i++) {
+		r_list.push_back(list[i].name);
+	}
+	return r_list;
+}
+
 void LinkerScript::set_method_list(const Dictionary &p_methods) {
 	for (int i = 0; i < p_methods.keys().size(); i++) {
 		StringName key = p_methods.keys()[i];
-		set_method(MethodInfo(p_methods[key]));
+		set_method(MethodInfo::from_dict(p_methods[key]));
 	};
 }
 
@@ -283,12 +294,41 @@ void LinkerScript::set_method(const MethodInfo &p_info) {
 	}
 }
 
+void LinkerScript::rename_method(const StringName &p_name, const StringName &p_new_name) {
+	if (member_functions.has(p_new_name)) {
+		ERR_PRINT("Duplicate member name: " + p_new_name);
+		return;
+	}
+	if (!member_functions.has(p_name)) {
+		ERR_PRINT("No member name: " + p_name);
+		return;
+	}
+	if (member_functions.has(p_name)) {
+		MethodInfo info = member_functions[p_name];
+		member_functions.erase(p_name);
+		member_functions.insert(p_new_name, info);
+		emit_changed();
+		return;
+	}
+}
+
 Dictionary LinkerScript::get_property_list() const {
 	Dictionary properties;
 	for (const KeyValue<StringName, VariableInfo> &E : member_properties) {
 		properties[E.key] = Dictionary(E.value);
 	}
 	return properties;
+}
+
+List<StringName> LinkerScript::get_property_name_list() const {
+	List<PropertyInfo> list;
+	get_script_property_list(&list);
+	List<StringName> r_list;
+
+	for (int i = 0; i < list.size(); i++) {
+		r_list.push_back(list[i].name);
+	}
+	return r_list;
 }
 
 void LinkerScript::set_property_list(const Dictionary &p_properties) {
@@ -298,40 +338,62 @@ void LinkerScript::set_property_list(const Dictionary &p_properties) {
 	};
 }
 
-void LinkerScript::set_member_variable(const StringName &p_name, const PropertyInfo &p_info, Variant *p_default_value) {
-	emit_changed();
-	ERR_PRINT("Duplicate member variable: " + p_name);
-	if (member_properties.has(p_name)) {
-		if (p_default_value == nullptr) {
-			member_properties[p_name] = VariableInfo(p_info);
-			return;
-		}
-		member_properties[p_name] = VariableInfo(p_info, &p_default_value);
-		return;
-	} else if (!members.has(p_name)) {
-		members.insert(p_name);
-		if (p_default_value == nullptr) {
-			member_properties[p_name] = VariableInfo(p_info);
-			return;
-		}
-		member_properties.insert(p_name, VariableInfo(p_info, &p_default_value));
-		return;
-	}
-}
-
 void LinkerScript::set_property(const VariableInfo &p_info) {
 	if (members.has(p_info.info.name)) {
 		if (member_properties.has(p_info.info.name)) {
 			member_properties[p_info.info.name] = p_info;
+			emit_changed();
 			return;
 		}
 		ERR_PRINT("Duplicate member name: " + p_info.info.name);
 		return;
-	} else {
+	} else if (!members.has(p_info.info.name)) {
 		members.insert(p_info.info.name);
 		member_properties.insert(p_info.info.name, p_info);
+		emit_changed();
 		return;
 	}
+}
+
+void LinkerScript::set_member_variable(const PropertyInfo &p_info, const Variant &p_default_value) {
+	StringName p_name = p_info.name;
+	if (member_properties.has(p_name)) {
+		member_properties[p_name] = VariableInfo(p_info, p_default_value);
+		emit_changed();
+		return;
+	} else if (!members.has(p_name)) {
+		members.insert(p_name);
+		member_properties.insert(p_name, VariableInfo(p_info, p_default_value));
+		emit_changed();
+		return;
+	}
+}
+
+void LinkerScript::rename_member_variable(const StringName &p_name, const StringName &p_new_name) {
+	if (member_properties.has(p_new_name)) {
+		ERR_PRINT("Duplicate member name: " + p_new_name);
+		return;
+	}
+	if (!member_properties.has(p_name)) {
+		ERR_PRINT("No member name: " + p_name);
+		return;
+	}
+	if (member_properties.has(p_name)) {
+		VariableInfo info = member_properties[p_name];
+		member_properties.erase(p_name);
+		info.info.name = p_new_name;
+		member_properties.insert(p_new_name, info);
+		emit_changed();
+		return;
+	}
+	ERR_PRINT("No member name: " + p_name);
+}
+
+PropertyInfo LinkerScript::get_property_info(const StringName &p_name) {
+	if (member_properties.has(p_name)) {
+		return member_properties[p_name].info;
+	}
+	return PropertyInfo();
 }
 
 Dictionary LinkerScript::get_constants() const {

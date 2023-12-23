@@ -9,11 +9,32 @@ void LinkerEditor::_update_graph() {
 	}
 	is_updating = true;
 	base_editor->update_graph();
+	members_section->update_members();
 	is_updating = false;
 }
 
 void LinkerEditor::_bind_methods() {
 	//ClassDB::bind_method(D_METHOD("script_changed"), &LinkerEditor::script_changed);
+}
+
+void LinkerEditor::_notification(int p_what) {
+	switch (p_what) {
+		case NOTIFICATION_ENTER_TREE: {
+		} break;
+		case NOTIFICATION_READY: {
+			ERR_FAIL_NULL(script);
+			ERR_FAIL_COND_MSG(!script.is_valid(), "Script is not valid.");
+			script->connect("changed", callable_mp(this, &LinkerEditor::script_changed));
+			base_editor->set_script(script);
+			members_section->set_script(script);
+		} break;
+		case NOTIFICATION_EXIT_TREE: {
+			members_section->queue_free();
+		} break;
+		case NOTIFICATION_VISIBILITY_CHANGED: {
+			members_section->set_visible(is_visible_in_tree());
+		} break;
+	}
 }
 
 void LinkerEditor::apply_code() {
@@ -45,16 +66,8 @@ Vector<String> LinkerEditor::get_functions() {
 
 void LinkerEditor::set_edited_resource(const Ref<Resource> &p_res) {
 	ERR_FAIL_COND(script.is_valid());
-	ERR_FAIL_COND(p_res.is_null());
+	ERR_FAIL_NULL(p_res);
 	script = p_res;
-	script->connect("changed", callable_mp(this, &LinkerEditor::script_changed));
-	script->emit_changed();
-	base_editor->set_script(p_res);
-
-	// set script refrence for sub editors heare
-
-	// emit signal to update all sub editors
-	// same signal as after reload
 }
 
 void LinkerEditor::enable_editor(Control *p_shortcut_context) {
@@ -145,7 +158,7 @@ void LinkerEditor::register_editor() {
 
 void LinkerEditor::test() {
 	ERR_PRINT("test button pressed");
-	script->set_member_variable("test", PropertyInfo(Variant::STRING, "test"), nullptr);
+	script->set_member_variable(PropertyInfo(Variant::STRING, "test"), Variant());
 }
 
 void LinkerEditor::script_changed() {
@@ -159,6 +172,7 @@ LinkerEditor::LinkerEditor() {
 	base_editor = memnew(EditorLayout);
 	edit_menu = memnew(Control);
 	find_replace_bar = memnew(FindReplaceBar);
+	members_section = memnew(MembersSection);
 }
 
 LinkerEditor::~LinkerEditor() {
@@ -166,5 +180,6 @@ LinkerEditor::~LinkerEditor() {
 		memdelete(base_editor);
 		memdelete(edit_menu);
 		memdelete(find_replace_bar);
+		memdelete(members_section);
 	}
 }

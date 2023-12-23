@@ -95,7 +95,7 @@ public:
 		static VariableInfo from_dict(const Dictionary &p_dict) {
 			VariableInfo vi;
 			vi.index = p_dict["index"];
-			vi.info = PropertyInfo(p_dict["info"]);
+			vi.info = PropertyInfo::from_dict(p_dict["info"]);
 			vi.default_value = p_dict["default_value"];
 			vi.setter = p_dict["setter"];
 			vi.getter = p_dict["getter"];
@@ -217,13 +217,19 @@ public:
 	TypedArray<StringName> get_members() const;
 
 	Dictionary get_method_list() const;
+	List<StringName> get_method_name_list() const;
 	void set_method_list(const Dictionary &p_methods);
 	void set_method(const MethodInfo &p_info);
+	void rename_method(const StringName &p_name, const StringName &p_new_name);
 
 	Dictionary get_property_list() const;
+	List<StringName> get_property_name_list() const;
 	void set_property_list(const Dictionary &p_properties);
-	void set_member_variable(const StringName &p_name, const PropertyInfo &p_value, Variant *p_default_value = nullptr); // /!!!!!!!!
 	void set_property(const VariableInfo &p_info);
+
+	void set_member_variable(const PropertyInfo &p_value, const Variant &p_default_value); // needs to be replaced with set_property using Varible info when the VariantEditor is ready
+	void rename_member_variable(const StringName &p_name, const StringName &p_new_name); // needs to be replaced with set_property using Varible info when the VariantEditor is ready
+	PropertyInfo get_property_info(const StringName &p_name);
 
 	Dictionary get_constants() const;
 	void set_constants(const Dictionary &p_constants);

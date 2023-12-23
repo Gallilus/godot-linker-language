@@ -5,21 +5,26 @@
 #include "../language/linker_language.h"
 #include "../language/linker_scene_refrence.h"
 #include "../language/linker_script.h"
+#include "editor_graph.h"
 #include "link_controler.h"
 
+//#include "core/io/json.h"
+//#include "core/math/vector2.h"
 #include "core/object/ref_counted.h"
 #include "editor/editor_interface.h"
 #include "editor/editor_node.h"
-#include "editor_graph.h"
+
 // #include "scene/gui/container.h"
 #include "scene/gui/box_container.h"
 #include "scene/gui/control.h"
 #include "scene/gui/grid_container.h"
+#include "scene/gui/item_list.h"
 #include "scene/gui/label.h"
 #include "scene/gui/panel.h"
 #include "scene/gui/scroll_container.h"
 #include "scene/gui/split_container.h"
 #include "scene/gui/texture_rect.h"
+#include "scene/gui/tree.h"
 #include "scene/main/window.h"
 
 class EditorLayout : public Control {
@@ -27,6 +32,11 @@ class EditorLayout : public Control {
 	Ref<LinkerScript> script;
 
 	HashMap<LinkerLink *, LinkControler *> link_contorlers;
+
+	bool updating_members = true;
+	VBoxContainer *members_section = nullptr;
+	Tree *members = nullptr;
+	void _update_members();
 
 protected:
 	static void _bind_methods();

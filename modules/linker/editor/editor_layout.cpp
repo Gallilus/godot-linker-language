@@ -71,6 +71,8 @@ void EditorLayout::drop_data(const Point2 &p_point, const Variant &p_data) {
 
 	Dictionary d = p_data;
 
+	//ERR_PRINT(JSON::stringify(d, "\t"));
+
 	if (d.has("object")) {
 		Variant var = d["object"];
 		if (var) {
@@ -179,8 +181,6 @@ void EditorLayout::update_graph() {
 		LinkControler *controler = get_linker_controler(link);
 		controler->set_position(E.value);
 	}
-
-	ERR_PRINT("String(recalculated_pos)");
 }
 
 EditorLayout::EditorLayout() {

@@ -13,6 +13,7 @@
 #include "../language/linker_language.h"
 #include "../language/linker_script.h"
 #include "editor_layout.h"
+#include "members_section.h"
 
 class LinkerEditor : public ScriptEditorBase {
 	GDCLASS(LinkerEditor, ScriptEditorBase);
@@ -30,8 +31,11 @@ class LinkerEditor : public ScriptEditorBase {
 	bool changed = false;
 	void _update_graph();
 
+	MembersSection *members_section = nullptr;
+
 protected:
 	static void _bind_methods();
+	void _notification(int p_what);
 
 public:
 	virtual void add_syntax_highlighter(Ref<EditorSyntaxHighlighter> p_highlighter) override {}
@@ -67,7 +71,7 @@ public:
 	virtual bool can_lose_focus_on_node_selection() { return true; }
 	virtual void update_toggle_scripts_button() {}
 
-	virtual bool show_members_overview() override { return true; }
+	virtual bool show_members_overview() override { return false; }
 
 	virtual void set_tooltip_request_func(const Callable &p_toolip_callback) override {}
 
