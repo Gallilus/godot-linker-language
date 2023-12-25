@@ -226,10 +226,12 @@ public:
 	List<StringName> get_property_name_list() const;
 	void set_property_list(const Dictionary &p_properties);
 	void set_property(const VariableInfo &p_info);
+	void remove_property(const StringName &p_name);
 
 	void set_member_variable(const PropertyInfo &p_value, const Variant &p_default_value); // needs to be replaced with set_property using Varible info when the VariantEditor is ready
 	void rename_member_variable(const StringName &p_name, const StringName &p_new_name); // needs to be replaced with set_property using Varible info when the VariantEditor is ready
 	PropertyInfo get_property_info(const StringName &p_name);
+	Variant get_property_default_value(const StringName &p_name);
 
 	Dictionary get_constants() const;
 	void set_constants(const Dictionary &p_constants);

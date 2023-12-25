@@ -20,6 +20,8 @@ void LinkerEditor::_bind_methods() {
 void LinkerEditor::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_ENTER_TREE: {
+			linker_editor_inspector_plugin.instantiate();
+			EditorInspector::add_inspector_plugin(linker_editor_inspector_plugin);
 		} break;
 		case NOTIFICATION_READY: {
 			ERR_FAIL_NULL(script);
@@ -27,9 +29,11 @@ void LinkerEditor::_notification(int p_what) {
 			script->connect("changed", callable_mp(this, &LinkerEditor::script_changed));
 			base_editor->set_script(script);
 			members_section->set_script(script);
+			inspector->set_script(script);
 		} break;
 		case NOTIFICATION_EXIT_TREE: {
 			members_section->queue_free();
+			EditorInspector::remove_inspector_plugin(linker_editor_inspector_plugin);
 		} break;
 		case NOTIFICATION_VISIBILITY_CHANGED: {
 			members_section->set_visible(is_visible_in_tree());
@@ -102,6 +106,9 @@ void LinkerEditor::enable_editor(Control *p_shortcut_context) {
 	background->set_v_size_flags(SIZE_EXPAND_FILL);
 	background->set_h_size_flags(SIZE_EXPAND_FILL);
 	add_child(background);
+
+	add_child(inspector);
+	members_section->connect("edit_member", callable_mp(inspector, &LinkerInspector::edit_member));
 }
 
 String LinkerEditor::get_name() {
@@ -173,13 +180,5 @@ LinkerEditor::LinkerEditor() {
 	edit_menu = memnew(Control);
 	find_replace_bar = memnew(FindReplaceBar);
 	members_section = memnew(MembersSection);
-}
-
-LinkerEditor::~LinkerEditor() {
-	if (!editor_enabled) {
-		memdelete(base_editor);
-		memdelete(edit_menu);
-		memdelete(find_replace_bar);
-		memdelete(members_section);
-	}
+	inspector = memnew(LinkerInspector);
 }

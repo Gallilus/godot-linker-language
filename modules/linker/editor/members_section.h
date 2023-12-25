@@ -12,7 +12,8 @@
 #include "scene/gui/tree.h"
 
 class MembersSection : public VBoxContainer {
-protected:
+	GDCLASS(MembersSection, VBoxContainer);
+
 	Ref<LinkerScript> script;
 
 	const int ID_ADD = 0;
@@ -34,7 +35,7 @@ protected:
 	String _item_meta_group(const Dictionary &p_metadata) const;
 
 protected:
-	static void _bind_methods() {}
+	static void _bind_methods();
 
 public:
 	void set_script(Ref<LinkerScript> p_script) { script = p_script; }

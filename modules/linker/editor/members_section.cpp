@@ -91,7 +91,7 @@ void MembersSection::_member_button(Object *p_item, int p_column, int p_button, 
 	}
 
 	if (p_button == ID_EDIT) {
-		ERR_PRINT("edit " + String(ti->get_metadata(0)));
+		emit_signal("edit_member", name);
 	}
 }
 
@@ -147,6 +147,10 @@ String MembersSection::_item_meta_name(const Dictionary &p_metadata) const {
 
 String MembersSection::_item_meta_group(const Dictionary &p_metadata) const {
 	return p_metadata["group"];
+}
+
+void MembersSection::_bind_methods() {
+	ADD_SIGNAL(MethodInfo("edit_member", PropertyInfo(Variant::STRING, "name")));
 }
 
 MembersSection::MembersSection() {

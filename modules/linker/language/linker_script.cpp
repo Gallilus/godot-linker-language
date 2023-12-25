@@ -355,6 +355,14 @@ void LinkerScript::set_property(const VariableInfo &p_info) {
 	}
 }
 
+void LinkerScript::remove_property(const StringName &p_name) {
+	if (members.has(p_name) && member_properties.has(p_name)) {
+		members.erase(p_name);
+		member_properties.erase(p_name);
+		emit_changed();
+	}
+}
+
 void LinkerScript::set_member_variable(const PropertyInfo &p_info, const Variant &p_default_value) {
 	StringName p_name = p_info.name;
 	if (member_properties.has(p_name)) {
@@ -394,6 +402,13 @@ PropertyInfo LinkerScript::get_property_info(const StringName &p_name) {
 		return member_properties[p_name].info;
 	}
 	return PropertyInfo();
+}
+
+Variant LinkerScript::get_property_default_value(const StringName &p_name) {
+	if (member_properties.has(p_name)) {
+		return member_properties[p_name].default_value;
+	}
+	return Variant();
 }
 
 Dictionary LinkerScript::get_constants() const {

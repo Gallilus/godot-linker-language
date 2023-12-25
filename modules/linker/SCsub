@@ -6,6 +6,7 @@ env.add_source_files(env.modules_sources, "*language/*.cpp")
 
 #if env.editor_build:
 env.add_source_files(env.modules_sources, "./editor/*.cpp")
+env.add_source_files(env.modules_sources, "./editor/plugins/*.cpp")
     # SConscript("editor/script_templates/SCsub")
 
 # Import iGraph 
