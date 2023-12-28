@@ -34,6 +34,9 @@ class MembersSection : public VBoxContainer {
 	String _item_meta_name(const Dictionary &p_metadata) const;
 	String _item_meta_group(const Dictionary &p_metadata) const;
 
+	PopupMenu *select_virtual_method = nullptr;
+	void _on_virtual_method_selected(int p_index);
+
 protected:
 	static void _bind_methods();
 

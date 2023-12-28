@@ -283,6 +283,7 @@ void LinkerScript::set_method(const MethodInfo &p_info) {
 	if (members.has(p_info.name)) {
 		if (member_functions.has(p_info.name)) {
 			member_functions[p_info.name] = p_info;
+			emit_changed();
 			return;
 		}
 		ERR_PRINT("Duplicate member name: " + p_info.name);
@@ -290,6 +291,7 @@ void LinkerScript::set_method(const MethodInfo &p_info) {
 	} else {
 		members.insert(p_info.name);
 		member_functions.insert(p_info.name, p_info);
+		emit_changed();
 		return;
 	}
 }

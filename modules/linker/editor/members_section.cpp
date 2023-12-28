@@ -68,9 +68,42 @@ void MembersSection::_member_button(Object *p_item, int p_column, int p_button, 
 	String name = _item_meta_name(ti->get_metadata(0));
 	String group = _item_meta_group(ti->get_metadata(0));
 
+	// Todo: handle errors
+	// if (!new_name.is_valid_identifier()) {
+	// 	EditorNode::get_singleton()->show_warning(TTR("Name is not a valid identifier:") + " " + new_name);
+	// 	updating_members = true;
+	// 	ti->set_text(0, name);
+	// 	updating_members = false;
+	// 	return;
+	// }
+	// if (script->has_function(new_name) || script->has_variable(new_name) || script->has_custom_signal(new_name)) {
+	// 	EditorNode::get_singleton()->show_warning(TTR("Name already in use by another func/var/signal:") + " " + new_name);
+	// 	updating_members = true;
+	// 	ti->set_text(0, name);
+	// 	updating_members = false;
+	// 	return;
+	// }
+
 	if (p_button == ID_OVERRIDE) {
 		if (group == "group_name" && name == "Functions") {
-			// emit signal
+			select_virtual_method->clear();
+			select_virtual_method->popup_centered();
+			select_virtual_method->set_max_size(Size2(300, 400));
+			select_virtual_method->add_icon_item(Control::get_theme_icon(SNAME("Add"), EditorStringName(EditorIcons)), TTR("Create a new function."));
+			select_virtual_method->add_separator();
+			select_virtual_method->add_item(TTR("Override Function"));
+
+			List<MethodInfo> methods;
+			script->get_script_method_list(&methods);
+			//ClassDB::get_method_list(script->get_instance_base_type(), &methods);
+			ClassDB::get_virtual_methods("Node", &methods);
+			for (List<MethodInfo>::Element *E = methods.front(); E; E = E->next()) {
+				select_virtual_method->add_item(E->get().name);
+				select_virtual_method->set_item_metadata(-1, Dictionary(E->get()));
+			}
+			select_virtual_method->connect("id_pressed", callable_mp(this, &MembersSection::_on_virtual_method_selected));
+
+			select_virtual_method->popup_centered_ratio(.5f);
 			ERR_PRINT("Override function");
 		}
 	}
@@ -149,6 +182,11 @@ String MembersSection::_item_meta_group(const Dictionary &p_metadata) const {
 	return p_metadata["group"];
 }
 
+void MembersSection::_on_virtual_method_selected(int p_index) {
+	MethodInfo mi = MethodInfo::from_dict(select_virtual_method->get_item_metadata(p_index));
+	script->set_method(mi);
+}
+
 void MembersSection::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("edit_member", PropertyInfo(Variant::STRING, "name")));
 }
@@ -176,4 +214,7 @@ MembersSection::MembersSection() {
 	// members->set_allow_reselect(true);
 	// members->set_hide_folding(true);
 	// members->set_drag_forwarding(this);
+
+	select_virtual_method = memnew(PopupMenu);
+	add_child(select_virtual_method);
 }
