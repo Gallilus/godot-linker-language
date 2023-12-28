@@ -11,7 +11,7 @@ void MembersSection::_update_members() {
 	functions = members->create_item(root);
 	functions->set_selectable(0, false);
 	functions->set_text(0, TTR("Functions:"));
-	functions->set_metadata(0, _item_metadata("Functions", "group_name"));
+	functions->set_metadata(0, _item_metadata2("group_name", "Functions"));
 	functions->add_button(0, Control::get_theme_icon(SNAME("Override"), EditorStringName(EditorIcons)), ID_OVERRIDE, false, TTR("Override an existing built-in function."));
 	functions->add_button(0, Control::get_theme_icon(SNAME("Add"), EditorStringName(EditorIcons)), ID_ADD, false, TTR("Create a new function."));
 	functions->set_custom_color(0, Control::get_theme_color(SNAME("mono_color"), SNAME("Editor")));
@@ -20,19 +20,32 @@ void MembersSection::_update_members() {
 	func_names.sort_custom<StringName::AlphCompare>();
 	for (const StringName &E : func_names) {
 		TreeItem *ti = members->create_item(functions);
+		MethodInfo mi = script->get_method_info(E);
 		ti->set_text(0, E);
 		ti->set_selectable(0, true);
-		ti->set_metadata(0, _item_metadata(E, "Functions"));
+		ti->set_metadata(0, _item_metadata2("method", Dictionary(mi)));
 		ti->add_button(0, Control::get_theme_icon(SNAME("Edit"), EditorStringName(EditorIcons)), ID_EDIT);
-		if (selected == E) {
-			ti->select(0);
+		{
+			TreeItem *func_return = members->create_item(ti);
+			func_return->set_text(0, "return");
+			func_return->set_selectable(0, true);
+			func_return->set_metadata(0, _item_metadata2("func_return", E));
+			func_return->set_icon(0, Control::get_theme_icon(Variant::get_type_name(mi.return_val.type), SNAME("EditorIcons")));
 		}
+		for (int i = 0; i < mi.arguments.size(); i++) {
+			TreeItem *func_arg = members->create_item(ti);
+			func_arg->set_text(0, mi.arguments[i].name);
+			func_arg->set_selectable(0, true);
+			func_arg->set_metadata(0, _item_metadata2("func_arg", Dictionary(mi.arguments[i])));
+			func_arg->set_icon(0, Control::get_theme_icon(Variant::get_type_name(mi.arguments[i].type), SNAME("EditorIcons")));
+		}
+		ti->set_collapsed(true);
 	}
 
 	variables = members->create_item(root);
 	variables->set_selectable(0, false);
 	variables->set_text(0, TTR("Variables:"));
-	variables->set_metadata(0, _item_metadata("Variables", "group_name"));
+	variables->set_metadata(0, _item_metadata2("group_name", "Variables"));
 	variables->add_button(0, Control::get_theme_icon(SNAME("Add"), EditorStringName(EditorIcons)), ID_ADD, false, TTR("Create a new variable."));
 	variables->set_custom_color(0, Control::get_theme_color(SNAME("mono_color"), SNAME("Editor")));
 
@@ -47,11 +60,8 @@ void MembersSection::_update_members() {
 		ti->set_icon(0, Control::get_theme_icon(icon_name, SNAME("EditorIcons")));
 
 		ti->set_selectable(0, true);
-		ti->set_metadata(0, _item_metadata(E, "Variables"));
+		ti->set_metadata(0, _item_metadata2("variable", Dictionary(script->get_property_info(E))));
 		ti->add_button(0, Control::get_theme_icon(SNAME("Edit"), EditorStringName(EditorIcons)), ID_EDIT);
-		if (selected == E) {
-			ti->select(0);
-		}
 	}
 
 	updating_members = false;
@@ -68,7 +78,7 @@ void MembersSection::_member_button(Object *p_item, int p_column, int p_button, 
 	String name = _item_meta_name(ti->get_metadata(0));
 	String group = _item_meta_group(ti->get_metadata(0));
 
-	// Todo: handle errors
+	// Todo in Script: handle errors
 	// if (!new_name.is_valid_identifier()) {
 	// 	EditorNode::get_singleton()->show_warning(TTR("Name is not a valid identifier:") + " " + new_name);
 	// 	updating_members = true;
@@ -83,6 +93,7 @@ void MembersSection::_member_button(Object *p_item, int p_column, int p_button, 
 	// 	updating_members = false;
 	// 	return;
 	// }
+	// check not is nodePath
 
 	if (p_button == ID_OVERRIDE) {
 		if (group == "group_name" && name == "Functions") {
@@ -104,20 +115,19 @@ void MembersSection::_member_button(Object *p_item, int p_column, int p_button, 
 			select_virtual_method->connect("id_pressed", callable_mp(this, &MembersSection::_on_virtual_method_selected));
 
 			select_virtual_method->popup_centered_ratio(.5f);
-			ERR_PRINT("Override function");
 		}
 	}
 
 	if (p_button == ID_ADD) {
 		if (group == "group_name" && name == "Functions") {
 			TreeItem *ti = members->create_item(functions);
-			ti->set_metadata(0, _item_metadata("", "Functions"));
+			ti->set_metadata(0, _item_metadata2("method", ""));
 			ti->set_selectable(0, true);
 			ti->set_editable(0, true);
 		}
 		if (group == "group_name" && name == "Variables") {
 			TreeItem *ti = members->create_item(variables);
-			ti->set_metadata(0, _item_metadata("", "Variables"));
+			ti->set_metadata(0, _item_metadata2("variable", ""));
 			ti->set_selectable(0, true);
 			ti->set_editable(0, true);
 		}
@@ -149,37 +159,46 @@ void MembersSection::_member_edited() {
 		return;
 	}
 
-	if (group == "Functions") {
-		if (name == "" && new_name != "") {
+	if (group == "method") {
+		if (name == "" && name != new_name) {
 			script->set_method(MethodInfo(new_name));
 		} else if (name != new_name) {
 			script->rename_method(name, new_name);
 		}
 	}
 
-	if (group == "Variables") {
-		ERR_PRINT(String(new_name));
+	if (group == "variable") {
 		if (name == "" && name != new_name) {
 			script->set_member_variable(PropertyInfo(Variant::NIL, new_name), Variant());
 		} else if (name != new_name) {
-			script->rename_method(name, new_name);
+			script->rename_member_variable(name, new_name);
 		}
 	}
 }
 
-Dictionary MembersSection::_item_metadata(const String &p_name, const String &p_group) const {
+Dictionary MembersSection::_item_metadata2(const String &p_type, const Variant &p_value) const {
 	Dictionary d;
-	d["name"] = p_name;
-	d["group"] = p_group;
+	d["type"] = p_type;
+	d["value"] = p_value;
 	return d;
 }
 
 String MembersSection::_item_meta_name(const Dictionary &p_metadata) const {
-	return p_metadata["name"];
+	Variant value = p_metadata["value"];
+	if (value.get_type() == Variant::STRING) {
+		return value;
+	}
+	if (value.get_type() == Variant::DICTIONARY) {
+		Dictionary d = value;
+		if (d.has("name")) {
+			return String(d["name"]);
+		}
+	}
+	return "";
 }
 
 String MembersSection::_item_meta_group(const Dictionary &p_metadata) const {
-	return p_metadata["group"];
+	return p_metadata["type"];
 }
 
 void MembersSection::_on_virtual_method_selected(int p_index) {
@@ -189,6 +208,11 @@ void MembersSection::_on_virtual_method_selected(int p_index) {
 
 void MembersSection::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("edit_member", PropertyInfo(Variant::STRING, "name")));
+}
+
+Variant MembersSection::get_drag_data(const Point2 &p_point) {
+	ERR_PRINT("get_drag_data " + String(p_point));
+	return Variant();
 }
 
 MembersSection::MembersSection() {
@@ -201,10 +225,11 @@ MembersSection::MembersSection() {
 	// members_section->add_child(tool_script_check);
 	// tool_script_check->connect("pressed", callable_mp(this, &MembersSection::_toggle_tool_script));
 
-	members = memnew(Tree);
+	members = memnew(TreeDroppable);
 	add_margin_child(TTR("Members:"), members, true);
 	members->set_custom_minimum_size(Size2(0, 150));
 	members->set_hide_root(true);
+	members->set_drop_mode_flags(Tree::DROP_MODE_INBETWEEN | Tree::DROP_MODE_ON_ITEM);
 	members->connect("button_clicked", callable_mp(this, &MembersSection::_member_button));
 	members->connect("item_edited", callable_mp(this, &MembersSection::_member_edited));
 	// members->connect("cell_selected", callable_mp(this, &MembersSection::_member_selected), CONNECT_DEFERRED);

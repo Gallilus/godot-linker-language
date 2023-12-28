@@ -298,11 +298,11 @@ void LinkerScript::set_method(const MethodInfo &p_info) {
 
 void LinkerScript::rename_method(const StringName &p_name, const StringName &p_new_name) {
 	if (member_functions.has(p_new_name)) {
-		ERR_PRINT("Duplicate member name: " + p_new_name);
+		ERR_PRINT("Duplicate method name: " + p_new_name);
 		return;
 	}
 	if (!member_functions.has(p_name)) {
-		ERR_PRINT("No member name: " + p_name);
+		ERR_PRINT("No method named: " + p_name);
 		return;
 	}
 	if (member_functions.has(p_name)) {
@@ -312,6 +312,7 @@ void LinkerScript::rename_method(const StringName &p_name, const StringName &p_n
 		emit_changed();
 		return;
 	}
+	ERR_PRINT("No method named: " + p_name);
 }
 
 Dictionary LinkerScript::get_property_list() const {
@@ -385,7 +386,7 @@ void LinkerScript::rename_member_variable(const StringName &p_name, const String
 		return;
 	}
 	if (!member_properties.has(p_name)) {
-		ERR_PRINT("No member name: " + p_name);
+		ERR_PRINT("No member named: " + p_name);
 		return;
 	}
 	if (member_properties.has(p_name)) {
@@ -396,7 +397,7 @@ void LinkerScript::rename_member_variable(const StringName &p_name, const String
 		emit_changed();
 		return;
 	}
-	ERR_PRINT("No member name: " + p_name);
+	ERR_PRINT("No member named: " + p_name);
 }
 
 PropertyInfo LinkerScript::get_property_info(const StringName &p_name) {
@@ -554,6 +555,25 @@ int LinkerScript::get_link_idx(const LinkerLink *p_link) const {
 		}
 	}
 	return -1;
+}
+
+Ref<LinkerLink> LinkerScript::get_method_link(const StringName &p_method) {
+	if (!members.has(p_method) || !member_functions.has(p_method)) {
+		ERR_PRINT("No method named: " + p_method);
+		return nullptr;
+	}
+
+	for (int i = 0; i < links.size(); i++) {
+		if (links[i].is_valid() && links[i]->get_member_name() == p_method) {
+			return links[i];
+		}
+	}
+
+	Ref<LinkerFunction> func = memnew(LinkerFunction);
+	func->set_member_name(p_method);
+	//func->set_host(this);
+
+	return func;
 }
 
 LinkerScript::LinkerScript() :

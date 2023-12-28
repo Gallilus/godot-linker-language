@@ -55,7 +55,11 @@ bool EditorLayout::can_drop_data(const Point2 &p_point, const Variant &p_data) c
 			(String(d["type"]) == "obj_property" ||
 					String(d["type"]) == "resource" ||
 					String(d["type"]) == "files" ||
-					String(d["type"]) == "nodes")) {
+					String(d["type"]) == "nodes" ||
+					String(d["type"]) == "variable" ||
+					String(d["type"]) == "method" ||
+					String(d["type"]) == "func_return" ||
+					String(d["type"]) == "func_arg")) {
 		return true;
 	}
 	return false;
@@ -70,8 +74,6 @@ void EditorLayout::drop_data(const Point2 &p_point, const Variant &p_data) {
 	drop_data.shift_drop = Input::get_singleton()->is_key_pressed(Key::SHIFT);
 
 	Dictionary d = p_data;
-
-	//ERR_PRINT(JSON::stringify(d, "\t"));
 
 	if (d.has("object")) {
 		Variant var = d["object"];
@@ -98,6 +100,8 @@ void EditorLayout::drop_data(const Point2 &p_point, const Variant &p_data) {
 
 	if (d.has("value")) {
 		drop_data.value = d["value"];
+		// check if value can be cast to PropertyInfo
+		// check if value can be cast to MethodInfo
 	}
 
 	if (d.has("nodes")) {
@@ -141,6 +145,24 @@ void EditorLayout::drop_data(const Point2 &p_point, const Variant &p_data) {
 			script->add_link(drop_data.nodes[i]);
 		}
 	}
+
+	if (String(d["type"]) == "method") {
+		MethodInfo method_info = MethodInfo::from_dict(drop_data.value);
+		Ref<LinkerLink> ll = script->get_method_link(method_info.name);
+		script->add_link(ll);
+	}
+
+	if (String(d["type"]) == "func_return") {
+		ERR_PRINT("droped func_return");
+	}
+
+	if (String(d["type"]) == "func_arg") {
+		ERR_PRINT("droped func_arg");
+	}
+
+	if (String(d["type"]) == "variable") {
+		ERR_PRINT("droped variable");
+	}
 }
 
 void EditorLayout::update_graph() {
@@ -151,6 +173,7 @@ void EditorLayout::update_graph() {
 
 	TypedArray<LinkerLink> links = script->get_links();
 
+	// add vertices
 	for (int i = 0; i < links.size(); i++) {
 		LinkerLink *link = Object::cast_to<LinkerLink>(links[i]);
 		if (!link) {
@@ -159,6 +182,7 @@ void EditorLayout::update_graph() {
 		graph.add_linker_link(Ref<LinkerLink>(link));
 	}
 
+	// add edges
 	for (int i = 0; i < links.size(); i++) {
 		LinkerLink *link = Object::cast_to<LinkerLink>(links[i]);
 		if (!link) {
@@ -168,7 +192,7 @@ void EditorLayout::update_graph() {
 		Vector<Ref<LinkerLink>> args = link->get_arg_links();
 		// link categorys [get, set, call, sequence, graph_input, graph_output]
 		// edge categorys [data, refrence, sequence]
-		if (category == "get") {
+		if (category == "get" || category == "graph_output") {
 			for (int j = 0; j < args.size(); j++) {
 				Ref<LinkerLink> arg = args[j];
 				graph.add_edge(arg, link, "data");

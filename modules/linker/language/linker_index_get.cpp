@@ -25,6 +25,14 @@ void LinkerIndexGet::set_link_refrences() {
 	source = get_host()->get_link(source_links_idx);
 }
 
+Vector<Ref<LinkerLink>> LinkerIndexGet::get_arg_links() {
+	if (source.is_valid()) {
+		return Vector<Ref<LinkerLink>>({ source });
+	}
+	ERR_PRINT("LinkerIndexGet::get_arg_links: source is not valid");
+	return Vector<Ref<LinkerLink>>();
+}
+
 int LinkerIndexGet::get_arg_count() const {
 	return 0;
 }
@@ -73,12 +81,4 @@ void LinkerIndexGet::set_source(const Ref<LinkerLink> &p_source) {
 
 Ref<LinkerLink> LinkerIndexGet::get_source() const {
 	return source;
-}
-
-Vector<Ref<LinkerLink>> LinkerIndexGet::get_arg_links() {
-	if (source.is_valid()) {
-		return Vector<Ref<LinkerLink>>({ source });
-	}
-	ERR_PRINT("LinkerIndexGet::get_arg_links: source is not valid");
-	return Vector<Ref<LinkerLink>>();
 }

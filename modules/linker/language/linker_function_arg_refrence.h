@@ -1,17 +1,17 @@
-#ifndef LINKER_FUNCTION_H
-#define LINKER_FUNCTION_H
+#ifndef LINKER_FUNCTION_ARG_REFRENCE_H
+#define LINKER_FUNCTION_ARG_REFRENCE_H
 
 #include "editor/editor_node.h"
 #include "linker_link.h"
 #include "linker_script.h"
 
-class LinkerFunction : public LinkerLink {
-	GDCLASS(LinkerFunction, LinkerLink);
+class LinkerFunctionArgRefrence : public LinkerLink {
+	GDCLASS(LinkerFunctionArgRefrence, LinkerLink);
 
 private:
-	StringName member_name = "";
-	Ref<LinkerLink> source;
-	int source_links_idx = -1; // used temporarily for loading from file
+	StringName arg_name = "";
+	// Ref<LinkerLink> source;
+	// int source_links_idx = -1; // used temporarily for loading from file
 
 	// void _set_source_links_idx(int p_source_links_idx) { source_links_idx = p_source_links_idx; }
 	// int _get_source_links_idx() const;
@@ -20,15 +20,14 @@ protected:
 	static void _bind_methods();
 
 public:
-	virtual void set_member_name(StringName p_name) { member_name = p_name; }
-	virtual StringName get_member_name() const override { return member_name; };
+	virtual StringName get_member_name() const { return arg_name; };
 
 	virtual void set_link_refrences(); // called when loading file after all links are loaded
 	virtual Vector<Ref<LinkerLink>> get_arg_links() override; // a list of all links that are represented as arguments
 
 	virtual StringName get_caption() const override { return "func"; }
-	virtual StringName get_category() const override { return "graph_output"; }
-	virtual StringName get_tooltip() const override { return "call " + member_name; }
+	virtual StringName get_category() const override { return "graph_input"; }
+	virtual StringName get_tooltip() const override { return "(" + arg_name + ")"; }
 
 	// The return argument is as a arg of LinkerFunction
 	// The function arguments are represented as output the LinkerFunction
@@ -40,9 +39,6 @@ public:
 	virtual PropertyInfo get_output_info(int p_idx) const override;
 
 	virtual Ref<Texture2D> get_icon() const override;
-
-	void set_source(const Ref<LinkerLink> &p_source);
-	Ref<LinkerLink> get_source() const;
 };
 
-#endif // LINKER_FUNCTION_H
+#endif // LINKER_FUNCTION_ARG_REFRENCE_H

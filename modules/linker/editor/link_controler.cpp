@@ -21,6 +21,10 @@ void LinkControler::update_node() {
 		button->set_text(link->get_tooltip());
 		button->set_icon_alignment(HORIZONTAL_ALIGNMENT_RIGHT);
 	}
+	if (link->get_class() == "LinkerFunction") {
+		button->set_text(link->get_tooltip());
+		button->set_icon_alignment(HORIZONTAL_ALIGNMENT_LEFT);
+	}
 
 	if (icon.is_valid()) {
 		button->set_icon(icon);

@@ -20,7 +20,7 @@ protected:
 	static void _bind_methods();
 
 public:
-	virtual StringName get_member_name() const { return get_node_scene_relative_path(); };
+	virtual StringName get_member_name() const { return node_scene_relative_path; };
 
 	virtual StringName get_caption() const override { return node_scene_relative_path; };
 	virtual StringName get_category() const override { return "graph_input"; }

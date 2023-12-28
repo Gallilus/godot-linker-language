@@ -3,6 +3,7 @@
 
 #include "core/io/resource.h"
 #include "editor/editor_node.h"
+#include "editor/editor_string_names.h"
 
 class LinkerScript;
 
@@ -11,10 +12,10 @@ class LinkerLink : public Resource {
 	friend class LinkerScript;
 
 private:
-	LinkerScript *host = nullptr;
 	int saved_links_idx = -1; // used temporarily for loading from file
 
 protected:
+	LinkerScript *host = nullptr;
 	static void _bind_methods();
 
 public:
@@ -25,6 +26,7 @@ public:
 	void set_to_idx(int p_idx);
 	virtual void set_link_refrences() {} // called when loading file after all links are loaded
 	virtual Vector<Ref<LinkerLink>> get_arg_links() { return Vector<Ref<LinkerLink>>(); } // a list of all links that are represented as arguments
+	virtual void set_member_name(StringName p_name) {}
 	virtual StringName get_member_name() const { return StringName(); }
 
 	virtual StringName get_caption() const = 0;

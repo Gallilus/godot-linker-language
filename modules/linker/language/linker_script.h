@@ -1,6 +1,7 @@
 #ifndef LINKER_SCRIPT_H
 #define LINKER_SCRIPT_H
 
+#include "linker_function.h"
 #include "linker_language.h"
 #include "linker_link.h"
 #include "linker_scene_refrence.h"
@@ -115,6 +116,7 @@ private:
 	HashMap<StringName, MethodInfo> signals;
 	// HashMap for member links (named links)
 	HashMap<StringName, Ref<LinkerSceneRefrence>> scene_refrences;
+	//	HashMap<StringName, Ref<LinkerFunction>> method_refrences;
 	// Vector for all links (named and unnamed)
 	Vector<Ref<LinkerLink>> links;
 
@@ -253,6 +255,10 @@ public:
 	bool has_named_link(const StringName &p_name) const;
 	Ref<LinkerLink> get_link(int p_index) const { return links[p_index]; }
 	int get_link_idx(const LinkerLink *p_link) const;
+
+	Ref<LinkerLink> get_method_link(const StringName &p_method);
+	// LinkerLink *get_method_arg_link(const StringName &p_method, const StringName &p_arg_name);
+	// LinkerLink *get_method_return_link(const StringName &p_method);
 
 	LinkerScript();
 	~LinkerScript() {}
