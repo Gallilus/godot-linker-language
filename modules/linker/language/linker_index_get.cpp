@@ -77,6 +77,7 @@ StringName LinkerIndexGet::get_index() const {
 
 void LinkerIndexGet::set_source(const Ref<LinkerLink> &p_source) {
 	source = p_source;
+	set_arg_link(0, source);
 }
 
 Ref<LinkerLink> LinkerIndexGet::get_source() const {
