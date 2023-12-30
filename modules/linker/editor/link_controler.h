@@ -8,18 +8,24 @@
 
 //#include "core/variant/dictionary.h"
 #include "editor/editor_node.h"
+#include "editor/editor_string_names.h"
 #include "scene/gui/box_container.h"
 #include "scene/gui/button.h"
 #include "scene/gui/control.h"
 #include "scene/gui/label.h"
+#include "scene/gui/margin_container.h"
+#include "scene/gui/texture_rect.h"
 
-class LinkControler : public Control {
-	GDCLASS(LinkControler, Control);
+
+class LinkControler : public MarginContainer {
+	GDCLASS(LinkControler, MarginContainer);
 
 	Ref<LinkerLink> link;
 
 	Button *button = nullptr;
+	HBoxContainer *title_box = nullptr;
 	Label *title = nullptr;
+	TextureRect *title_icon = nullptr;
 	VBoxContainer *argument_refrences = nullptr;
 	VBoxContainer *output_refrences = nullptr;
 
@@ -28,6 +34,7 @@ protected:
 	void _notification(int p_what);
 
 	void _instantiate();
+	void _instantiate_titlebox();
 
 	virtual void update_node(); // use on_ready() and  update controle-SORT_CHILDREN
 	virtual void update_connection();
@@ -43,6 +50,7 @@ protected:
 	// handle input (getting deleted, etc.)
 
 public:
+	virtual Variant get_drag_data(const Point2 &p_point) override;
 	virtual StringName get_category() const;
 
 	void set_link(Ref<LinkerLink> p_link);
