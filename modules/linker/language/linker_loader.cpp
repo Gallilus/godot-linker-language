@@ -43,7 +43,7 @@ void LinkerLoader::read_script_settings(const Ref<LinkerScript> &p_script, Confi
 
 void LinkerLoader::read_script_values(const Ref<LinkerScript> &p_script, ConfigFile &p_config_file) {
 	String section = "script_values";
-	p_script->set_method_list(p_config_file.get_value(section, "methods", p_script->get_method_list()));
+	p_script->set_function_list(p_config_file.get_value(section, "methods", p_script->get_function_list()));
 	p_script->set_property_list(p_config_file.get_value(section, "properties", p_script->get_property_list()));
 	p_script->set_constants(p_config_file.get_value(section, "constants", p_script->get_constants()));
 	p_script->set_signal_list(p_config_file.get_value(section, "signals", p_script->get_signal_list()));

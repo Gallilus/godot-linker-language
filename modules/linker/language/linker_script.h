@@ -116,7 +116,7 @@ private:
 	HashMap<StringName, MethodInfo> signals;
 	// HashMap for member links (named links)
 	HashMap<StringName, Ref<LinkerSceneRefrence>> scene_refrences;
-	//	HashMap<StringName, Ref<LinkerFunction>> method_refrences;
+	HashMap<StringName, Ref<LinkerFunction>> function_refrences; // Method is a function witch is linked to a class or object
 	// Vector for all links (named and unnamed)
 	Vector<Ref<LinkerLink>> links;
 
@@ -218,11 +218,16 @@ public:
 
 	TypedArray<StringName> get_members() const;
 
-	Dictionary get_method_list() const;
-	List<StringName> get_method_name_list() const;
-	void set_method_list(const Dictionary &p_methods);
-	void set_method(const MethodInfo &p_info);
-	void rename_method(const StringName &p_name, const StringName &p_new_name);
+	Dictionary get_function_list() const;
+	Dictionary get_member_list() const;
+	List<StringName> get_function_name_list() const;
+	void set_function_list(const Dictionary &p_methods);
+	void set_function(const MethodInfo &p_info);
+	void rename_function(const StringName &p_name, const StringName &p_new_name);
+	Ref<LinkerLink> get_function_link(const StringName &p_method);
+	void add_function_refrence(Ref<LinkerFunction> p_node_info);
+	// Ref<LinkerLink> get_method_arg_link(const StringName &p_method, const StringName &p_arg_name);
+	// Ref<LinkerLink> get_method_return_link(const StringName &p_method);
 
 	Dictionary get_property_list() const;
 	List<StringName> get_property_name_list() const;
@@ -255,10 +260,6 @@ public:
 	bool has_named_link(const StringName &p_name) const;
 	Ref<LinkerLink> get_link(int p_index) const { return links[p_index]; }
 	int get_link_idx(const LinkerLink *p_link) const;
-
-	Ref<LinkerLink> get_method_link(const StringName &p_method);
-	// LinkerLink *get_method_arg_link(const StringName &p_method, const StringName &p_arg_name);
-	// LinkerLink *get_method_return_link(const StringName &p_method);
 
 	LinkerScript();
 	~LinkerScript() {}

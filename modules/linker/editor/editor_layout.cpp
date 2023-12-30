@@ -148,7 +148,7 @@ void EditorLayout::drop_data(const Point2 &p_point, const Variant &p_data) {
 
 	if (String(d["type"]) == "method") {
 		MethodInfo method_info = MethodInfo::from_dict(drop_data.value);
-		Ref<LinkerLink> ll = script->get_method_link(method_info.name);
+		Ref<LinkerLink> ll = script->get_function_link(method_info.name);
 		script->add_link(ll);
 	}
 

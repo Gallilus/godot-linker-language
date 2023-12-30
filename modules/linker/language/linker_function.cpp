@@ -1,4 +1,5 @@
 #include "linker_function.h"
+#include "linker_script.h"
 
 void LinkerFunction::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_member_name", "name"), &LinkerFunction::set_member_name);
@@ -8,7 +9,6 @@ void LinkerFunction::_bind_methods() {
 
 void LinkerFunction::set_link_refrences() {
 	if (source_links_idx == -1) {
-		ERR_PRINT("LinkerIndexGet::set_link_refrences: source_links_idx is -1");
 		return;
 	}
 	source = get_host()->get_link(source_links_idx);

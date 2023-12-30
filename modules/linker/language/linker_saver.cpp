@@ -41,7 +41,7 @@ void LinkerSaver::write_script_settings(const Ref<LinkerScript> &p_script, Confi
 void LinkerSaver::write_script_values(const Ref<LinkerScript> &p_script, ConfigFile &p_config_file) {
 	String section = "script_values";
 	p_config_file.set_value(section, "members", p_script->get_members());
-	p_config_file.set_value(section, "methods", p_script->get_method_list());
+	p_config_file.set_value(section, "methods", p_script->get_function_list());
 	p_config_file.set_value(section, "properties", p_script->get_property_list());
 	p_config_file.set_value(section, "constants", p_script->get_constants());
 	p_config_file.set_value(section, "signals", p_script->get_signal_list());

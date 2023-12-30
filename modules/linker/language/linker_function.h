@@ -3,7 +3,6 @@
 
 #include "editor/editor_node.h"
 #include "linker_link.h"
-#include "linker_script.h"
 
 class LinkerFunction : public LinkerLink {
 	GDCLASS(LinkerFunction, LinkerLink);

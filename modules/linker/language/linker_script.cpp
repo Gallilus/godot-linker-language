@@ -24,6 +24,9 @@ void LinkerScript::add_member_link(Ref<LinkerLink> p_link) {
 	if (Object::cast_to<LinkerSceneRefrence>(*p_link)) {
 		add_scene_refrence(Object::cast_to<LinkerSceneRefrence>(*p_link));
 	}
+	if (Object::cast_to<LinkerFunction>(*p_link)) {
+		add_function_refrence(Object::cast_to<LinkerFunction>(*p_link));
+	}
 }
 
 void LinkerScript::remove_member_link(Ref<LinkerLink> p_link) {
@@ -253,7 +256,7 @@ TypedArray<StringName> LinkerScript::get_members() const {
 	return names;
 }
 
-Dictionary LinkerScript::get_method_list() const {
+Dictionary LinkerScript::get_function_list() const {
 	Dictionary methods;
 	for (const KeyValue<StringName, MethodInfo> &E : member_functions) {
 		methods[E.key] = Dictionary(E.value);
@@ -261,7 +264,16 @@ Dictionary LinkerScript::get_method_list() const {
 	return methods;
 }
 
-List<StringName> LinkerScript::get_method_name_list() const {
+Dictionary LinkerScript::get_member_list() const {
+	// Todo same as get_function_list only need to filter out private functions and functions linkt to the script not the class
+	Dictionary methods;
+	for (const KeyValue<StringName, MethodInfo> &E : member_functions) {
+		methods[E.key] = Dictionary(E.value);
+	}
+	return methods;
+}
+
+List<StringName> LinkerScript::get_function_name_list() const {
 	List<MethodInfo> list;
 	get_script_method_list(&list);
 	List<StringName> r_list;
@@ -272,14 +284,14 @@ List<StringName> LinkerScript::get_method_name_list() const {
 	return r_list;
 }
 
-void LinkerScript::set_method_list(const Dictionary &p_methods) {
+void LinkerScript::set_function_list(const Dictionary &p_methods) {
 	for (int i = 0; i < p_methods.keys().size(); i++) {
 		StringName key = p_methods.keys()[i];
-		set_method(MethodInfo::from_dict(p_methods[key]));
+		set_function(MethodInfo::from_dict(p_methods[key]));
 	};
 }
 
-void LinkerScript::set_method(const MethodInfo &p_info) {
+void LinkerScript::set_function(const MethodInfo &p_info) {
 	if (members.has(p_info.name)) {
 		if (member_functions.has(p_info.name)) {
 			member_functions[p_info.name] = p_info;
@@ -296,7 +308,7 @@ void LinkerScript::set_method(const MethodInfo &p_info) {
 	}
 }
 
-void LinkerScript::rename_method(const StringName &p_name, const StringName &p_new_name) {
+void LinkerScript::rename_function(const StringName &p_name, const StringName &p_new_name) {
 	if (member_functions.has(p_new_name)) {
 		ERR_PRINT("Duplicate method name: " + p_new_name);
 		return;
@@ -313,6 +325,31 @@ void LinkerScript::rename_method(const StringName &p_name, const StringName &p_n
 		return;
 	}
 	ERR_PRINT("No method named: " + p_name);
+}
+
+Ref<LinkerLink> LinkerScript::get_function_link(const StringName &p_method) {
+	if (!members.has(p_method) || !member_functions.has(p_method)) {
+		ERR_PRINT("No method named: " + p_method);
+		return nullptr;
+	}
+
+	for (int i = 0; i < links.size(); i++) {
+		if (links[i].is_valid() && links[i]->get_member_name() == p_method) {
+			return links[i];
+		}
+	}
+
+	Ref<LinkerFunction> func = memnew(LinkerFunction);
+	func->set_member_name(p_method);
+	//func->set_host(this);
+
+	return func;
+}
+
+void LinkerScript::add_function_refrence(Ref<LinkerFunction> p_node_info) {
+	if (!function_refrences.has(p_node_info->get_member_name())) {
+		function_refrences.insert(p_node_info->get_member_name(), p_node_info);
+	}
 }
 
 Dictionary LinkerScript::get_property_list() const {
@@ -496,9 +533,8 @@ void LinkerScript::set_scene_refrences(TypedArray<LinkerSceneRefrence> p_scene_r
 }
 
 void LinkerScript::add_scene_refrence(Ref<LinkerSceneRefrence> p_node_info) {
-	if (!scene_refrences.has(p_node_info->get_node_scene_relative_path())) {
-		scene_refrences.insert(p_node_info->get_node_scene_relative_path(), p_node_info);
-		emit_changed();
+	if (!scene_refrences.has(p_node_info->get_member_name())) {
+		scene_refrences.insert(p_node_info->get_member_name(), p_node_info);
 	}
 }
 
@@ -555,25 +591,6 @@ int LinkerScript::get_link_idx(const LinkerLink *p_link) const {
 		}
 	}
 	return -1;
-}
-
-Ref<LinkerLink> LinkerScript::get_method_link(const StringName &p_method) {
-	if (!members.has(p_method) || !member_functions.has(p_method)) {
-		ERR_PRINT("No method named: " + p_method);
-		return nullptr;
-	}
-
-	for (int i = 0; i < links.size(); i++) {
-		if (links[i].is_valid() && links[i]->get_member_name() == p_method) {
-			return links[i];
-		}
-	}
-
-	Ref<LinkerFunction> func = memnew(LinkerFunction);
-	func->set_member_name(p_method);
-	//func->set_host(this);
-
-	return func;
 }
 
 LinkerScript::LinkerScript() :

@@ -16,7 +16,7 @@ void MembersSection::_update_members() {
 	functions->add_button(0, Control::get_theme_icon(SNAME("Add"), EditorStringName(EditorIcons)), ID_ADD, false, TTR("Create a new function."));
 	functions->set_custom_color(0, Control::get_theme_color(SNAME("mono_color"), SNAME("Editor")));
 
-	List<StringName> func_names = script->get_method_name_list();
+	List<StringName> func_names = script->get_function_name_list();
 	func_names.sort_custom<StringName::AlphCompare>();
 	for (const StringName &E : func_names) {
 		TreeItem *ti = members->create_item(functions);
@@ -161,9 +161,9 @@ void MembersSection::_member_edited() {
 
 	if (group == "method") {
 		if (name == "" && name != new_name) {
-			script->set_method(MethodInfo(new_name));
+			script->set_function(MethodInfo(new_name));
 		} else if (name != new_name) {
-			script->rename_method(name, new_name);
+			script->rename_function(name, new_name);
 		}
 	}
 
@@ -203,7 +203,7 @@ String MembersSection::_item_meta_group(const Dictionary &p_metadata) const {
 
 void MembersSection::_on_virtual_method_selected(int p_index) {
 	MethodInfo mi = MethodInfo::from_dict(select_virtual_method->get_item_metadata(p_index));
-	script->set_method(mi);
+	script->set_function(mi);
 }
 
 void MembersSection::_bind_methods() {
