@@ -87,6 +87,7 @@ void EditorLayout::drop_data(const Point2 &p_point, const Variant &p_data) {
 			Node *node = Object::cast_to<Node>(d["object"]);
 			if (node) {
 				Ref<LinkerSceneRefrence> node_info = memnew(LinkerSceneRefrence);
+				node_info->set_host(script.ptr());
 				_get_node_data(node, node_info, scripted_node);
 				drop_data.nodes.append(node_info);
 			}

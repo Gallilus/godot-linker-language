@@ -8,11 +8,11 @@ void LinkRefrence::_notification(int p_what) {
 				if (parent->get_class() == "LinkControler") {
 					LinkControler *controler = Object::cast_to<LinkControler>(parent);
 					host = Ref<LinkerLink>(controler->get_link());
-					return;
+					break;
 				}
 				parent = parent->get_parent_control();
 			}
-			ERR_PRINT("LinkRefrence: is not child of LinkControler!");
+			ERR_PRINT("LinkRefrence::_notification: " + String(get_parent()->get_class()) + " is not LinkControler");
 			break;
 		}
 		case NOTIFICATION_READY: {
@@ -22,14 +22,14 @@ void LinkRefrence::_notification(int p_what) {
 					if (link_idx >= 0 && link_idx <= max_idx) {
 						info = host->get_arg_info(link_idx);
 						_instantiate();
-						return;
+						break;
 					}
 				} else {
 					int max_idx = host->get_output_count() - 1;
 					if (link_idx >= 0 && link_idx <= max_idx) {
 						info = host->get_output_info(link_idx);
 						_instantiate();
-						return;
+						break;
 					}
 				}
 			}
@@ -40,21 +40,10 @@ void LinkRefrence::_notification(int p_what) {
 }
 
 void LinkRefrence::_instantiate() {
-	if (is_input) {
-		add_theme_constant_override("margin_left", 20);
-		add_theme_constant_override("margin_top", 1);
-		add_theme_constant_override("margin_right", 1);
-		add_theme_constant_override("margin_bottom", 1);
-	} else {
-		add_theme_constant_override("margin_left", 1);
-		add_theme_constant_override("margin_top", 1);
-		add_theme_constant_override("margin_right", 20);
-		add_theme_constant_override("margin_bottom", 1);
-	}
-
 	Button *button = memnew(Button);
 	add_child(button);
 	button->set_flat(true);
+	button->set_mouse_filter(Control::MOUSE_FILTER_IGNORE);
 	button->set_tooltip_text(String(info.name));
 	button->set_text(String(info.name));
 	if (info.type == Variant::OBJECT) {
@@ -63,28 +52,14 @@ void LinkRefrence::_instantiate() {
 		button->set_icon(EditorNode::get_singleton()->get_class_icon(Variant::get_type_name(info.type)));
 	}
 	if (is_input) {
-		button->set_icon_alignment(HORIZONTAL_ALIGNMENT_LEFT);
-	} else {
 		button->set_icon_alignment(HORIZONTAL_ALIGNMENT_RIGHT);
-	}
-	if (label_override != "") {
-		button->set_text(label_override);
+	} else {
+		button->set_icon_alignment(HORIZONTAL_ALIGNMENT_LEFT);
 	}
 }
 
 Variant LinkRefrence::get_drag_data(const Point2 &p_point) {
-	ERR_PRINT("LinkRefrence::get_drag_data: Not implemented");
 	return Variant();
-}
-
-void LinkRefrence::override_label(String p_label) {
-	label_override = p_label;
-	if (get_child_count() > 0) {
-		Button *button = Object::cast_to<Button>(get_child(0));
-		if (button) {
-			button->set_text(p_label);
-		}
-	}
 }
 
 LinkRefrence::LinkRefrence(int p_idx, bool p_is_input) {

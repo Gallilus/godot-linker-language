@@ -10,7 +10,8 @@ void LinkControler::_notification(int p_what) {
 }
 
 void LinkControler::_instantiate() {
-	_instantiate_titlebox();
+	title->set_text(link->get_tooltip());
+	title->set_tooltip_text(link->get_tooltip());
 	for (int i = 0; i < link->get_arg_count(); i++) {
 		//	Ref<LinkerLink> arg = link->get_arg_link(i);
 		LinkRefrence *ref = memnew(LinkRefrence(i, true));
@@ -23,21 +24,6 @@ void LinkControler::_instantiate() {
 		//	ref->set_refrence(arg);
 		output_refrences->add_child(ref);
 	}
-}
-
-void LinkControler::_instantiate_titlebox() {
-	if (link->get_class() == "LinkerIndexGet") {
-		//title_icon->set_texture(EditorNode::get_singleton()->get_theme_icon("LinkerIndexGet", "EditorIcons"));
-		title_icon->hide();
-	} else if (link->get_class() == "LinkerFunction") {
-		title_icon->set_texture(Control::get_theme_icon(SNAME("MemberMethod"), EditorStringName(EditorIcons)));
-		title->set_text(link->get_caption());
-		title->set_tooltip_text(link->get_tooltip());
-		return;
-	}
-	title_box->hide();
-	// title_icon->hide();
-	// title->hide();
 }
 
 void LinkControler::update_node() {
@@ -85,11 +71,6 @@ void LinkControler::on_size_changed() {
 	}
 }
 
-Variant LinkControler::get_drag_data(const Point2 &p_point) {
-	ERR_PRINT("LinkControler::get_drag_data: Not implemented");
-	return Variant();
-}
-
 StringName LinkControler::get_category() const {
 	return link->get_category();
 }
@@ -113,23 +94,12 @@ LinkControler::LinkControler() {
 	set_v_size_flags(SIZE_EXPAND_FILL);
 	set_h_size_flags(SIZE_EXPAND_FILL);
 	set_focus_mode(Control::FOCUS_ALL);
-
-	VBoxContainer *vbox = memnew(VBoxContainer);
-	add_child(vbox);
-	title_box = memnew(HBoxContainer);
-	vbox->add_child(title_box);
-	title = memnew(Label);
-	// title->set_mouse_filter(Control::MOUSE_FILTER_IGNORE);
-	title_box->add_child(title);
-	title_icon = memnew(TextureRect);
-	// title_icon->set_mouse_filter(Control::MOUSE_FILTER_IGNORE);
-	title_box->add_child(title_icon);
-
 	HBoxContainer *hbox = memnew(HBoxContainer);
-	vbox->add_child(hbox);
-	// hbox->set_mouse_filter(Control::MOUSE_FILTER_IGNORE);
+	add_child(hbox);
 	argument_refrences = memnew(VBoxContainer);
 	hbox->add_child(argument_refrences);
 	output_refrences = memnew(VBoxContainer);
 	hbox->add_child(output_refrences);
+	title = memnew(Label);
+	output_refrences->add_child(title);
 }

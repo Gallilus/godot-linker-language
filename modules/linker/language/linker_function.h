@@ -25,7 +25,7 @@ public:
 	virtual void set_link_refrences(); // called when loading file after all links are loaded
 	virtual Vector<Ref<LinkerLink>> get_arg_links() override; // a list of all links that are represented as arguments
 
-	virtual StringName get_caption() const override { return member_name; }
+	virtual StringName get_caption() const override { return "func"; }
 	virtual StringName get_category() const override { return "graph_output"; }
 	virtual StringName get_tooltip() const override { return "call " + member_name; }
 
