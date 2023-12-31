@@ -17,8 +17,6 @@ private:
 protected:
 	LinkerScript *host = nullptr;
 	static void _bind_methods();
-	Vector<Ref<LinkerLink>> argument_links;
-	Vector<Ref<LinkerLink>> output_links;
 
 public:
 	void set_host(LinkerScript *p_host);
@@ -37,14 +35,10 @@ public:
 
 	virtual int get_arg_count() const = 0;
 	virtual PropertyInfo get_arg_info(int p_idx) const = 0;
-	Ref<LinkerLink> get_arg_link(int p_idx) const;
-	void set_arg_link(int p_idx, Ref<LinkerLink> p_link);
 	virtual int get_default_arg_count() const = 0;
 	virtual Variant get_default_arg(int p_idx) const = 0;
 	virtual int get_output_count() const = 0;
 	virtual PropertyInfo get_output_info(int p_idx) const = 0;
-	Ref<LinkerLink> get_output_link(int p_idx) const;
-	void set_output_link(int p_idx, Ref<LinkerLink> p_link);
 
 	virtual Ref<Texture2D> get_icon() const = 0;
 

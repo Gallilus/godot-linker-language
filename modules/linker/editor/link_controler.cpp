@@ -9,27 +9,7 @@ void LinkControler::_notification(int p_what) {
 	}
 }
 
-void LinkControler::_instantiate() {
-	title->set_text(link->get_tooltip());
-	title->set_tooltip_text(link->get_tooltip());
-	for (int i = 0; i < link->get_arg_count(); i++) {
-		//	Ref<LinkerLink> arg = link->get_arg_link(i);
-		LinkRefrence *ref = memnew(LinkRefrence(i, true));
-		//	ref->set_refrence(arg);
-		argument_refrences->add_child(ref);
-	}
-	for (int i = 0; i < link->get_output_count(); i++) {
-		//	Ref<LinkerLink> arg = link->get_output_link(i);
-		LinkRefrence *ref = memnew(LinkRefrence(i, false));
-		//	ref->set_refrence(arg);
-		output_refrences->add_child(ref);
-	}
-}
-
 void LinkControler::update_node() {
-	_instantiate();
-	return;
-
 	PropertyInfo pi = link->get_output_info(0);
 	Ref<Texture2D> icon = link->get_icon();
 
@@ -71,10 +51,6 @@ void LinkControler::on_size_changed() {
 	}
 }
 
-StringName LinkControler::get_category() const {
-	return link->get_category();
-}
-
 void LinkControler::set_link(Ref<LinkerLink> p_link) {
 	link = p_link;
 	link->connect("removed_from_script", Callable(this, "queue_free"));
@@ -86,20 +62,12 @@ void LinkControler::set_link(Ref<LinkerLink> p_link) {
 	// ctrl + select = add to graph_search_focus
 }
 
-LinkerLink *LinkControler::get_link() const {
-	return link.ptr();
+StringName LinkControler::get_category() const {
+	return link->get_category();
 }
 
 LinkControler::LinkControler() {
 	set_v_size_flags(SIZE_EXPAND_FILL);
 	set_h_size_flags(SIZE_EXPAND_FILL);
 	set_focus_mode(Control::FOCUS_ALL);
-	HBoxContainer *hbox = memnew(HBoxContainer);
-	add_child(hbox);
-	argument_refrences = memnew(VBoxContainer);
-	hbox->add_child(argument_refrences);
-	output_refrences = memnew(VBoxContainer);
-	hbox->add_child(output_refrences);
-	title = memnew(Label);
-	output_refrences->add_child(title);
 }
