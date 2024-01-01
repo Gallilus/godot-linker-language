@@ -18,32 +18,22 @@ void LinkerSceneRefrence::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::STRING_NAME, "node_scene_relative_path"), "set_node_scene_relative_path", "get_node_scene_relative_path");
 }
 
-int LinkerSceneRefrence::get_arg_count() const {
-	return 0;
-}
-
-PropertyInfo LinkerSceneRefrence::get_arg_info(int p_idx) const {
-	return PropertyInfo();
-}
-
-int LinkerSceneRefrence::get_default_arg_count() const {
-	return 0;
-}
-
-Variant LinkerSceneRefrence::get_default_arg(int p_idx) const {
+Variant LinkerSceneRefrence::get_placeholder_value() const {
+	// get variant from property info
 	return Variant();
 }
 
-PropertyInfo LinkerSceneRefrence::get_output_info(int p_idx) const {
+Dictionary LinkerSceneRefrence::get_placeholder_info() const {
+	Dictionary d;
+	d["type"] = "PropertyInfo";
+
 	PropertyInfo pi;
 	pi.type = Variant::OBJECT;
 	pi.name = node_name;
 	pi.class_name = node_class_name;
-	return pi;
-}
+	d["value"] = Dictionary(pi);
 
-Ref<Texture2D> LinkerSceneRefrence::get_icon() const {
-	return EditorNode::get_singleton()->get_class_icon(node_class_name);
+	return d;
 }
 
 void LinkerSceneRefrence::set_refrence(Node *p_ref_node, Node *p_scripted_node) {
@@ -52,4 +42,9 @@ void LinkerSceneRefrence::set_refrence(Node *p_ref_node, Node *p_scripted_node) 
 	node_script_file_path = p_ref_node->get_scene_file_path();
 	node_scene_path = EditorInterface::get_singleton()->get_edited_scene_root()->get_path_to(p_ref_node);
 	node_scene_relative_path = StringName(p_scripted_node->get_path_to(p_ref_node));
+}
+
+void LinkerSceneRefrence::set_node_scene_relative_path(const StringName &p_node_scene_relative_path) {
+	node_scene_relative_path = p_node_scene_relative_path;
+	set_index(p_node_scene_relative_path);
 }

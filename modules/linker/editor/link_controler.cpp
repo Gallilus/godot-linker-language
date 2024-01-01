@@ -3,40 +3,27 @@
 void LinkControler::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_READY: {
-			update_node();
+			_instantiate();
 			break;
 		}
 	}
 }
 
-void LinkControler::update_node() {
-	PropertyInfo pi = link->get_output_info(0);
-	Ref<Texture2D> icon = link->get_icon();
-
+void LinkControler::_instantiate() {
+	if (!link.is_valid()) {
+		return;
+	}
+	PropertyInfo pi = link->get_output_info();
 	button = memnew(Button);
 	add_child(button);
 	button->set_flat(true);
-	button->set_tooltip_text(String(link->get_tooltip()));
-	if (link->get_class() == "LinkerIndexGet") {
-		button->set_text(link->get_tooltip());
-		button->set_icon_alignment(HORIZONTAL_ALIGNMENT_RIGHT);
-	}
-	if (link->get_class() == "LinkerFunction") {
-		button->set_text(link->get_tooltip());
-		button->set_icon_alignment(HORIZONTAL_ALIGNMENT_LEFT);
-	}
+	button->set_tooltip_text(String(link->get_class()));
+	button->set_text(_get_text(link.ptr()));
+	button->set_icon(_get_link_icon(link.ptr()));
+	button->set_icon_alignment(_get_icon_h_alignement(link.ptr()));
 
-	if (icon.is_valid()) {
-		button->set_icon(icon);
-	}
-
-	button->connect("pressed", callable_mp(link.ptr(), &LinkerLink::remove_from_script), CONNECT_DEFERRED);
+	button->connect("pressed", callable_mp(link.ptr(), &LinkerLink::remove_from_script).bind(false), CONNECT_DEFERRED);
 	button->connect("resized", callable_mp(this, &LinkControler::on_size_changed), CONNECT_DEFERRED);
-
-	// ports
-	//      link->get_arg_links().size
-	//          inbedding Links or creating boxes is to be avoided at all times
-	//          Reserve space for ports
 }
 
 void LinkControler::update_connection() {
@@ -51,6 +38,39 @@ void LinkControler::on_size_changed() {
 	}
 }
 
+Ref<Texture2D> LinkControler::_get_link_icon(LinkerLink *p_link) const {
+	PropertyInfo pi = p_link->get_output_info();
+
+	if (pi.type == Variant::OBJECT) {
+		return EditorNode::get_singleton()->get_class_icon(pi.class_name);
+	} else {
+		return EditorNode::get_singleton()->get_class_icon(Variant::get_type_name(pi.type));
+	}
+
+	if (p_link->get_class() == "LinkerFunction") {
+		return Control::get_theme_icon(SNAME("MemberMethod"), EditorStringName(EditorIcons));
+	}
+
+	return Ref<Texture2D>();
+}
+
+HorizontalAlignment LinkControler::_get_icon_h_alignement(LinkerLink *p_link) const {
+	if (p_link->get_class() == "LinkerFunction") {
+		return HORIZONTAL_ALIGNMENT_RIGHT;
+	}
+	return HORIZONTAL_ALIGNMENT_LEFT;
+}
+
+String LinkControler::_get_text(LinkerLink *p_link) const {
+	if (p_link->get_class() == "LinkerSceneRefrence") {
+		LinkerSceneRefrence *scene_ref = Object::cast_to<LinkerSceneRefrence>(p_link);
+		if (scene_ref) {
+			return String(scene_ref->get_node_scene_relative_path());
+		}
+	}
+	return String(p_link->get_index());
+}
+
 void LinkControler::set_link(Ref<LinkerLink> p_link) {
 	link = p_link;
 	link->connect("removed_from_script", Callable(this, "queue_free"));
@@ -60,10 +80,6 @@ void LinkControler::set_link(Ref<LinkerLink> p_link) {
 	// alt + drag = move
 	// select = Graph_inspector to position to inspect
 	// ctrl + select = add to graph_search_focus
-}
-
-StringName LinkControler::get_category() const {
-	return link->get_category();
 }
 
 LinkControler::LinkControler() {

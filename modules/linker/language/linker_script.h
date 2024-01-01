@@ -152,7 +152,9 @@ private:
 protected:
 	virtual bool editor_can_reload_from_file() override { return false; } // this is handled by editor better
 	static void _bind_methods() {}
+	void _notification(int p_what);
 	virtual void _placeholder_erased(PlaceHolderScriptInstance *p_placeholder) override {}
+	bool _is_memeber_link(Ref<LinkerLink> p_link) const;
 
 public:
 	virtual bool can_instantiate() const override { return !abstract; }
@@ -225,7 +227,7 @@ public:
 	void set_function(const MethodInfo &p_info);
 	void rename_function(const StringName &p_name, const StringName &p_new_name);
 	Ref<LinkerLink> get_function_link(const StringName &p_method);
-	void add_function_refrence(Ref<LinkerFunction> p_node_info);
+	void add_function_refrence(Ref<LinkerFunction> p_link);
 	// Ref<LinkerLink> get_method_arg_link(const StringName &p_method, const StringName &p_arg_name);
 	// Ref<LinkerLink> get_method_return_link(const StringName &p_method);
 
@@ -251,13 +253,12 @@ public:
 	TypedArray<LinkerSceneRefrence> get_scene_refrences() const;
 	Ref<LinkerSceneRefrence> get_scene_refrence(const StringName p_relative_path) const;
 	void set_scene_refrences(TypedArray<LinkerSceneRefrence> p_scene_refrences);
-	void add_scene_refrence(Ref<LinkerSceneRefrence> p_node_info);
+	void add_scene_refrence(Ref<LinkerSceneRefrence> p_link);
 	void remove_scene_refrence(StringName relative_path);
 
 	TypedArray<LinkerLink> get_links() const;
 	void add_link(Ref<LinkerLink> p_link);
 	void remove_link(Ref<LinkerLink> p_link);
-	bool has_named_link(const StringName &p_name) const;
 	Ref<LinkerLink> get_link(int p_index) const { return links[p_index]; }
 	int get_link_idx(const LinkerLink *p_link) const;
 

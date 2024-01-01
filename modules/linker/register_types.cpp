@@ -25,9 +25,11 @@ void initialize_linker_module(ModuleInitializationLevel p_level) {
 	}
 	if (p_level == GDEXTENSION_INITIALIZATION_SERVERS) {
 		GDREGISTER_CLASS(LinkerScript);
-		GDREGISTER_CLASS(LinkerFunction);
-		GDREGISTER_CLASS(LinkerIndexGet);
 		GDREGISTER_CLASS(LinkerSceneRefrence);
+		GDREGISTER_CLASS(LinkerIndexGet);
+		GDREGISTER_CLASS(LinkerFunction);
+		// When Saving and loading no longer works on a rebase https://github.com/godotengine/godot/pull/84611
+		// GDREGISTER_ calls _bind_methods() which is not needed for this class or getting things lige signals to work on base classes
 
 		linker_language = memnew(LinkerLanguage);
 		ScriptServer::register_language(linker_language);
@@ -41,7 +43,6 @@ void initialize_linker_module(ModuleInitializationLevel p_level) {
 	if (p_level == GDEXTENSION_INITIALIZATION_SCENE) {
 	}
 	if (p_level == GDEXTENSION_INITIALIZATION_EDITOR) {
-		GDREGISTER_CLASS(LinkerEditor);
 		LinkerEditor::register_editor();
 	}
 }

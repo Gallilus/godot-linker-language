@@ -26,7 +26,7 @@ Error EditorGraph::add_linker_link(Ref<LinkerLink> p_linker_link) {
 	igraph_integer_t vertex_id = igraph_vcount(&graph) - 1;
 	links[vertex_id] = p_linker_link;
 
-	const char *category = String(p_linker_link->get_category()).utf8();
+	const char *category = p_linker_link->get_graph_category().utf8();
 	SETVAS(&graph, "category", vertex_id, category);
 
 	return OK;
@@ -36,7 +36,7 @@ HashMap<LinkerLink *, Vector2> EditorGraph::get_linker_link_positions() {
 	HashMap<LinkerLink *, Vector2> positions;
 	igraph_matrix_t pos_matrix;
 	igraph_matrix_init(&pos_matrix, 0, 0);
-	igraph_layout_sugiyama(&graph, &pos_matrix, NULL, NULL, NULL, 20.0, 20.0, 100, NULL);
+	igraph_layout_sugiyama(&graph, &pos_matrix, NULL, NULL, NULL, 30.0, 150.0, 100, NULL);
 
 	for (igraph_integer_t i = 0; i < igraph_matrix_nrow(&pos_matrix); i++) {
 		igraph_real_t y = igraph_matrix_get(&pos_matrix, i, 0);

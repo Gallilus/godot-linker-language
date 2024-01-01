@@ -8,9 +8,6 @@ void LinkerScript::set_links(TypedArray<LinkerLink> p_links) {
 }
 
 void LinkerScript::add_link_by_index(Ref<LinkerLink> p_link) {
-	if (p_link->get_member_name() != StringName() && has_named_link(p_link->get_member_name())) {
-		return;
-	}
 	if (get_link_idx(p_link.ptr()) < 0) {
 		int index = p_link->saved_links_idx;
 		links.set(index, p_link);
@@ -80,6 +77,31 @@ void LinkerScript::_set_script_loading() {
 void LinkerScript::_set_script_loaded() {
 	script_loading = false;
 	set_saved(true);
+}
+
+void LinkerScript::_notification(int p_what) {
+	switch (p_what) {
+		case NOTIFICATION_POSTINITIALIZE: {
+#ifdef TOOLS_ENABLED
+			connect("changed", callable_mp(this, &LinkerScript::set_saved).bind(false));
+#endif // TOOLS_ENABLED
+			break;
+		}
+	}
+}
+
+bool LinkerScript::_is_memeber_link(Ref<LinkerLink> p_link) const {
+	if (Object::cast_to<LinkerSceneRefrence>(*p_link)) {
+		if (scene_refrences.has(p_link->get_index())) {
+			return true;
+		}
+	}
+	if (Object::cast_to<LinkerFunction>(*p_link)) {
+		if (function_refrences.has(p_link->get_index())) {
+			return true;
+		}
+	}
+	return false;
 }
 
 Ref<Script> LinkerScript::get_base_script() const {
@@ -334,21 +356,20 @@ Ref<LinkerLink> LinkerScript::get_function_link(const StringName &p_method) {
 	}
 
 	for (int i = 0; i < links.size(); i++) {
-		if (links[i].is_valid() && links[i]->get_member_name() == p_method) {
+		if (links[i].is_valid() &&
+				links[i]->get_class() == "LinkerFunction" &&
+				links[i]->get_index() == p_method) {
 			return links[i];
 		}
 	}
-
 	Ref<LinkerFunction> func = memnew(LinkerFunction);
-	func->set_member_name(p_method);
-	//func->set_host(this);
-
+	func->set_index(p_method);
 	return func;
 }
 
-void LinkerScript::add_function_refrence(Ref<LinkerFunction> p_node_info) {
-	if (!function_refrences.has(p_node_info->get_member_name())) {
-		function_refrences.insert(p_node_info->get_member_name(), p_node_info);
+void LinkerScript::add_function_refrence(Ref<LinkerFunction> p_link) {
+	if (!function_refrences.has(p_link->get_index())) {
+		function_refrences.insert(p_link->get_index(), p_link);
 	}
 }
 
@@ -532,9 +553,9 @@ void LinkerScript::set_scene_refrences(TypedArray<LinkerSceneRefrence> p_scene_r
 	};
 }
 
-void LinkerScript::add_scene_refrence(Ref<LinkerSceneRefrence> p_node_info) {
-	if (!scene_refrences.has(p_node_info->get_member_name())) {
-		scene_refrences.insert(p_node_info->get_member_name(), p_node_info);
+void LinkerScript::add_scene_refrence(Ref<LinkerSceneRefrence> p_link) {
+	if (!scene_refrences.has(p_link->get_index())) {
+		scene_refrences.insert(p_link->get_index(), p_link);
 	}
 }
 
@@ -555,7 +576,7 @@ TypedArray<LinkerLink> LinkerScript::get_links() const {
 }
 
 void LinkerScript::add_link(Ref<LinkerLink> p_link) {
-	if (p_link->get_member_name() != StringName() && has_named_link(p_link->get_member_name())) {
+	if (_is_memeber_link(p_link)) {
 		return;
 	}
 	if (get_link_idx(p_link.ptr()) < 0) {
@@ -575,15 +596,6 @@ void LinkerScript::remove_link(Ref<LinkerLink> p_link) {
 	}
 }
 
-bool LinkerScript::has_named_link(const StringName &p_name) const {
-	for (int i = 0; i < links.size(); i++) {
-		if (links[i].is_valid() && links[i]->get_member_name() == p_name) {
-			return true;
-		}
-	}
-	return false;
-}
-
 int LinkerScript::get_link_idx(const LinkerLink *p_link) const {
 	for (int i = 0; i < links.size(); i++) {
 		if (links[i].ptr() == p_link) {
@@ -600,7 +612,4 @@ LinkerScript::LinkerScript() :
 		LinkerLanguage::get_singleton()->script_list.add(&script_list);
 	}
 	path = vformat("linkerscript://%d.ls", get_instance_id());
-#ifdef TOOLS_ENABLED
-	connect("changed", callable_mp(this, &LinkerScript::set_saved).bind(false));
-#endif // TOOLS_ENABLED
 }

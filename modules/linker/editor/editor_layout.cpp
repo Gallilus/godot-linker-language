@@ -34,17 +34,15 @@ void EditorLayout::_bind_methods() {
 
 LinkControler *EditorLayout::get_linker_controler(LinkerLink *p_link) {
 	if (link_contorlers.has(p_link)) {
-		return link_contorlers[p_link];
+		if (link_contorlers[p_link]->is_inside_tree()) {
+			return link_contorlers[p_link];
+		}
 	}
 	LinkControler *controler = memnew(LinkControler);
 	controler->set_link(Ref<LinkerLink>(p_link));
 	add_child(controler);
 	link_contorlers[p_link] = controler;
 	return controler;
-	//	LinkerSceneRefrence *scene_ref = Object::cast_to<LinkerSceneRefrence>(*p_link);
-	//	if (scene_ref) {
-	//	}
-	//	return nullptr;
 }
 
 bool EditorLayout::can_drop_data(const Point2 &p_point, const Variant &p_data) const {
@@ -87,7 +85,6 @@ void EditorLayout::drop_data(const Point2 &p_point, const Variant &p_data) {
 			Node *node = Object::cast_to<Node>(d["object"]);
 			if (node) {
 				Ref<LinkerSceneRefrence> node_info = memnew(LinkerSceneRefrence);
-				node_info->set_host(script.ptr());
 				_get_node_data(node, node_info, scripted_node);
 				drop_data.nodes.append(node_info);
 			}
@@ -111,7 +108,6 @@ void EditorLayout::drop_data(const Point2 &p_point, const Variant &p_data) {
 			Node *node = get_node(node_path);
 			if (node) {
 				Ref<LinkerSceneRefrence> node_info = memnew(LinkerSceneRefrence);
-				node_info->set_host(script.ptr());
 				_get_node_data(node, node_info, scripted_node);
 				drop_data.nodes.append(node_info);
 			}
@@ -129,18 +125,9 @@ void EditorLayout::drop_data(const Point2 &p_point, const Variant &p_data) {
 			index_get->set_source(node_info);
 			script->add_link(index_get);
 		}
-
-		// create a property getter
-
-		// if droped on graphical interface overwrite @to do in graphical interface
 	}
 
 	if (String(d["type"]) == "nodes") {
-		if (drop_data.nodes.size() == 1) {
-			script->add_link(drop_data.nodes[0]);
-			// set popup inspector for keyed and or select properties or methods
-			return;
-		}
 		for (int i = 0; i < drop_data.nodes.size(); i++) {
 			script->add_link(drop_data.nodes[i]);
 		}
@@ -188,14 +175,12 @@ void EditorLayout::update_graph() {
 		if (!link) {
 			continue;
 		}
-		StringName category = link->get_category();
-		Vector<Ref<LinkerLink>> args = link->get_arg_links();
-		// link categorys [get, set, call, sequence, graph_input, graph_output]
-		// edge categorys [data, refrence, sequence]
-		if (category == "get" || category == "graph_output") {
+		StringName category = link->get_graph_category();
+		Vector<Ref<LinkerLink>> args = link->get_pull_link_refs();
+		if (category == "graph_data" || category == "graph_output") {
 			for (int j = 0; j < args.size(); j++) {
 				Ref<LinkerLink> arg = args[j];
-				graph.add_edge(arg, link, "data");
+				graph.add_edge(arg, link, "edge_data");
 			}
 		}
 	}

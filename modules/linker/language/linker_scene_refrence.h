@@ -10,6 +10,9 @@ class LinkerSceneRefrence : public LinkerLink {
 	GDCLASS(LinkerSceneRefrence, LinkerLink);
 
 private:
+	// set_member_name
+	// scene relative path is index
+
 	StringName node_class_name;
 	StringName node_name;
 	String node_script_file_path;
@@ -18,22 +21,12 @@ private:
 
 protected:
 	static void _bind_methods();
+	virtual void _set_owned_links() override {}
 
 public:
-	virtual StringName get_member_name() const { return node_scene_relative_path; };
-
-	virtual StringName get_caption() const override { return node_scene_relative_path; };
-	virtual StringName get_category() const override { return "graph_input"; }
-	virtual StringName get_tooltip() const override { return get_caption(); }
-
-	virtual int get_arg_count() const override;
-	virtual PropertyInfo get_arg_info(int p_idx) const override;
-	virtual int get_default_arg_count() const override;
-	virtual Variant get_default_arg(int p_idx) const override;
-	virtual int get_output_count() const override { return 1; }
-	virtual PropertyInfo get_output_info(int p_idx) const override;
-
-	virtual Ref<Texture2D> get_icon() const override;
+	virtual Variant get_placeholder_value() const override;
+	virtual Dictionary get_placeholder_info() const override;
+	virtual String get_graph_category() const override { return "graph_input"; }
 
 	void set_refrence(Node *p_ref_node, Node *p_scripted_node);
 
@@ -45,7 +38,7 @@ public:
 	String get_node_script_file_path() const { return node_script_file_path; }
 	void set_node_scene_path(const NodePath &p_node_scene_path) { node_scene_path = p_node_scene_path; }
 	NodePath get_node_scene_path() const { return node_scene_path; }
-	void set_node_scene_relative_path(const StringName &p_node_scene_relative_path) { node_scene_relative_path = p_node_scene_relative_path; }
+	void set_node_scene_relative_path(const StringName &p_node_scene_relative_path);
 	StringName get_node_scene_relative_path() const { return node_scene_relative_path; }
 };
 
