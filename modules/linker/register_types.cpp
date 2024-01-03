@@ -7,11 +7,11 @@
 #include "language/linker_function.h"
 #include "language/linker_index_get.h"
 #include "language/linker_language.h"
+#include "language/linker_link.h"
 #include "language/linker_loader.h"
 #include "language/linker_saver.h"
 #include "language/linker_scene_refrence.h"
 #include "language/linker_script.h"
-
 
 using namespace godot;
 
@@ -25,6 +25,7 @@ void initialize_linker_module(ModuleInitializationLevel p_level) {
 	}
 	if (p_level == GDEXTENSION_INITIALIZATION_SERVERS) {
 		GDREGISTER_CLASS(LinkerScript);
+		GDREGISTER_ABSTRACT_CLASS(LinkerLink);
 		GDREGISTER_CLASS(LinkerSceneRefrence);
 		GDREGISTER_CLASS(LinkerIndexGet);
 		GDREGISTER_CLASS(LinkerFunction);

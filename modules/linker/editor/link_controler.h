@@ -2,14 +2,16 @@
 #define LINK_CONTROLER_H
 
 #include "../language/linker_link.h"
-#include "../language/linker_scene_refrence.h"
+#include "../language/linker_script.h"
 
 #include "editor/editor_node.h"
 #include "scene/gui/button.h"
 #include "scene/gui/control.h"
+#include "scene/gui/margin_container.h"
+#include "scene/main/viewport.h"
 
-class LinkControler : public Control {
-	GDCLASS(LinkControler, Control);
+class LinkControler : public MarginContainer {
+	GDCLASS(LinkControler, MarginContainer);
 
 	Ref<LinkerLink> link;
 
@@ -27,8 +29,14 @@ protected:
 	Ref<Texture2D> _get_link_icon(LinkerLink *p_link) const;
 	HorizontalAlignment _get_icon_h_alignement(LinkerLink *p_link) const;
 	String _get_text(LinkerLink *p_link) const;
+	void _set_margin(HorizontalAlignment p_align);
 
 public:
+	virtual void gui_input(const Ref<InputEvent> &p_event) override;
+
+	virtual Variant get_drag_data(const Point2 &p_point) override;
+	virtual bool can_drop_data(const Point2 &p_point, const Variant &p_data) const override;
+	virtual void drop_data(const Point2 &p_point, const Variant &p_data) override;
 	void set_link(Ref<LinkerLink> p_link);
 	LinkerLink *get_link() const { return link.ptr(); }
 	int get_link_idx() const { return link->get_link_idx(); }

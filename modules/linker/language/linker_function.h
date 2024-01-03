@@ -16,6 +16,8 @@ public:
 	virtual Variant get_placeholder_value() const override;
 	virtual Dictionary get_placeholder_info() const override;
 	virtual String get_graph_category() const override { return "graph_output"; }
+
+	virtual bool can_drop(Ref<LinkerLink> drag_link) const override { return false; }
 };
 
 #endif // LINKER_FUNCTION_H

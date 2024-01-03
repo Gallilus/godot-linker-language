@@ -6,6 +6,10 @@ void LinkerLink::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_to_idx", "idx"), &LinkerLink::set_to_idx);
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "links_idx"), "set_to_idx", "get_link_idx");
 
+	ClassDB::bind_method(D_METHOD("get_index"), &LinkerLink::get_index);
+	ClassDB::bind_method(D_METHOD("set_index", "idx"), &LinkerLink::set_index);
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "index_name"), "set_index", "get_index");
+
 	ClassDB::bind_method(D_METHOD("get_pull_links"), &LinkerLink::get_pull_links);
 	ClassDB::bind_method(D_METHOD("set_pull_links", "idx"), &LinkerLink::set_pull_links);
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "pull_links_idx "), "set_pull_links", "get_pull_links");
@@ -41,7 +45,9 @@ void LinkerLink::set_host(LinkerScript *p_host) {
 void LinkerLink::set_source(Ref<LinkerLink> p_source) {
 	if (pull_links.is_empty()) {
 		pull_links.append(p_source);
-		ERR_PRINT("set_source not implemented");
+		emit_signal("changed");
+	} else {
+		pull_links.set(0, p_source);
 	}
 }
 
@@ -93,19 +99,19 @@ int LinkerLink::get_owner_idx() const {
 
 void LinkerLink::set_link_refrences() {
 	for (int i = 0; i < pull_links_idx.size(); i++) {
-		Ref<LinkerLink> link = _get_host()->get_link(pull_links_idx[i]);
+		Ref<LinkerLink> link = get_host()->get_link(pull_links_idx[i]);
 		if (link.is_valid()) {
 			pull_links.append(link);
 		}
 	}
 	for (int i = 0; i < push_links_idx.size(); i++) {
-		Ref<LinkerLink> link = _get_host()->get_link(push_links_idx[i]);
+		Ref<LinkerLink> link = get_host()->get_link(push_links_idx[i]);
 		if (link.is_valid()) {
 			push_links.append(link);
 		}
 	}
 	if (owner_links_idx != -1) {
-		Ref<LinkerLink> link = _get_host()->get_link(owner_links_idx);
+		Ref<LinkerLink> link = get_host()->get_link(owner_links_idx);
 		if (link.is_valid()) {
 			set_owner(link.ptr());
 		}
@@ -121,6 +127,18 @@ PropertyInfo LinkerLink::get_output_info() {
 		return PropertyInfo::from_dict(info["value"]);
 	}
 	return PropertyInfo();
+}
+
+Variant LinkerLink::get_drag_data() const {
+	Dictionary drag_data;
+	drag_data["type"] = "linker_link";
+	drag_data["link_idx"] = get_link_idx();
+	// ToDo add script refrence
+	return drag_data;
+}
+
+bool LinkerLink::can_drop(Ref<LinkerLink> drag_link) const {
+	return false;
 }
 
 void LinkerLink::remove_from_script(bool p_force) {

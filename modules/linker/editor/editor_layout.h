@@ -8,9 +8,9 @@
 #include "editor_graph.h"
 #include "link_controler.h"
 
+#include "core/variant/variant_utility.h"
 #include "editor/editor_interface.h"
 #include "editor/editor_node.h"
-#include "core/variant/variant_utility.h"
 #include "scene/gui/box_container.h"
 #include "scene/gui/control.h"
 #include "scene/gui/grid_container.h"
@@ -52,6 +52,7 @@ public:
 
 	void set_script(Ref<LinkerScript> p_script) { script = p_script; }
 
+	virtual void gui_input(const Ref<InputEvent> &p_event) override;
 	virtual bool can_drop_data(const Point2 &p_point, const Variant &p_data) const override;
 	virtual void drop_data(const Point2 &p_point, const Variant &p_data) override;
 

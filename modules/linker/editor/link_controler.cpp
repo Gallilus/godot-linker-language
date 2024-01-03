@@ -22,8 +22,12 @@ void LinkControler::_instantiate() {
 	button->set_icon(_get_link_icon(link.ptr()));
 	button->set_icon_alignment(_get_icon_h_alignement(link.ptr()));
 
-	button->connect("pressed", callable_mp(link.ptr(), &LinkerLink::remove_from_script).bind(false), CONNECT_DEFERRED);
+	//button->connect("pressed", callable_mp(link.ptr(), &LinkerLink::remove_from_script).bind(false), CONNECT_DEFERRED);
+	button->set_drag_forwarding(callable_mp(this, &LinkControler::get_drag_data), callable_mp(this, &LinkControler::can_drop_data), callable_mp(this, &LinkControler::drop_data));
 	button->connect("resized", callable_mp(this, &LinkControler::on_size_changed), CONNECT_DEFERRED);
+	button->set_mouse_filter(Control::MOUSE_FILTER_PASS);
+
+	_set_margin(_get_icon_h_alignement(link.ptr()));
 }
 
 void LinkControler::update_connection() {
@@ -69,6 +73,64 @@ String LinkControler::_get_text(LinkerLink *p_link) const {
 		}
 	}
 	return String(p_link->get_index());
+}
+
+void LinkControler::_set_margin(HorizontalAlignment p_align) {
+	if (p_align == HORIZONTAL_ALIGNMENT_LEFT) {
+		add_theme_constant_override(SNAME("margin_left"), 20);
+		add_theme_constant_override(SNAME("margin_right"), 1);
+		add_theme_constant_override(SNAME("margin_top"), 1);
+		add_theme_constant_override(SNAME("margin_bottom"), 1);
+	}
+	if (p_align == HORIZONTAL_ALIGNMENT_RIGHT) {
+		add_theme_constant_override(SNAME("margin_left"), 1);
+		add_theme_constant_override(SNAME("margin_right"), 20);
+		add_theme_constant_override(SNAME("margin_top"), 1);
+		add_theme_constant_override(SNAME("margin_bottom"), 1);
+	}
+}
+
+void LinkControler::gui_input(const Ref<InputEvent> &p_event) {
+	if (p_event->is_action("ui_graph_delete")) {
+		link->remove_from_script();
+		get_viewport()->set_input_as_handled();
+	}
+	if (p_event->is_action("ui_select")) {
+		// default press spacebar
+		button->grab_focus();
+		get_viewport()->set_input_as_handled();
+	}
+}
+
+Variant LinkControler::get_drag_data(const Point2 &p_point) {
+	return link->get_drag_data();
+}
+
+bool LinkControler::can_drop_data(const Point2 &p_point, const Variant &p_data) const {
+	Dictionary d_data = p_data;
+	if (!d_data.has("type") ||
+			d_data["type"] != "linker_link") {
+		return false;
+	}
+	Ref<LinkerLink> drag_link = link->get_host()->get_link(d_data["link_idx"]);
+	if (drag_link.is_null() ||
+			drag_link->get_host() != link->get_host()) {
+		return false;
+	}
+	if (link->can_drop(drag_link)) {
+		return true;
+	}
+	return false;
+}
+
+void LinkControler::drop_data(const Point2 &p_point, const Variant &p_data) {
+	Dictionary d_data = p_data;
+	if (!d_data.has("type") ||
+			d_data["type"] != "linker_link") {
+		return;
+	}
+	Ref<LinkerLink> drag_link = link->get_host()->get_link(d_data["link_idx"]);
+	link->drop_data(drag_link);
 }
 
 void LinkControler::set_link(Ref<LinkerLink> p_link) {

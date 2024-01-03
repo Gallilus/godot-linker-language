@@ -32,10 +32,9 @@ protected:
 	virtual void _set_owned_links() = 0; // when creating a new Linkerlink set the default links like get_value for return
 	void _add_owned_link(Ref<LinkerLink> p_link, bool p_is_push = false);
 
-	LinkerScript *_get_host() const { return host; }
-
 public:
 	void set_host(LinkerScript *p_host);
+	LinkerScript *get_host() const { return host; }
 	virtual void set_source(Ref<LinkerLink> p_source);
 	void set_index(StringName p_index) { index = p_index; }
 	StringName get_index() const { return index; }
@@ -57,6 +56,9 @@ public:
 	virtual Dictionary get_placeholder_info() const = 0;
 	PropertyInfo get_output_info();
 	virtual String get_graph_category() const { return "graph_data"; }
+	Variant get_drag_data() const;
+	virtual bool can_drop(Ref<LinkerLink> drag_link) const;
+	virtual void drop_data(Ref<LinkerLink> dropped_link) {}
 
 	void remove_from_script(bool p_force = false);
 };

@@ -3,8 +3,9 @@
 
 #include "editor/editor_interface.h"
 #include "editor/editor_node.h"
-#include "linker_link.h"
 #include "scene/main/node.h"
+
+#include "linker_link.h"
 
 class LinkerSceneRefrence : public LinkerLink {
 	GDCLASS(LinkerSceneRefrence, LinkerLink);
@@ -40,6 +41,9 @@ public:
 	NodePath get_node_scene_path() const { return node_scene_path; }
 	void set_node_scene_relative_path(const StringName &p_node_scene_relative_path);
 	StringName get_node_scene_relative_path() const { return node_scene_relative_path; }
+
+	virtual bool can_drop(Ref<LinkerLink> drag_link) const override;
+	virtual void drop_data(Ref<LinkerLink> dropped_link) override;
 };
 
 #endif // LINKER_SCENE_REFRENCE_H

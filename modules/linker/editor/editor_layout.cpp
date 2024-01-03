@@ -45,6 +45,12 @@ LinkControler *EditorLayout::get_linker_controler(LinkerLink *p_link) {
 	return controler;
 }
 
+void EditorLayout::gui_input(const Ref<InputEvent> &p_event) {
+	// if (p_event->is_action("ui_select")) {
+	// 	grab_focus();
+	// }
+}
+
 bool EditorLayout::can_drop_data(const Point2 &p_point, const Variant &p_data) const {
 	// Check position if it is relevant to you
 	// Otherwise, just check data

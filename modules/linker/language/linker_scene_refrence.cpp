@@ -48,3 +48,20 @@ void LinkerSceneRefrence::set_node_scene_relative_path(const StringName &p_node_
 	node_scene_relative_path = p_node_scene_relative_path;
 	set_index(p_node_scene_relative_path);
 }
+
+bool LinkerSceneRefrence::can_drop(Ref<LinkerLink> drag_link) const {
+	if (drag_link.is_null()) {
+		return false;
+	}
+	if (drag_link->get_class() == "LinkerIndexGet") {
+		return true;
+	}
+	return false;
+}
+
+void LinkerSceneRefrence::drop_data(Ref<LinkerLink> dropped_link) {
+	if (dropped_link.is_null()) {
+		return;
+	}
+	dropped_link->set_source(this);
+}
