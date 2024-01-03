@@ -99,14 +99,6 @@ void LinkerEditor::enable_editor(Control *p_shortcut_context) {
 
 	add_child(base_editor);
 
-	Panel *background = memnew(Panel);
-	background->set_anchors_and_offsets_preset(Control::PRESET_FULL_RECT);
-	background->set_modulate(Color(0.5, 0.5, 1.0));
-	background->set_focus_mode(Control::FOCUS_ALL);
-	background->set_v_size_flags(SIZE_EXPAND_FILL);
-	background->set_h_size_flags(SIZE_EXPAND_FILL);
-	add_child(background);
-
 	add_child(inspector);
 	members_section->connect("edit_member", callable_mp(inspector, &LinkerInspector::edit_member));
 }
