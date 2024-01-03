@@ -55,7 +55,7 @@ Ref<Texture2D> LinkControler::_get_link_icon(LinkerLink *p_link) const {
 }
 
 HorizontalAlignment LinkControler::_get_icon_h_alignement(LinkerLink *p_link) const {
-	if (p_link->get_class() == "LinkerFunction") {
+	if (p_link->get_graph_category() == "graph_input") {
 		return HORIZONTAL_ALIGNMENT_RIGHT;
 	}
 	return HORIZONTAL_ALIGNMENT_LEFT;
