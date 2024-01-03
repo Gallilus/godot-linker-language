@@ -34,7 +34,7 @@ void EditorLayout::_bind_methods() {
 
 LinkControler *EditorLayout::get_linker_controler(LinkerLink *p_link) {
 	if (link_contorlers.has(p_link)) {
-		if (link_contorlers[p_link]->is_inside_tree()) {
+		if (VariantUtilityFunctions::is_instance_valid(link_contorlers[p_link])) {
 			return link_contorlers[p_link];
 		}
 	}
