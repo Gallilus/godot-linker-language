@@ -23,8 +23,8 @@
 #include "scene/gui/tree.h"
 #include "scene/main/window.h"
 
-class EditorLayout : public Control {
-	GDCLASS(EditorLayout, Control);
+class LinkerEditorLayout : public Control {
+	GDCLASS(LinkerEditorLayout, Control);
 	Ref<LinkerScript> script;
 
 	HashMap<LinkerLink *, LinkControler *> link_contorlers;
@@ -46,6 +46,7 @@ public:
 		Variant::Type object_type;
 		StringName object_class_name;
 		Vector<Ref<LinkerSceneRefrence>> nodes;
+		Vector<Ref<LinkerLink>> links;
 		StringName property_name;
 		Variant value;
 	};
@@ -58,8 +59,8 @@ public:
 
 	void update_graph();
 
-	EditorLayout();
-	~EditorLayout() {}
+	LinkerEditorLayout();
+	~LinkerEditorLayout() {}
 };
 
 #endif // EDITOR_LAYOUT_H

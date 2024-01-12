@@ -1,4 +1,4 @@
-#include "editor_layout.h"
+#include "linker_editor_layout.h"
 
 static Node *_find_script_node(Node *p_edited_scene, Node *p_current_node, const Ref<Script> &script) {
 	if (p_edited_scene != p_current_node && p_current_node->get_owner() != p_edited_scene) {
@@ -29,10 +29,11 @@ static void _get_node_data(Node *p_node, Ref<LinkerSceneRefrence> p_node_info, N
 	p_node_info->set_node_scene_relative_path(StringName(p_scripted_node->get_path_to(p_node)));
 }
 
-void EditorLayout::_bind_methods() {
+void LinkerEditorLayout::_bind_methods() {
+	ADD_SIGNAL(MethodInfo("inspect_links_request", PropertyInfo(Variant::ARRAY, "links"), PropertyInfo(Variant::VECTOR2, "glob_pos")));
 }
 
-LinkControler *EditorLayout::get_linker_controler(LinkerLink *p_link) {
+LinkControler *LinkerEditorLayout::get_linker_controler(LinkerLink *p_link) {
 	if (link_contorlers.has(p_link)) {
 		if (VariantUtilityFunctions::is_instance_valid(link_contorlers[p_link])) {
 			return link_contorlers[p_link];
@@ -45,18 +46,24 @@ LinkControler *EditorLayout::get_linker_controler(LinkerLink *p_link) {
 	return controler;
 }
 
-void EditorLayout::gui_input(const Ref<InputEvent> &p_event) {
-	// if (p_event->is_action("ui_select")) {
-	// 	grab_focus();
-	// }
+void LinkerEditorLayout::gui_input(const Ref<InputEvent> &p_event) {
+	Ref<InputEventMouseButton> mb = p_event;
+	if (mb.is_valid()) {
+		if (mb->is_double_click()) {
+			// popup menu
+			ERR_PRINT("create popup");
+			get_viewport()->set_input_as_handled();
+		}
+	}
 }
 
-bool EditorLayout::can_drop_data(const Point2 &p_point, const Variant &p_data) const {
+bool LinkerEditorLayout::can_drop_data(const Point2 &p_point, const Variant &p_data) const {
 	// Check position if it is relevant to you
 	// Otherwise, just check data
 	Dictionary d = p_data;
 	if (d.has("type") &&
-			(String(d["type"]) == "obj_property" ||
+			(String(d["type"]) == "linker_link" ||
+					String(d["type"]) == "obj_property" ||
 					String(d["type"]) == "resource" ||
 					String(d["type"]) == "files" ||
 					String(d["type"]) == "nodes" ||
@@ -69,7 +76,7 @@ bool EditorLayout::can_drop_data(const Point2 &p_point, const Variant &p_data) c
 	return false;
 }
 
-void EditorLayout::drop_data(const Point2 &p_point, const Variant &p_data) {
+void LinkerEditorLayout::drop_data(const Point2 &p_point, const Variant &p_data) {
 	Node *scripted_node = _find_script_node(get_tree()->get_edited_scene_root(), get_tree()->get_edited_scene_root(), script);
 	String this_script_path = script->get_path();
 
@@ -78,6 +85,11 @@ void EditorLayout::drop_data(const Point2 &p_point, const Variant &p_data) {
 	drop_data.shift_drop = Input::get_singleton()->is_key_pressed(Key::SHIFT);
 
 	Dictionary d = p_data;
+
+	if (d.has("link_idx")) {
+		Ref<LinkerLink> drag_link = script->get_link(d["link_idx"]);
+		drop_data.links.append(drag_link);
+	}
 
 	if (d.has("object")) {
 		Variant var = d["object"];
@@ -120,6 +132,19 @@ void EditorLayout::drop_data(const Point2 &p_point, const Variant &p_data) {
 		}
 	}
 
+	if (String(d["type"]) == "linker_link") {
+		if (drop_data.links.size() == 1) {
+			Array links;
+			links.append(d["link_idx"]);
+			// emit inspect link+pos
+			emit_signal("inspect_links_request", links, Vector2(p_point));
+
+			// editor inspector for return type
+			// editor inspector for next function
+			// higlight compatible links
+		}
+	}
+
 	if (String(d["type"]) == "obj_property") {
 		if (drop_data.nodes.size() == 1) {
 			StringName rel_path = drop_data.nodes[0]->get_node_scene_relative_path();
@@ -158,7 +183,7 @@ void EditorLayout::drop_data(const Point2 &p_point, const Variant &p_data) {
 	}
 }
 
-void EditorLayout::update_graph() {
+void LinkerEditorLayout::update_graph() {
 	EditorGraph graph;
 	if (!script.is_valid()) {
 		return;
@@ -189,6 +214,14 @@ void EditorLayout::update_graph() {
 				graph.add_edge(arg, link, "edge_data");
 			}
 		}
+		Vector<Ref<LinkerLink>> folowing = link->get_push_link_refs();
+		if (category == "graph_data" || category == "graph_input") {
+			for (int j = 0; j < folowing.size(); j++) {
+				Ref<LinkerLink> next = folowing[j];
+				graph.add_edge(link, next, "edge_sequence");
+				ERR_PRINT(next->get_index());
+			}
+		}
 	}
 
 	for (const KeyValue<LinkerLink *, Vector2> &E : graph.get_linker_link_positions()) {
@@ -198,7 +231,7 @@ void EditorLayout::update_graph() {
 	}
 }
 
-EditorLayout::EditorLayout() {
+LinkerEditorLayout::LinkerEditorLayout() {
 	set_v_size_flags(SIZE_EXPAND_FILL);
 	set_h_size_flags(SIZE_EXPAND_FILL);
 	set_focus_mode(Control::FOCUS_ALL);
