@@ -100,6 +100,15 @@ void LinkControler::gui_input(const Ref<InputEvent> &p_event) {
 		button->grab_focus();
 		get_viewport()->set_input_as_handled();
 	}
+	Ref<InputEventMouseButton> mb = p_event;
+	if (mb.is_valid()) {
+		if (mb->is_double_click()) {
+			// popup menu
+			ERR_PRINT("create popup");
+			button->grab_focus();
+			get_viewport()->set_input_as_handled();
+		}
+	}
 }
 
 Variant LinkControler::get_drag_data(const Point2 &p_point) {
