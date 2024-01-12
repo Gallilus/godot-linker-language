@@ -12,7 +12,8 @@
 
 #include "../language/linker_language.h"
 #include "../language/linker_script.h"
-#include "editor_layout.h"
+#include "linker_editor_layout.h"
+#include "linker_editor_selector.h"
 #include "linker_inspector.h"
 #include "members_section.h"
 #include "plugins/linker_editor_inspector_plugin.h"
@@ -27,8 +28,9 @@ class LinkerEditor : public ScriptEditorBase {
 
 	Control *edit_menu = nullptr;
 	FindReplaceBar *find_replace_bar = nullptr;
-	EditorLayout *base_editor = nullptr;
+	LinkerEditorLayout *base_editor = nullptr;
 	LinkerInspector *inspector = nullptr;
+	LinkerEditorSelector *selector = nullptr;
 
 	//	Ref<EditorUndoRedoManager> undo_redo;
 	bool is_updating = false;

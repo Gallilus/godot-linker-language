@@ -30,6 +30,7 @@ void LinkerEditor::_notification(int p_what) {
 			base_editor->set_script(script);
 			members_section->set_script(script);
 			inspector->set_script(script);
+			selector->set_script(script);
 		} break;
 		case NOTIFICATION_EXIT_TREE: {
 			members_section->queue_free();
@@ -101,6 +102,9 @@ void LinkerEditor::enable_editor(Control *p_shortcut_context) {
 
 	add_child(inspector);
 	members_section->connect("edit_member", callable_mp(inspector, &LinkerInspector::edit_member));
+
+	add_child(selector);
+	base_editor->connect("inspect_links_request", callable_mp(selector, &LinkerEditorSelector::inspect_links));
 }
 
 String LinkerEditor::get_name() {
@@ -168,9 +172,10 @@ void LinkerEditor::script_changed() {
 }
 
 LinkerEditor::LinkerEditor() {
-	base_editor = memnew(EditorLayout);
+	base_editor = memnew(LinkerEditorLayout);
 	edit_menu = memnew(Control);
 	find_replace_bar = memnew(FindReplaceBar);
 	members_section = memnew(MembersSection);
 	inspector = memnew(LinkerInspector);
+	selector = memnew(LinkerEditorSelector);
 }
