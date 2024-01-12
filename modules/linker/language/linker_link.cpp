@@ -90,6 +90,14 @@ Array LinkerLink::get_push_links() const {
 	return r_idx;
 }
 
+void LinkerLink::add_push_link_ref(Ref<LinkerLink> p_link) {
+	if (p_link.is_valid()) {
+		push_links.append(p_link);
+		p_link->set_owner(this);
+		emit_signal("changed");
+	}
+}
+
 int LinkerLink::get_owner_idx() const {
 	if (owner) {
 		return owner->get_link_idx();

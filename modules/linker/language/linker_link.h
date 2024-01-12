@@ -47,6 +47,7 @@ public:
 	void set_pull_links(Array p_links) { pull_links_idx = p_links; }
 	Array get_push_links() const;
 	Vector<Ref<LinkerLink>> get_push_link_refs() const { return push_links; }
+	void add_push_link_ref(Ref<LinkerLink> p_link);
 	void set_push_links(Array p_links) { push_links_idx = p_links; }
 	int get_owner_idx() const;
 	void set_owner_idx(int p_idx) { owner_links_idx = p_idx; }
