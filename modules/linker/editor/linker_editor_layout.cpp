@@ -219,7 +219,6 @@ void LinkerEditorLayout::update_graph() {
 			for (int j = 0; j < folowing.size(); j++) {
 				Ref<LinkerLink> next = folowing[j];
 				graph.add_edge(link, next, "edge_sequence");
-				ERR_PRINT(next->get_index());
 			}
 		}
 	}
