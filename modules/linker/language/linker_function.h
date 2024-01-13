@@ -18,6 +18,8 @@ public:
 	virtual String get_graph_category() const override { return "graph_output"; }
 
 	virtual bool can_drop(Ref<LinkerLink> drag_link) const override { return false; }
+
+	virtual LinkerLinkInstance *create_instance() override;
 };
 
 #endif // LINKER_FUNCTION_H

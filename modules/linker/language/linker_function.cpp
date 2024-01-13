@@ -17,3 +17,7 @@ Dictionary LinkerFunction::get_placeholder_info() const {
 	// keys (type, value)
 	return Dictionary(host->get_method_info(index).return_val);
 }
+
+LinkerLinkInstance *LinkerFunction::create_instance() {
+	return nullptr;
+}

@@ -19,6 +19,8 @@ public:
 
 	virtual bool can_drop(Ref<LinkerLink> drag_link) const override;
 	virtual void drop_data(Ref<LinkerLink> dropped_link) override;
+
+	virtual LinkerLinkInstance *create_instance() override { return nullptr; }
 };
 
 #endif // LINKER_INDEX_CALL_H

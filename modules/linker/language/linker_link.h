@@ -6,6 +6,7 @@
 #include "editor/editor_string_names.h"
 
 class LinkerScript;
+class LinkerLinkInstance;
 
 class LinkerLink : public Resource {
 	GDCLASS(LinkerLink, Resource);
@@ -60,6 +61,8 @@ public:
 	Variant get_drag_data() const;
 	virtual bool can_drop(Ref<LinkerLink> drag_link) const;
 	virtual void drop_data(Ref<LinkerLink> dropped_link) {}
+
+	virtual LinkerLinkInstance *create_instance() = 0;
 
 	void remove_from_script(bool p_force = false);
 };

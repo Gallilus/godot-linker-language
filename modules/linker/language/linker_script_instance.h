@@ -2,7 +2,10 @@
 #define LINKER_SCRIPT_INSTANCE_H
 
 #include "linker_language.h"
+#include "linker_link.h"
+#include "linker_link_instance.h"
 #include "linker_script.h"
+
 
 #include "core/object/script_instance.h"
 
@@ -35,8 +38,9 @@ public:
 	virtual bool has_method(const StringName &p_method) const override;
 
 	virtual Variant callp(const StringName &p_method, const Variant **p_args, int p_argcount, Callable::CallError &r_error) override;
+	Variant _call_internal(const StringName &p_method, void *p_stack, int p_stack_size, LinkerLinkInstance *p_node, int p_flow_stack_pos, int p_pass, bool p_resuming_yield, Callable::CallError &r_error);
 
-	virtual void notification(int p_notification, bool p_reversed = false) override;
+	virtual void notification(int p_notification, bool p_reversed = false) override {}
 
 	virtual Ref<Script> get_script() const override { return script; }
 
