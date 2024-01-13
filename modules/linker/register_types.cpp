@@ -4,8 +4,8 @@
 #include "core/object/class_db.h"
 
 #include "editor/linker_editor.h"
-#include "editor/linker_editor_selector.h"
 #include "editor/linker_editor_layout.h"
+#include "editor/linker_editor_selector.h"
 #include "language/linker_function.h"
 #include "language/linker_index_call.h"
 #include "language/linker_index_get.h"
