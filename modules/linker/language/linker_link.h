@@ -6,6 +6,7 @@
 #include "editor/editor_string_names.h"
 
 class LinkerScript;
+class LinkerScriptInstance;
 class LinkerLinkInstance;
 
 class LinkerLink : public Resource {
@@ -24,6 +25,8 @@ protected:
 	StringName index = "";
 
 	static void _bind_methods();
+
+	HashMap<int, LinkerLinkInstance *> link_instances;
 
 	Vector<Ref<LinkerLink>> pull_links;
 	Vector<Ref<LinkerLink>> push_links;
@@ -62,7 +65,7 @@ public:
 	virtual bool can_drop(Ref<LinkerLink> drag_link) const;
 	virtual void drop_data(Ref<LinkerLink> dropped_link) {}
 
-	virtual LinkerLinkInstance *create_instance() = 0;
+	virtual void initialize_instance(LinkerLinkInstance *link, LinkerScriptInstance *p_host, int p_start_mode, void *p_stack, int p_stack_size) = 0;
 
 	void remove_from_script(bool p_force = false);
 };

@@ -4,6 +4,8 @@
 #include "editor/editor_node.h"
 #include "linker_link.h"
 
+class LinkerLinkInstance;
+
 class LinkerFunction : public LinkerLink {
 	GDCLASS(LinkerFunction, LinkerLink);
 
@@ -19,7 +21,7 @@ public:
 
 	virtual bool can_drop(Ref<LinkerLink> drag_link) const override { return false; }
 
-	virtual LinkerLinkInstance *create_instance() override;
+	virtual void initialize_instance(LinkerLinkInstance *link, LinkerScriptInstance *p_host, int p_start_mode, void *p_stack, int p_stack_size) override;
 };
 
 #endif // LINKER_FUNCTION_H

@@ -1,7 +1,16 @@
 #ifndef LINKER_LINK_INSTANCE_H
 #define LINKER_LINK_INSTANCE_H
 
+#include "linker_script_instance.h"
+
 class LinkerLinkInstance {
+protected:
+	LinkerScriptInstance *host = nullptr;
+	StringName index = "";
+
+	Vector<LinkerLinkInstance *> pull_links;
+	Vector<LinkerLinkInstance *> push_links;
+
 public:
 	enum StartMode {
 		START_MODE_BEGIN_SEQUENCE,

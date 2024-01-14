@@ -1,4 +1,5 @@
 #include "linker_script_instance.h"
+#include "linker_function_instance.h"
 
 bool LinkerScriptInstance::set(const StringName &p_name, const Variant &p_value) {
 	return false;
@@ -43,18 +44,16 @@ Variant LinkerScriptInstance::callp(const StringName &p_method, const Variant **
 	int total_stack_size = 0;
 	void *stack = alloca(total_stack_size);
 
-	//LinkerLinkInstance *link = script->member_functions[p_method].create_instance();
-
-	// return _call_internal(p_method, stack, total_stack_size, link, 0, 0, false, r_error);
-	return Variant();
+	return _call_internal(p_method, stack, total_stack_size, 0, 0, false, r_error);
+	//return Variant();
 }
 
-Variant LinkerScriptInstance::_call_internal(const StringName &p_method, void *p_stack, int p_stack_size, LinkerLinkInstance *p_link, int p_flow_stack_pos, int p_pass, bool p_resuming_yield, Callable::CallError &r_error) {
+Variant LinkerScriptInstance::_call_internal(const StringName &p_method, void *p_stack, int p_stack_size, int p_flow_stack_pos, int p_pass, bool p_resuming_yield, Callable::CallError &r_error) {
 	bool error = false;
 	String error_str;
 	Variant return_value;
 
-	int current_node_id; // ToDo = p_link->get_node_id();
+	int current_node_id;
 
 	while (true) {
 		p_pass++;
@@ -69,6 +68,9 @@ Variant LinkerScriptInstance::_call_internal(const StringName &p_method, void *p
 				start_mode = LinkerLinkInstance::START_MODE_BEGIN_SEQUENCE;
 			}
 		}
+		LinkerFunctionInstance lfi = LinkerFunctionInstance();
+		current_node_id = script->function_refrences[p_method]->get_link_idx();
+		script->function_refrences[p_method]->initialize_instance(&lfi, this, start_mode, p_stack, p_stack_size);
 
 		LinkerLinkInstance::StepResultMask ret; // ToDo = link->step(start_mode, r_error, error_str);
 
@@ -92,7 +94,7 @@ Variant LinkerScriptInstance::_call_internal(const StringName &p_method, void *p
 		String err_func = p_method;
 		int err_line = current_node_id; // Not a line but it works as one.
 
-		if (p_link && (r_error.error != Callable::CallError::CALL_ERROR_INVALID_METHOD || error_str.is_empty())) {
+		if (r_error.error != Callable::CallError::CALL_ERROR_INVALID_METHOD || error_str.is_empty()) {
 			if (!error_str.is_empty()) {
 				error_str += " ";
 			}
