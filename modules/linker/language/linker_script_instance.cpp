@@ -70,9 +70,12 @@ Variant LinkerScriptInstance::_call_internal(const StringName &p_method, int p_s
 		current_node_id = script->function_refrences[p_method]->get_link_idx();
 
 		LinkerLinkInstance *link = script->function_refrences[p_method]->get_instance(this, start_mode, p_stack_size);
-		//script->function_refrences[p_method]->initialize_instance(&lfi, this, start_mode, p_stack, p_stack_size);
-
-		// Cast from base to derived requires dynamic_cast or static_cast
+		LinkerFunctionInstance *function_instance = static_cast<LinkerFunctionInstance *>(link);
+		if (function_instance == nullptr) {
+			error_str = "LinkerScriptInstance::_call_internal: instance is not a LinkerFunctionInstance";
+			error = true;
+			break;
+		}
 
 		LinkerLinkInstance::StepResultMask ret; // ToDo = link->step(start_mode, r_error, error_str);
 

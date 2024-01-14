@@ -15,12 +15,13 @@ void LinkerFunction::_initialize_instance(LinkerLinkInstance *link, LinkerScript
 		return;
 	}
 	instance->host = p_host;
-	//	instance->index = index;
 
-	ERR_PRINT("LinkerFunction::initialize_instance: not implemented");
-
-	// instance->pull_links = pull_links;
-	// instance->push_links = push_links;
+	for (int i = 0; i < pull_links.size(); i++) {
+		instance->pull_links.append(pull_links[i]->get_instance(p_host, p_start_mode, p_stack_size));
+	}
+	for (int i = 0; i < push_links.size(); i++) {
+		instance->push_links.append(push_links[i]->get_instance(p_host, p_start_mode, p_stack_size));
+	}
 }
 
 Variant LinkerFunction::get_placeholder_value() const {
