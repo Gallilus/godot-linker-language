@@ -69,7 +69,7 @@ Variant LinkerScriptInstance::_call_internal(const StringName &p_method, int p_s
 		}
 		current_node_id = script->function_refrences[p_method]->get_link_idx();
 
-		LinkerLinkInstance *link = script->function_refrences[p_method]->get_instance(this, start_mode, p_stack_size);
+		LinkerLinkInstance *link = script->function_refrences[p_method]->get_instance(this, p_stack_size);
 		LinkerFunctionInstance *function_instance = static_cast<LinkerFunctionInstance *>(link);
 		if (function_instance == nullptr) {
 			error_str = "LinkerScriptInstance::_call_internal: instance is not a LinkerFunctionInstance";

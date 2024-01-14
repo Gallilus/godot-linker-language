@@ -8,7 +8,7 @@ void LinkerFunction::_set_owned_links() {
 	// object and index will be set manually
 }
 
-void LinkerFunction::_initialize_instance(LinkerLinkInstance *link, LinkerScriptInstance *p_host, int p_start_mode, int p_stack_size) {
+void LinkerFunction::_initialize_instance(LinkerLinkInstance *link, LinkerScriptInstance *p_host, int p_stack_size) {
 	LinkerFunctionInstance *instance = static_cast<LinkerFunctionInstance *>(link);
 	if (instance == nullptr) {
 		ERR_PRINT("LinkerFunction::initialize_instance: instance is not a LinkerFunctionInstance");
@@ -17,10 +17,10 @@ void LinkerFunction::_initialize_instance(LinkerLinkInstance *link, LinkerScript
 	instance->host = p_host;
 
 	for (int i = 0; i < pull_links.size(); i++) {
-		instance->pull_links.append(pull_links[i]->get_instance(p_host, p_start_mode, p_stack_size));
+		instance->pull_links.append(pull_links[i]->get_instance(p_host, p_stack_size));
 	}
 	for (int i = 0; i < push_links.size(); i++) {
-		instance->push_links.append(push_links[i]->get_instance(p_host, p_start_mode, p_stack_size));
+		instance->push_links.append(push_links[i]->get_instance(p_host, p_stack_size));
 	}
 }
 
@@ -35,10 +35,10 @@ Dictionary LinkerFunction::get_placeholder_info() const {
 	return Dictionary(host->get_method_info(index).return_val);
 }
 
-LinkerLinkInstance *LinkerFunction::get_instance(LinkerScriptInstance *p_host, int p_start_mode, int p_stack_size) {
+LinkerLinkInstance *LinkerFunction::get_instance(LinkerScriptInstance *p_host, int p_stack_size) {
 	if (!link_instances.has(p_stack_size)) {
 		link_instances.insert(p_stack_size, p_host->add_link_instance(LinkerFunctionInstance()));
-		_initialize_instance(link_instances[p_stack_size], p_host, p_start_mode, p_stack_size);
+		_initialize_instance(link_instances[p_stack_size], p_host, p_stack_size);
 	}
 	return link_instances[p_stack_size];
 }

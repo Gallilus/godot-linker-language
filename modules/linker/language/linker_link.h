@@ -35,7 +35,7 @@ protected:
 
 	virtual void _set_owned_links() = 0; // when creating a new Linkerlink set the default links like get_value for return
 	void _add_owned_link(Ref<LinkerLink> p_link, bool p_is_push = false);
-	virtual void _initialize_instance(LinkerLinkInstance *link, LinkerScriptInstance *p_host, int p_start_mode, int p_stack_size) = 0;
+	virtual void _initialize_instance(LinkerLinkInstance *link, LinkerScriptInstance *p_host, int p_stack_size) = 0;
 
 public:
 	void set_host(LinkerScript *p_host);
@@ -66,7 +66,7 @@ public:
 	virtual bool can_drop(Ref<LinkerLink> drag_link) const;
 	virtual void drop_data(Ref<LinkerLink> dropped_link) {}
 
-	virtual LinkerLinkInstance *get_instance(LinkerScriptInstance *p_host, int p_start_mode, int p_stack_size) = 0;
+	virtual LinkerLinkInstance *get_instance(LinkerScriptInstance *p_host, int p_stack_size) = 0;
 
 	void remove_from_script(bool p_force = false);
 };
