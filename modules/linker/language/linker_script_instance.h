@@ -19,6 +19,7 @@ class LinkerScriptInstance : public ScriptInstance {
 
 	Vector<Variant> members;
 	bool base_ref_counted;
+	Vector<LinkerLinkInstance> link_instances;
 
 protected:
 public:
@@ -37,7 +38,7 @@ public:
 	virtual bool has_method(const StringName &p_method) const override;
 
 	virtual Variant callp(const StringName &p_method, const Variant **p_args, int p_argcount, Callable::CallError &r_error) override;
-	Variant _call_internal(const StringName &p_method, void *p_stack, int p_stack_size, int p_flow_stack_pos, int p_pass, bool p_resuming_yield, Callable::CallError &r_error);
+	Variant _call_internal(const StringName &p_method, int p_stack_size, int p_flow_stack_pos, int p_pass, bool p_resuming_yield, Callable::CallError &r_error);
 
 	virtual void notification(int p_notification, bool p_reversed = false) override {}
 
@@ -45,6 +46,7 @@ public:
 
 	virtual ScriptLanguage *get_language() override { return LinkerLanguage::get_singleton(); }
 
+	LinkerLinkInstance *add_link_instance(LinkerLinkInstance p_link_instance);
 	void initialize();
 
 	LinkerScriptInstance();

@@ -42,13 +42,12 @@ Variant LinkerScriptInstance::callp(const StringName &p_method, const Variant **
 		return Variant();
 	}
 	int total_stack_size = 0;
-	void *stack = alloca(total_stack_size);
 
-	return _call_internal(p_method, stack, total_stack_size, 0, 0, false, r_error);
+	return _call_internal(p_method, total_stack_size, 0, 0, false, r_error);
 	//return Variant();
 }
 
-Variant LinkerScriptInstance::_call_internal(const StringName &p_method, void *p_stack, int p_stack_size, int p_flow_stack_pos, int p_pass, bool p_resuming_yield, Callable::CallError &r_error) {
+Variant LinkerScriptInstance::_call_internal(const StringName &p_method, int p_stack_size, int p_flow_stack_pos, int p_pass, bool p_resuming_yield, Callable::CallError &r_error) {
 	bool error = false;
 	String error_str;
 	Variant return_value;
@@ -68,9 +67,12 @@ Variant LinkerScriptInstance::_call_internal(const StringName &p_method, void *p
 				start_mode = LinkerLinkInstance::START_MODE_BEGIN_SEQUENCE;
 			}
 		}
-		LinkerFunctionInstance lfi = LinkerFunctionInstance();
 		current_node_id = script->function_refrences[p_method]->get_link_idx();
-		script->function_refrences[p_method]->initialize_instance(&lfi, this, start_mode, p_stack, p_stack_size);
+
+		LinkerLinkInstance *link = script->function_refrences[p_method]->get_instance(this, start_mode, p_stack_size);
+		//script->function_refrences[p_method]->initialize_instance(&lfi, this, start_mode, p_stack, p_stack_size);
+
+		// Cast from base to derived requires dynamic_cast or static_cast
 
 		LinkerLinkInstance::StepResultMask ret; // ToDo = link->step(start_mode, r_error, error_str);
 
@@ -120,6 +122,11 @@ Variant LinkerScriptInstance::_call_internal(const StringName &p_method, void *p
 	}
 
 	return return_value;
+}
+
+LinkerLinkInstance *LinkerScriptInstance::add_link_instance(LinkerLinkInstance p_link_instance) {
+	link_instances.push_back(p_link_instance);
+	return &link_instances.get(link_instances.size() - 1);
 }
 
 void LinkerScriptInstance::initialize() {
