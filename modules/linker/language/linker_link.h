@@ -22,7 +22,7 @@ private:
 
 protected:
 	LinkerScript *host = nullptr;
-	StringName index = "";
+	StringName index;
 
 	static void _bind_methods();
 
@@ -67,29 +67,46 @@ public:
 	virtual void drop_data(Ref<LinkerLink> dropped_link) {}
 
 	virtual LinkerLinkInstance *get_instance(LinkerScriptInstance *p_host, int p_stack_size) = 0;
+	virtual void remove_instance(LinkerScriptInstance *p_host, int p_stack_size) = 0;
 
 	void remove_from_script(bool p_force = false);
 };
 
+////////////////////////////////////////////////////////////////////////
+//////////////////////////////  INSTANCE  //////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+class LinkerLinkInstance {
+protected:
+	LinkerScriptInstance *host = nullptr;
+	StringName index;
+
+	Vector<LinkerLinkInstance *> pull_links;
+	Vector<LinkerLinkInstance *> push_links;
+
+	Variant return_value;
+
+public:
+	enum StartMode {
+		START_MODE_BEGIN_SEQUENCE,
+		START_MODE_CONTINUE_SEQUENCE,
+		START_MODE_RESUME_YIELD
+	};
+
+	enum StepResultMask {
+		STEP_SHIFT = 1 << 24,
+		STEP_MASK = STEP_SHIFT - 1,
+		STEP_FLAG_PUSH_STACK_BIT = STEP_SHIFT, // push bit to stack
+		STEP_FLAG_GO_BACK_BIT = STEP_SHIFT << 1, // go back to previous node
+		STEP_NO_ADVANCE_BIT = STEP_SHIFT << 2, // do not advance past this node
+		STEP_EXIT_FUNCTION_BIT = STEP_SHIFT << 3, // return from function
+		STEP_YIELD_BIT = STEP_SHIFT << 4, // yield (will find VisualScriptFunctionState state in first working memory)
+
+		FLOW_STACK_PUSHED_BIT = 1 << 30, // in flow stack, means bit was pushed (must go back here if end of sequence)
+		FLOW_STACK_MASK = FLOW_STACK_PUSHED_BIT - 1
+	};
+
+	virtual int step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str);
+};
+
 #endif // LINKER_LINK_H
-
-// function examle
-// object_resource is this get_value "return" link
-// the link logic is the destination
-
-// get_value examle
-// object_resource is the other link
-// the link logic Object::get()
-// the destination is the resource triggering this instance
-
-// set_value examle							// set_value examle
-// is triggered after the logic of the function
-// object_resource is the source of the link (always a other link)
-// the link logic Object::set()
-// the destination is the resource triggering this instance
-
-// a link needs to trigger its arguments
-// a link needs to trigger its popstprocessing links (call_func set_value etc)
-// then it is able to return its value
-
-// the post_processing needs to be deterministic in order of operation

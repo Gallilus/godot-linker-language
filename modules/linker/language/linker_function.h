@@ -5,7 +5,6 @@
 #include "linker_link.h"
 
 class LinkerLinkInstance;
-
 class LinkerFunction : public LinkerLink {
 	GDCLASS(LinkerFunction, LinkerLink);
 
@@ -24,6 +23,17 @@ public:
 	virtual bool can_drop(Ref<LinkerLink> drag_link) const override { return false; }
 
 	virtual LinkerLinkInstance *get_instance(LinkerScriptInstance *p_host, int p_stack_size) override;
+	virtual void remove_instance(LinkerScriptInstance *p_host, int p_stack_size) override;
 };
 
+////////////////////////////////////////////////////////////////////////
+//////////////////////////////  INSTANCE  //////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+class LinkerFunctionInstance : public LinkerLinkInstance {
+	friend class LinkerFunction;
+
+public:
+	virtual int step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) override;
+};
 #endif // LINKER_FUNCTION_H

@@ -215,7 +215,7 @@ void LinkerEditorLayout::update_graph() {
 			}
 		}
 		Vector<Ref<LinkerLink>> folowing = link->get_push_link_refs();
-		if (category == "graph_data" || category == "graph_input") {
+		if (category != "graph_data" || category == "graph_input") {
 			for (int j = 0; j < folowing.size(); j++) {
 				Ref<LinkerLink> next = folowing[j];
 				graph.add_edge(link, next, "edge_sequence");
