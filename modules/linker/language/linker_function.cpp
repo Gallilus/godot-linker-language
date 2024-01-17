@@ -17,7 +17,10 @@ void LinkerFunction::_initialize_instance(LinkerLinkInstance *link, LinkerScript
 	instance->host = p_host;
 	instance->index = index;
 
-	for (int i = 0; i < pull_links.size(); i++) {
+	instance->pull_count = pull_links.size();
+	instance->push_count = push_links.size();
+
+	for (int i = 0; i < instance->pull_count; i++) {
 		LinkerLinkInstance *_link = pull_links[i]->get_instance(p_host, p_stack_size);
 		if (_link) {
 			instance->pull_links.push_back(_link);
@@ -25,7 +28,8 @@ void LinkerFunction::_initialize_instance(LinkerLinkInstance *link, LinkerScript
 			ERR_PRINT(String(pull_links[i]->get_class_name()) + ": instance is null");
 		}
 	}
-	for (int i = 0; i < push_links.size(); i++) {
+
+	for (int i = 0; i < instance->push_count; i++) {
 		LinkerLinkInstance *_link = push_links[i]->get_instance(p_host, p_stack_size);
 		if (_link) {
 			instance->push_links.push_back(_link);
@@ -57,6 +61,7 @@ LinkerLinkInstance *LinkerFunction::get_instance(LinkerScriptInstance *p_host, i
 
 void LinkerFunction::remove_instance(LinkerScriptInstance *p_host, int p_stack_size) {
 	if (link_instances.has(p_stack_size)) {
+		// need to remove the instance sublinks
 		p_host->remove_link_instance(link_instances[p_stack_size]);
 		link_instances.erase(p_stack_size);
 	}
@@ -66,10 +71,11 @@ void LinkerFunction::remove_instance(LinkerScriptInstance *p_host, int p_stack_s
 //////////////////////////////  INSTANCE  //////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-int LinkerFunctionInstance::step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) {
-	// find arguement from sourcecall
-	// run all pull links
-	// run all push links
-	// handle how to get returnvalue form script
-	return 0;
+int LinkerFunctionInstance::_step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) {
+	if (pull_count > 0) {
+		value = pull_links[0]->get_value();
+	} else {
+		value = memnew(Variant);
+	}
+	return STEP_COMPLETE;
 }

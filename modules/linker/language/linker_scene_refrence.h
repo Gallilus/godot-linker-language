@@ -23,7 +23,7 @@ private:
 protected:
 	static void _bind_methods();
 	virtual void _set_owned_links() override {}
-	virtual void _initialize_instance(LinkerLinkInstance *link, LinkerScriptInstance *p_host, int p_stack_size) override {}
+	virtual void _initialize_instance(LinkerLinkInstance *link, LinkerScriptInstance *p_host, int p_stack_size) override;
 
 public:
 	virtual Variant get_placeholder_value() const override;
@@ -57,8 +57,10 @@ public:
 class LinkerSceneRefrenceInstance : public LinkerLinkInstance {
 	friend class LinkerSceneRefrence;
 
+protected:
+	virtual int _step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) override;
+
 public:
-	virtual int step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) override;
 };
 
 #endif // LINKER_SCENE_REFRENCE_H

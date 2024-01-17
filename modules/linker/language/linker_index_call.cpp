@@ -6,7 +6,12 @@ void LinkerIndexCall::_initialize_instance(LinkerLinkInstance *link, LinkerScrip
 	instance->host = p_host;
 	instance->index = index;
 
-	for (int i = 0; i < pull_links.size(); i++) {
+	instance->pull_count = pull_links.size();
+	instance->push_count = push_links.size();
+
+	instance->input_args = new const Variant *[instance->pull_count];
+
+	for (int i = 0; i < instance->pull_count; i++) {
 		LinkerLinkInstance *_link = pull_links[i]->get_instance(p_host, p_stack_size);
 		if (_link) {
 			instance->pull_links.push_back(_link);
@@ -14,7 +19,8 @@ void LinkerIndexCall::_initialize_instance(LinkerLinkInstance *link, LinkerScrip
 			ERR_PRINT(String(pull_links[i]->get_class_name()) + ": instance is null");
 		}
 	}
-	for (int i = 0; i < push_links.size(); i++) {
+
+	for (int i = 0; i < instance->push_count; i++) {
 		LinkerLinkInstance *_link = push_links[i]->get_instance(p_host, p_stack_size);
 		if (_link) {
 			instance->push_links.push_back(_link);
@@ -61,6 +67,22 @@ void LinkerIndexCall::remove_instance(LinkerScriptInstance *p_host, int p_stack_
 //////////////////////////////  INSTANCE  //////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-int LinkerIndexCallInstance::step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) {
-	return 0;
+int LinkerIndexCallInstance::_step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) {
+	ERR_PRINT("LinkerIndexCallInstance::step: " + String(index));
+
+	for (int i = 0; i < pull_count; i++) {
+		input_args[i] = pull_links[i]->get_value();
+		ERR_PRINT("LinkerIndexCallInstance::step: input_args[" + itos(i) + "] = " + String(*input_args[i]));
+	}
+
+	host->callp(index, input_args, pull_count, r_error);
+
+	if (r_error.error != Callable::CallError::CALL_OK) {
+		return STEP_ERROR;
+	}
+	return STEP_COMPLETE;
+}
+
+LinkerIndexCallInstance::~LinkerIndexCallInstance() {
+	delete[] input_args;
 }

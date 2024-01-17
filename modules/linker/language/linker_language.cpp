@@ -12,6 +12,18 @@
 
 LinkerLanguage *LinkerLanguage::singleton = nullptr;
 
+bool LinkerLanguage::debug_break(const String &p_error, bool p_allow_continue) {
+	if (EngineDebugger::is_active() && Thread::get_caller_id() == Thread::get_main_id()) {
+		// _debug_parse_err_node = -1;
+		// _debug_parse_err_file = "";
+		// _debug_error = p_error;
+		EngineDebugger::get_script_debugger()->debug(this, p_allow_continue, true);
+		return true;
+	} else {
+		return false;
+	}
+}
+
 String LinkerLanguage::get_name() const {
 	return "LinkerScript";
 }

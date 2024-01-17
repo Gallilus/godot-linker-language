@@ -669,6 +669,7 @@ Variant LinkerScriptInstance::_call_internal(const StringName &p_method, int p_s
 	bool error = false;
 	String error_str;
 	Variant return_value;
+	Vector<LinkerLinkInstance *> call_stack;
 
 	int current_node_id;
 
@@ -682,13 +683,14 @@ Variant LinkerScriptInstance::_call_internal(const StringName &p_method, int p_s
 			if (p_resuming_yield) {
 				start_mode = LinkerLinkInstance::START_MODE_RESUME_YIELD;
 				p_resuming_yield = false; // Should resume only the first time.
-				// } else ToDo = LinkerLinkInstance::START_MODE_CONTINUE_SEQUENCE;
+				// } else ToDo = LinkerLinkInstance::START_MODE_CONTINUE;
 			} else {
-				start_mode = LinkerLinkInstance::START_MODE_BEGIN_SEQUENCE;
+				start_mode = LinkerLinkInstance::START_MODE_BEGIN;
 			}
 		}
 
 		LinkerLinkInstance *link = script->function_refrences[p_method]->get_instance(this, p_stack_size);
+		call_stack.push_back(link);
 		LinkerFunctionInstance *function_instance = static_cast<LinkerFunctionInstance *>(link);
 		if (function_instance == nullptr) {
 			error_str = "LinkerScriptInstance::_call_internal: instance is not a LinkerFunctionInstance";
@@ -696,7 +698,7 @@ Variant LinkerScriptInstance::_call_internal(const StringName &p_method, int p_s
 			break;
 		}
 
-		LinkerLinkInstance::StepResultMask ret; // ToDo = link->step(start_mode, r_error, error_str);
+		int ret = link->step(start_mode, r_error, error_str);
 
 		if (r_error.error != Callable::CallError::CALL_OK) {
 			// error from previus step.
@@ -704,12 +706,25 @@ Variant LinkerScriptInstance::_call_internal(const StringName &p_method, int p_s
 			break;
 		}
 
-		LinkerLinkInstance::StepResultMask output = static_cast<LinkerLinkInstance::StepResultMask>(ret & LinkerLinkInstance::STEP_MASK);
-
-		if (ret & LinkerLinkInstance::STEP_EXIT_FUNCTION_BIT) {
-			return_value; // = ToDo link->get_return_value();
+		if (ret & LinkerLinkInstance::STEP_ERROR) {
+			// reevalute current_node_id for debug errors
+			error = true;
+			break;
 		}
-		break;
+
+		if (ret & LinkerLinkInstance::STEP_BREAKPOINT) {
+			// reevalute current_node_id for debug errors
+		}
+
+		if (ret & LinkerLinkInstance::STEP_RESULT_YIELD) {
+			// reevalute current_node_id for debug errors
+		}
+
+		if (ret & LinkerLinkInstance::STEP_COMPLETE) {
+			// reevalute current_node_id for debug errors
+			return_value = *link->get_value();
+			break;
+		}
 	}
 	if (error) {
 		// Error
@@ -739,8 +754,16 @@ Variant LinkerScriptInstance::_call_internal(const StringName &p_method, int p_s
 			}
 		}
 
+		if (!LinkerLanguage::singleton->debug_break(error_str, false)) {
+			_err_print_error(err_func.utf8().get_data(), err_file.utf8().get_data(), err_line, error_str.utf8().get_data(), false, ERR_HANDLER_SCRIPT);
+		}
+
 		// ToDo if (!LinkerLanguage::singleton->debug_break(error_str, false)) {
-		_err_print_error(err_func.utf8().get_data(), err_file.utf8().get_data(), err_line, error_str.utf8().get_data(), false, ERR_HANDLER_SCRIPT);
+		// The node instance lets the Language singleton now it is a breakepoint
+	}
+
+	for (int i = 0; i < call_stack.size(); i++) {
+		script->function_refrences[p_method]->remove_instance(this, p_stack_size);
 	}
 
 	return return_value;
@@ -760,7 +783,9 @@ void LinkerScriptInstance::remove_link_instance(LinkerLinkInstance *p_link_insta
 		return;
 	}
 	link_instances.erase(p_link_instance);
-	memdelete(p_link_instance);
+	if (p_link_instance) {
+		delete p_link_instance;
+	}
 }
 
 void LinkerScriptInstance::initialize() {

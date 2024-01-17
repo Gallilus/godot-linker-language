@@ -33,7 +33,10 @@ public:
 class LinkerFunctionInstance : public LinkerLinkInstance {
 	friend class LinkerFunction;
 
+protected:
+	virtual int _step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) override;
+
 public:
-	virtual int step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) override;
 };
+
 #endif // LINKER_FUNCTION_H

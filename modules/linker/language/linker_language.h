@@ -3,6 +3,8 @@
 
 #include "linker_script.h"
 
+#include "core/debugger/engine_debugger.h"
+#include "core/debugger/script_debugger.h"
 #include "core/object/script_language.h"
 #include "core/templates/self_list.h"
 
@@ -20,6 +22,8 @@ class LinkerLanguage : public ScriptLanguage {
 	uint64_t script_frame_time;
 
 public:
+	bool debug_break(const String &p_error, bool p_allow_continue = true);
+
 	virtual String get_name() const override;
 	_FORCE_INLINE_ static LinkerLanguage *get_singleton() { return singleton; }
 

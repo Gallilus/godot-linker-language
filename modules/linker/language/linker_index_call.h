@@ -32,8 +32,13 @@ public:
 class LinkerIndexCallInstance : public LinkerLinkInstance {
 	friend class LinkerIndexCall;
 
+	const Variant **input_args = nullptr;
+
+protected:
+	virtual int _step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) override;
+
 public:
-	virtual int step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) override;
+	~LinkerIndexCallInstance();
 };
 
 #endif // LINKER_INDEX_CALL_H

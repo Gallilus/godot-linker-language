@@ -77,6 +77,21 @@ public:
 ////////////////////////////////////////////////////////////////////////
 
 class LinkerLinkInstance {
+public:
+	enum StartMode {
+		START_MODE_BEGIN,
+		START_MODE_CONTINUE,
+		START_MODE_RESUME_YIELD,
+	};
+
+	enum StepResult {
+		STEP_OK = 1 << 0,
+		STEP_ERROR = 1 << 1,
+		STEP_COMPLETE = 1 << 2,
+		STEP_BREAKPOINT = 1 << 3,
+		STEP_RESULT_YIELD = 1 << 4,
+	};
+
 protected:
 	LinkerScriptInstance *host = nullptr;
 	StringName index;
@@ -84,29 +99,21 @@ protected:
 	Vector<LinkerLinkInstance *> pull_links;
 	Vector<LinkerLinkInstance *> push_links;
 
-	Variant return_value;
+	Variant *value = nullptr;
+	int pull_count = 0;
+	int push_count = 0;
+	int step_count = 0;
+
+	bool stepped = false;
+	bool running = false;
+
+	virtual int _step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) = 0; // link specific step
 
 public:
-	enum StartMode {
-		START_MODE_BEGIN_SEQUENCE,
-		START_MODE_CONTINUE_SEQUENCE,
-		START_MODE_RESUME_YIELD
-	};
+	int step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str); // full step
+	Variant *get_value() const { return value; }
 
-	enum StepResultMask {
-		STEP_SHIFT = 1 << 24,
-		STEP_MASK = STEP_SHIFT - 1,
-		STEP_FLAG_PUSH_STACK_BIT = STEP_SHIFT, // push bit to stack
-		STEP_FLAG_GO_BACK_BIT = STEP_SHIFT << 1, // go back to previous node
-		STEP_NO_ADVANCE_BIT = STEP_SHIFT << 2, // do not advance past this node
-		STEP_EXIT_FUNCTION_BIT = STEP_SHIFT << 3, // return from function
-		STEP_YIELD_BIT = STEP_SHIFT << 4, // yield (will find VisualScriptFunctionState state in first working memory)
-
-		FLOW_STACK_PUSHED_BIT = 1 << 30, // in flow stack, means bit was pushed (must go back here if end of sequence)
-		FLOW_STACK_MASK = FLOW_STACK_PUSHED_BIT - 1
-	};
-
-	virtual int step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str);
+	~LinkerLinkInstance();
 };
 
 #endif // LINKER_LINK_H

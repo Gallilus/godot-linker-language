@@ -18,6 +18,34 @@ void LinkerSceneRefrence::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::STRING_NAME, "node_scene_relative_path"), "set_node_scene_relative_path", "get_node_scene_relative_path");
 }
 
+void LinkerSceneRefrence::_initialize_instance(LinkerLinkInstance *link, LinkerScriptInstance *p_host, int p_stack_size) {
+	LinkerSceneRefrenceInstance *instance = static_cast<LinkerSceneRefrenceInstance *>(link);
+
+	instance->host = p_host;
+	instance->index = index;
+
+	instance->pull_count = pull_links.size();
+	instance->push_count = push_links.size();
+
+	for (int i = 0; i < instance->pull_count; i++) {
+		LinkerLinkInstance *_link = pull_links[i]->get_instance(p_host, p_stack_size);
+		if (_link) {
+			instance->pull_links.push_back(_link);
+		} else {
+			ERR_PRINT(String(pull_links[i]->get_class_name()) + ": instance is null");
+		}
+	}
+
+	for (int i = 0; i < instance->push_count; i++) {
+		LinkerLinkInstance *_link = push_links[i]->get_instance(p_host, p_stack_size);
+		if (_link) {
+			instance->push_links.push_back(_link);
+		} else {
+			ERR_PRINT(String(push_links[i]->get_class_name()) + ": instance is null");
+		}
+	}
+}
+
 Variant LinkerSceneRefrence::get_placeholder_value() const {
 	// get variant from property info
 	return Variant();
@@ -70,6 +98,7 @@ void LinkerSceneRefrence::drop_data(Ref<LinkerLink> dropped_link) {
 //////////////////////////////  INSTANCE  //////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-int LinkerSceneRefrenceInstance::step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) {
-	return 0;
+int LinkerSceneRefrenceInstance::_step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) {
+	value = memnew(Variant);
+	return STEP_COMPLETE;
 }

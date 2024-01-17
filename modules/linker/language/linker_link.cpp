@@ -162,5 +162,43 @@ void LinkerLink::remove_from_script(bool p_force) {
 ////////////////////////////////////////////////////////////////////////
 
 int LinkerLinkInstance::step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) {
-	return 0;
+	int step_state;
+	if (running) {
+		r_error_str = "Step called while running, recursive connections are not allowed";
+		return STEP_ERROR;
+	}
+	running = true;
+	while (true) {
+		if (step_count < pull_count) {
+			step_state = pull_links[step_count]->step(p_start_mode, r_error, r_error_str);
+		} else if (step_count == pull_count && !stepped) {
+			step_state = step(p_start_mode, r_error, r_error_str);
+			if (step_state & STEP_COMPLETE) {
+				stepped = true;
+			}
+		} else if (step_count < pull_count + push_count) {
+			step_state = push_links[step_count - pull_count]->_step(p_start_mode, r_error, r_error_str);
+		} else {
+			break;
+		}
+		if (step_state & STEP_COMPLETE) {
+			step_count++;
+		} else if (step_state & STEP_ERROR) {
+			return STEP_ERROR;
+		} else if (step_state & STEP_BREAKPOINT) {
+			return STEP_BREAKPOINT;
+		} else if (step_state & STEP_RESULT_YIELD) {
+			return STEP_RESULT_YIELD;
+		}
+		// BREAK HERE EVERY SUBSTEP FOR DEBUGGING
+		// waiting on all steps to complete
+	};
+	running = false;
+	return STEP_COMPLETE;
+}
+
+LinkerLinkInstance::~LinkerLinkInstance() {
+	if (value) {
+		memdelete(value);
+	}
 }

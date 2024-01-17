@@ -32,8 +32,10 @@ public:
 class LinkerIndexGetInstance : public LinkerLinkInstance {
 	friend class LinkerIndexGet;
 
+protected:
+	virtual int _step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) override;
+
 public:
-	virtual int step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) override;
 };
 
 #endif // LINKER_INDEX_GET_H
