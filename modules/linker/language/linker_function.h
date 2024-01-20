@@ -20,7 +20,8 @@ public:
 	virtual Dictionary get_placeholder_info() const override;
 	virtual String get_graph_category() const override { return "graph_output"; }
 
-	virtual bool can_drop(Ref<LinkerLink> drag_link) const override { return false; }
+	virtual bool can_drop(Ref<LinkerLink> drag_link) const override;
+	virtual void drop_data(Ref<LinkerLink> dropped_link) override;
 
 	virtual LinkerLinkInstance *get_instance(LinkerScriptInstance *p_host, int p_stack_size) override;
 	virtual void remove_instance(LinkerScriptInstance *p_host, int p_stack_size) override;

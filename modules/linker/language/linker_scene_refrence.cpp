@@ -91,6 +91,7 @@ void LinkerSceneRefrence::drop_data(Ref<LinkerLink> dropped_link) {
 	if (dropped_link.is_null()) {
 		return;
 	}
+	// if no inxed found create ne popup
 	dropped_link->set_source(this);
 }
 

@@ -45,20 +45,17 @@ bool LinkerIndexGet::can_drop(Ref<LinkerLink> drag_link) const {
 	if (drag_link.is_null()) {
 		return false;
 	}
-	if (drag_link->get_class() == "LinkerIndexGet") {
-		return true;
-	}
-	if (drag_link->get_class() == "LinkerIndexSet" &&
+	if (	drag_link->get_class() == "LinkerIndexGet" &&
 			drag_link != this) {
 		return true;
+	}
+	if (drag_link->get_class() == "LinkerIndexSet") {
+		return false;
 	}
 	return false;
 }
 
 void LinkerIndexGet::drop_data(Ref<LinkerLink> dropped_link) {
-	if (dropped_link.is_null()) {
-		return;
-	}
 	set_source(dropped_link);
 }
 

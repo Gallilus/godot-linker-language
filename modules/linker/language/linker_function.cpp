@@ -1,6 +1,8 @@
 #include "linker_function.h"
+#include "linker_index_call.h"
 #include "linker_index_get.h"
 #include "linker_script.h"
+
 
 void LinkerFunction::_set_owned_links() {
 	if (pull_links.size() == 0) {
@@ -48,6 +50,35 @@ Dictionary LinkerFunction::get_placeholder_info() const {
 	// prefix dictionary with type MethodInfo
 	// keys (type, value)
 	return Dictionary(host->get_method_info(index).return_val);
+}
+
+bool LinkerFunction::can_drop(Ref<LinkerLink> drag_link) const {
+	if (drag_link.is_null() ||
+			drag_link == this) {
+		return false;
+	}
+	return false;
+}
+
+void LinkerFunction::drop_data(Ref<LinkerLink> dropped_link) {
+	if (dropped_link->get_class_name() == SNAME("LinkerIndexGet")) {
+		Ref<LinkerIndexGet> index_get = dropped_link;
+		PropertyInfo info = host->get_method_info(index).return_val;
+		if (info.type == Variant::NIL ||
+				info.type == int(index_get->get_placeholder_info()["type"])) {
+			set_source(dropped_link);
+		}
+	}
+	if (dropped_link->get_class_name() == SNAME("LinkerIndexCall")) {
+		Ref<LinkerIndexCall> index_call = dropped_link;
+		PropertyInfo info = host->get_method_info(index).return_val;
+		if (info.type == Variant::NIL ||
+				info.type == int(index_call->get_placeholder_info()["type"])) {
+			set_source(dropped_link);
+		} else {
+			add_push_link_ref(dropped_link);
+		}
+	}
 }
 
 LinkerLinkInstance *LinkerFunction::get_instance(LinkerScriptInstance *p_host, int p_stack_size) {

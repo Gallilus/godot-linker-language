@@ -225,8 +225,10 @@ void LinkerEditorLayout::update_graph() {
 
 	for (const KeyValue<LinkerLink *, Vector2> &E : graph.get_linker_link_positions()) {
 		LinkerLink *link = E.key;
-		LinkControler *controler = get_linker_controler(link);
-		controler->set_position(E.value);
+		if (link) {
+			LinkControler *controler = get_linker_controler(link);
+			controler->set_position(E.value);
+		}
 	}
 }
 

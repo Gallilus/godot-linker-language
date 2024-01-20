@@ -31,7 +31,8 @@ void LinkerIndexCall::_initialize_instance(LinkerLinkInstance *link, LinkerScrip
 }
 
 bool LinkerIndexCall::can_drop(Ref<LinkerLink> drag_link) const {
-	if (drag_link.is_null()) {
+	if (drag_link.is_null() ||
+			drag_link == this) {
 		return false;
 	}
 	if (drag_link->get_class() == "LinkerIndexGet") {
@@ -41,9 +42,7 @@ bool LinkerIndexCall::can_drop(Ref<LinkerLink> drag_link) const {
 }
 
 void LinkerIndexCall::drop_data(Ref<LinkerLink> dropped_link) {
-	if (dropped_link.is_null()) {
-		return;
-	}
+	// momentarly only compatible with one argument
 	set_source(dropped_link);
 }
 
