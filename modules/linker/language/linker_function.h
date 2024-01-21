@@ -12,13 +12,13 @@ private:
 protected:
 	static void _bind_methods() {}
 	virtual void _set_owned_links() override;
-
 	virtual void _initialize_instance(LinkerLinkInstance *link, LinkerScriptInstance *p_host, int p_stack_size) override;
 
 public:
 	virtual Variant get_placeholder_value() const override;
 	virtual Dictionary get_placeholder_info() const override;
 	virtual String get_graph_category() const override { return "graph_output"; }
+	virtual bool controlers_at_owners() override { return true; } // irelivant for functions as these are only hosted by scripts
 
 	virtual bool can_drop(Ref<LinkerLink> drag_link) const override;
 	virtual void drop_data(Ref<LinkerLink> dropped_link) override;

@@ -45,7 +45,7 @@ bool LinkerIndexGet::can_drop(Ref<LinkerLink> drag_link) const {
 	if (drag_link.is_null()) {
 		return false;
 	}
-	if (	drag_link->get_class() == "LinkerIndexGet" &&
+	if (drag_link->get_class() == "LinkerIndexGet" &&
 			drag_link != this) {
 		return true;
 	}

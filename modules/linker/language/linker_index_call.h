@@ -17,6 +17,7 @@ protected:
 public:
 	virtual Variant get_placeholder_value() const override { return Variant(); }
 	virtual Dictionary get_placeholder_info() const override { return Dictionary(); }
+	virtual bool controlers_at_owners() override { return true; } // a call link may have many owners and every owner wil have a controler.
 
 	virtual bool can_drop(Ref<LinkerLink> drag_link) const override;
 	virtual void drop_data(Ref<LinkerLink> dropped_link) override;

@@ -34,7 +34,7 @@ void LinkerEditorLayout::_bind_methods() {
 }
 
 LinkControler *LinkerEditorLayout::get_linker_controler(LinkerLink *p_link) {
-	if (link_contorlers.has(p_link)) {
+	if (link_contorlers.has(p_link) && !p_link->controlers_at_owners()) {
 		if (VariantUtilityFunctions::is_instance_valid(link_contorlers[p_link])) {
 			return link_contorlers[p_link];
 		}
@@ -42,7 +42,9 @@ LinkControler *LinkerEditorLayout::get_linker_controler(LinkerLink *p_link) {
 	LinkControler *controler = memnew(LinkControler);
 	controler->set_link(Ref<LinkerLink>(p_link));
 	add_child(controler);
-	link_contorlers[p_link] = controler;
+	if (!p_link->controlers_at_owners()) {
+		link_contorlers[p_link] = controler;
+	}
 	return controler;
 }
 
@@ -208,28 +210,25 @@ void LinkerEditorLayout::update_graph() {
 		}
 		StringName category = link->get_graph_category();
 		Vector<Ref<LinkerLink>> args = link->get_pull_link_refs();
-		if (category == "graph_data" || category == "graph_output") {
-			for (int j = 0; j < args.size(); j++) {
-				Ref<LinkerLink> arg = args[j];
-				graph.add_edge(arg, link, "edge_data");
-			}
-		}
 		Vector<Ref<LinkerLink>> folowing = link->get_push_link_refs();
-		if (category != "graph_data" || category == "graph_input") {
-			for (int j = 0; j < folowing.size(); j++) {
-				Ref<LinkerLink> next = folowing[j];
-				graph.add_edge(link, next, "edge_sequence");
-			}
+		for (int j = 0; j < args.size(); j++) {
+			Ref<LinkerLink> arg = args[j];
+			graph.add_edge(arg, link, "edge_data");
+		}
+		for (int j = 0; j < folowing.size(); j++) {
+			Ref<LinkerLink> next = folowing[j];
+			graph.add_edge(link, next, "edge_sequence");
 		}
 	}
 
+	// first raw iteration
 	for (const KeyValue<LinkerLink *, Vector2> &E : graph.get_linker_link_positions()) {
 		LinkerLink *link = E.key;
 		if (link) {
 			LinkControler *controler = get_linker_controler(link);
 			controler->set_position(E.value);
 		}
-	}
+	} //
 }
 
 LinkerEditorLayout::LinkerEditorLayout() {

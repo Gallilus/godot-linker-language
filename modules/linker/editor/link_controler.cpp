@@ -28,12 +28,13 @@ void LinkControler::_instantiate() {
 	button->set_mouse_filter(Control::MOUSE_FILTER_PASS);
 
 	_set_margin(_get_icon_h_alignement(link.ptr()));
-}
 
-void LinkControler::update_connection() {
-	// update connections
-	// link->get_arg_links()
-	//      add connection_point and connect to destination as routed by GraphTheory
+	if (link->has_source()) {
+		connection = memnew(LinkConnection);
+		get_parent()->add_child(connection);
+		//	connection->set_start(link->get_source());
+		connection->set_end(this);
+	}
 }
 
 void LinkControler::on_size_changed() {
@@ -157,4 +158,10 @@ LinkControler::LinkControler() {
 	set_v_size_flags(SIZE_EXPAND_FILL);
 	set_h_size_flags(SIZE_EXPAND_FILL);
 	set_focus_mode(Control::FOCUS_ALL);
+}
+
+LinkControler::~LinkControler() {
+	if (connection) {
+		connection->queue_free();
+	}
 }
