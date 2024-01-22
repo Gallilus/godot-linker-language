@@ -23,6 +23,11 @@ class LinkControler : public MarginContainer {
 
 	Button *button = nullptr;
 
+	int margin_top = 0;
+	int margin_bottom = 0;
+	int margin_left = 0;
+	int margin_right = 0;
+
 protected:
 	static void _bind_methods() {}
 	void _notification(int p_what);
@@ -48,6 +53,11 @@ public:
 	void set_link(Ref<LinkerLink> p_link);
 	LinkerLink *get_link() const { return link.ptr(); }
 	int get_link_idx() const { return link->get_link_idx(); }
+
+	Vector2 get_connection_point_top() const;
+	Vector2 get_connection_point_bottom() const;
+	Vector2 get_connection_point_left() const;
+	Vector2 get_connection_point_right() const;
 
 	LinkControler();
 	~LinkControler();

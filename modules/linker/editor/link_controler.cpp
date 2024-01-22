@@ -82,17 +82,21 @@ String LinkControler::_get_text(LinkerLink *p_link) const {
 
 void LinkControler::_set_margin(HorizontalAlignment p_align) {
 	if (p_align == HORIZONTAL_ALIGNMENT_LEFT) {
-		add_theme_constant_override(SNAME("margin_left"), 20);
-		add_theme_constant_override(SNAME("margin_right"), 1);
-		add_theme_constant_override(SNAME("margin_top"), 1);
-		add_theme_constant_override(SNAME("margin_bottom"), 1);
+		margin_left = 20;
+		margin_right = 1;
+		margin_top = 1;
+		margin_bottom = 1;
 	}
 	if (p_align == HORIZONTAL_ALIGNMENT_RIGHT) {
-		add_theme_constant_override(SNAME("margin_left"), 1);
-		add_theme_constant_override(SNAME("margin_right"), 20);
-		add_theme_constant_override(SNAME("margin_top"), 1);
-		add_theme_constant_override(SNAME("margin_bottom"), 1);
+		margin_left = 1;
+		margin_right = 20;
+		margin_top = 1;
+		margin_bottom = 1;
 	}
+	add_theme_constant_override(SNAME("margin_left"), margin_left);
+	add_theme_constant_override(SNAME("margin_right"), margin_right);
+	add_theme_constant_override(SNAME("margin_top"), margin_top);
+	add_theme_constant_override(SNAME("margin_bottom"), margin_bottom);
 }
 
 void LinkControler::gui_input(const Ref<InputEvent> &p_event) {
@@ -156,6 +160,38 @@ void LinkControler::set_link(Ref<LinkerLink> p_link) {
 	// alt + drag = move
 	// select = Graph_inspector to position to inspect
 	// ctrl + select = add to graph_search_focus
+}
+
+Vector2 LinkControler::get_connection_point_top() const {
+	Vector2 pos = get_position();
+	Vector2 size = get_size();
+	int center = pos.x + margin_left + (size.x - margin_left - margin_right) / 2;
+	int top = pos.y + margin_top;
+	return Vector2(center, top);
+}
+
+Vector2 LinkControler::get_connection_point_bottom() const {
+	Vector2 pos = get_position();
+	Vector2 size = get_size();
+	int center = pos.x + margin_left + (size.x - margin_left - margin_right) / 2;
+	int bottom = pos.y + size.y - margin_bottom;
+	return Vector2(center, bottom);
+}
+
+Vector2 LinkControler::get_connection_point_left() const {
+	Vector2 pos = get_position();
+	Vector2 size = get_size();
+	int left = pos.x + margin_left;
+	int center = pos.y + margin_top + (size.y - margin_top - margin_bottom) / 2;
+	return Vector2(left, center);
+}
+
+Vector2 LinkControler::get_connection_point_right() const {
+	Vector2 pos = get_position();
+	Vector2 size = get_size();
+	int right = pos.x + size.x - margin_right;
+	int center = pos.y + margin_top + (size.y - margin_top - margin_bottom) / 2;
+	return Vector2(right, center);
 }
 
 LinkControler::LinkControler() {
