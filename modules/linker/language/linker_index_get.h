@@ -17,7 +17,6 @@ protected:
 public:
 	virtual Variant get_placeholder_value() const override;
 	virtual Dictionary get_placeholder_info() const override;
-	virtual bool controlers_at_owners() override { return false; } // a get link may have many owners and will only have on source
 
 	virtual bool can_drop(Ref<LinkerLink> drag_link) const override;
 	virtual void drop_data(Ref<LinkerLink> dropped_link) override;

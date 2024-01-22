@@ -1,8 +1,6 @@
 #ifndef LINKER_LINK_H
 #define LINKER_LINK_H
 
-#include "../editor/link_controler.h"
-
 #include "core/io/resource.h"
 #include "editor/editor_node.h"
 #include "editor/editor_string_names.h"
@@ -29,7 +27,6 @@ protected:
 	static void _bind_methods();
 
 	HashMap<int, LinkerLinkInstance *> link_instances;
-	Vector<LinkControler *> link_contorlers;
 
 	Vector<Ref<LinkerLink>> pull_links;
 	Vector<Ref<LinkerLink>> push_links;
@@ -44,8 +41,6 @@ public:
 	void set_host(LinkerScript *p_host);
 	LinkerScript *get_host() const { return host; }
 	virtual void set_source(Ref<LinkerLink> p_source);
-	Ref<LinkerLink> get_source() const;
-	bool has_source() const { return !pull_links.is_empty(); }
 	void set_index(StringName p_index) { index = p_index; }
 	StringName get_index() const { return index; }
 	void set_owner(LinkerLink *p_link);
@@ -67,12 +62,9 @@ public:
 	virtual Dictionary get_placeholder_info() const = 0;
 	PropertyInfo get_output_info();
 	virtual String get_graph_category() const { return "graph_data"; }
-	virtual bool controlers_at_owners() = 0;
 	Variant get_drag_data() const;
 	virtual bool can_drop(Ref<LinkerLink> drag_link) const;
 	virtual void drop_data(Ref<LinkerLink> dropped_link) {}
-	void add_link_controler(LinkControler *p_controler) { link_contorlers.push_back(p_controler); }
-	Vector<LinkControler *> get_link_contorlers() const { return link_contorlers; }
 
 	virtual LinkerLinkInstance *get_instance(LinkerScriptInstance *p_host, int p_stack_size) = 0;
 	virtual void remove_instance(LinkerScriptInstance *p_host, int p_stack_size) = 0;

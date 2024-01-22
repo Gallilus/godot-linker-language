@@ -29,7 +29,6 @@ public:
 	virtual Variant get_placeholder_value() const override;
 	virtual Dictionary get_placeholder_info() const override;
 	virtual String get_graph_category() const override { return "graph_input"; }
-	virtual bool controlers_at_owners() override { return true; } // irelivant for scene_refrences as these are only hosted by scripts
 
 	void set_refrence(Node *p_ref_node, Node *p_scripted_node);
 

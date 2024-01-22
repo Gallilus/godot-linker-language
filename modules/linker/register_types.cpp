@@ -3,8 +3,6 @@
 #include "core/config/engine.h"
 #include "core/object/class_db.h"
 
-#include "editor/link_connection.h"
-#include "editor/link_controler.h"
 #include "editor/linker_editor.h"
 #include "editor/linker_editor_layout.h"
 #include "editor/linker_editor_selector.h"
@@ -17,7 +15,6 @@
 #include "language/linker_saver.h"
 #include "language/linker_scene_refrence.h"
 #include "language/linker_script.h"
-
 
 using namespace godot;
 
@@ -54,8 +51,6 @@ void initialize_linker_module(ModuleInitializationLevel p_level) {
 		LinkerEditor::register_editor();
 		GDREGISTER_CLASS(LinkerEditorSelector);
 		GDREGISTER_CLASS(LinkerEditorLayout);
-		GDREGISTER_CLASS(LinkConnection);
-		GDREGISTER_CLASS(LinkControler);
 	}
 }
 

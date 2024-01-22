@@ -1,8 +1,6 @@
 #ifndef LINK_CONTROLER_H
 #define LINK_CONTROLER_H
 
-#include "link_connection.h"
-
 #include "../language/linker_link.h"
 #include "../language/linker_script.h"
 
@@ -18,13 +16,13 @@ class LinkControler : public MarginContainer {
 	Ref<LinkerLink> link;
 
 	Button *button = nullptr;
-	LinkConnection *connection = nullptr;
 
 protected:
 	static void _bind_methods() {}
 	void _notification(int p_what);
 
 	virtual void _instantiate(); // use on_ready() and  update controle-SORT_CHILDREN
+	virtual void update_connection();
 
 	virtual void on_size_changed();
 
@@ -44,7 +42,7 @@ public:
 	int get_link_idx() const { return link->get_link_idx(); }
 
 	LinkControler();
-	~LinkControler();
+	~LinkControler() {}
 };
 
 #endif // LINK_CONTROLER_H
