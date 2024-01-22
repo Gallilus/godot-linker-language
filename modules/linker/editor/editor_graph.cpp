@@ -32,8 +32,8 @@ Error EditorGraph::add_linker_link(Ref<LinkerLink> p_linker_link) {
 	return OK;
 }
 
-HashMap<LinkerLink *, Vector2> EditorGraph::get_linker_link_positions() {
-	HashMap<LinkerLink *, Vector2> positions;
+HashMap<Ref<LinkerLink>, Vector2> EditorGraph::get_linker_link_positions() {
+	HashMap<Ref<LinkerLink>, Vector2> positions;
 	igraph_matrix_t pos_matrix;
 	igraph_matrix_init(&pos_matrix, 0, 0);
 	igraph_layout_sugiyama(&graph, &pos_matrix, NULL, NULL, NULL, 30.0, 150.0, 100, NULL);
@@ -41,7 +41,7 @@ HashMap<LinkerLink *, Vector2> EditorGraph::get_linker_link_positions() {
 	for (igraph_integer_t i = 0; i < igraph_matrix_nrow(&pos_matrix); i++) {
 		igraph_real_t y = igraph_matrix_get(&pos_matrix, i, 0);
 		igraph_real_t x = igraph_matrix_get(&pos_matrix, i, 1);
-		positions[links[i].ptr()] = Vector2(x, y);
+		positions[links[i]] = Vector2(x, y);
 	}
 
 	igraph_matrix_destroy(&pos_matrix);

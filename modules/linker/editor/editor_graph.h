@@ -21,7 +21,7 @@ protected:
 public:
 	Error add_linker_link(Ref<LinkerLink> p_linker_link);
 
-	HashMap<LinkerLink *, Vector2> get_linker_link_positions();
+	HashMap<Ref<LinkerLink>, Vector2> get_linker_link_positions();
 	void add_edge(Ref<LinkerLink> p_linker_link_from, Ref<LinkerLink> p_linker_link_to, String p_edge_category);
 
 	EditorGraph();

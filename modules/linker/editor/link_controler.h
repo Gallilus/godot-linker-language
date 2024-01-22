@@ -4,21 +4,24 @@
 #include "../language/linker_link.h"
 #include "../language/linker_script.h"
 
-#include "link_connection.h"
-
 #include "editor/editor_node.h"
 #include "scene/gui/button.h"
 #include "scene/gui/control.h"
 #include "scene/gui/margin_container.h"
 #include "scene/main/viewport.h"
 
+class LinkerEditorLayout;
+class LinkConnection;
+
 class LinkControler : public MarginContainer {
 	GDCLASS(LinkControler, MarginContainer);
+
+	LinkerEditorLayout *layout = nullptr;
+	LinkConnection *connection = nullptr;
 
 	Ref<LinkerLink> link;
 
 	Button *button = nullptr;
-	LinkConnection *connection = nullptr;
 
 protected:
 	static void _bind_methods() {}
@@ -35,6 +38,8 @@ protected:
 	void _set_margin(HorizontalAlignment p_align);
 
 public:
+	void set_layout(LinkerEditorLayout *p_layout) { layout = p_layout; }
+
 	virtual void gui_input(const Ref<InputEvent> &p_event) override;
 
 	virtual Variant get_drag_data(const Point2 &p_point) override;

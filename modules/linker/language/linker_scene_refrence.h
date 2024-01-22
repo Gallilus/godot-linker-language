@@ -29,6 +29,7 @@ public:
 	virtual Variant get_placeholder_value() const override;
 	virtual Dictionary get_placeholder_info() const override;
 	virtual String get_graph_category() const override { return "graph_input"; }
+	virtual bool controler_at_source() const override { return false; }
 
 	void set_refrence(Node *p_ref_node, Node *p_scripted_node);
 

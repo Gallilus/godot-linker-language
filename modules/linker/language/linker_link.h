@@ -65,6 +65,7 @@ public:
 	virtual Dictionary get_placeholder_info() const = 0;
 	PropertyInfo get_output_info();
 	virtual String get_graph_category() const { return "graph_data"; }
+	virtual bool controler_at_source() const = 0;
 	Variant get_drag_data() const;
 	virtual bool can_drop(Ref<LinkerLink> drag_link) const;
 	virtual void drop_data(Ref<LinkerLink> dropped_link) {}

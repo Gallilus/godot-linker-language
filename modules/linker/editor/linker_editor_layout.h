@@ -22,12 +22,13 @@
 #include "scene/main/window.h"
 
 class LinkControler;
+class EditorGraph;
 
 class LinkerEditorLayout : public Control {
 	GDCLASS(LinkerEditorLayout, Control);
 	Ref<LinkerScript> script;
 
-	HashMap<LinkerLink *, LinkControler *> link_contorlers;
+	HashMap<Ref<LinkerLink>, LinkControler *> link_contorlers;
 
 	bool updating_members = true;
 	VBoxContainer *members_section = nullptr;
@@ -37,7 +38,7 @@ class LinkerEditorLayout : public Control {
 protected:
 	static void _bind_methods();
 
-	LinkControler *get_linker_controler(LinkerLink *p_link);
+	LinkControler *make_link_controler(Ref<LinkerLink> p_link);
 
 public:
 	struct DropData {
@@ -56,6 +57,9 @@ public:
 	virtual void gui_input(const Ref<InputEvent> &p_event) override;
 	virtual bool can_drop_data(const Point2 &p_point, const Variant &p_data) const override;
 	virtual void drop_data(const Point2 &p_point, const Variant &p_data) override;
+
+	LinkControler *get_link_source_controler(Ref<LinkerLink> p_link);
+	LinkControler *get_link_controler(Ref<LinkerLink> p_link);
 
 	void update_graph();
 

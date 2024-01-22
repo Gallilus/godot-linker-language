@@ -1,4 +1,6 @@
 #include "link_controler.h"
+#include "link_connection.h"
+#include "linker_editor_layout.h"
 
 void LinkControler::_notification(int p_what) {
 	switch (p_what) {
@@ -34,7 +36,7 @@ void LinkControler::update_connection() {
 	if (link->has_source()) {
 		connection = memnew(LinkConnection);
 		get_parent()->add_child(connection);
-		//	connection->set_start(link->get_source());
+		connection->set_start(layout->get_link_source_controler(link));
 		connection->set_end(this);
 	}
 }

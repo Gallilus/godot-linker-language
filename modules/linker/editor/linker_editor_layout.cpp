@@ -1,4 +1,5 @@
 #include "linker_editor_layout.h"
+#include "editor_graph.h"
 #include "link_controler.h"
 
 static Node *_find_script_node(Node *p_edited_scene, Node *p_current_node, const Ref<Script> &script) {
@@ -34,14 +35,10 @@ void LinkerEditorLayout::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("inspect_links_request", PropertyInfo(Variant::ARRAY, "links"), PropertyInfo(Variant::VECTOR2, "glob_pos")));
 }
 
-LinkControler *LinkerEditorLayout::get_linker_controler(LinkerLink *p_link) {
-	if (link_contorlers.has(p_link)) {
-		if (VariantUtilityFunctions::is_instance_valid(link_contorlers[p_link])) {
-			return link_contorlers[p_link];
-		}
-	}
+LinkControler *LinkerEditorLayout::make_link_controler(Ref<LinkerLink> p_link) {
 	LinkControler *controler = memnew(LinkControler);
-	controler->set_link(Ref<LinkerLink>(p_link));
+	controler->set_layout(this);
+	controler->set_link(p_link);
 	add_child(controler);
 	link_contorlers[p_link] = controler;
 	return controler;
@@ -184,6 +181,30 @@ void LinkerEditorLayout::drop_data(const Point2 &p_point, const Variant &p_data)
 	}
 }
 
+LinkControler *LinkerEditorLayout::get_link_source_controler(Ref<LinkerLink> p_link) {
+	if (link_contorlers.has(p_link->get_source())) {
+		if (VariantUtilityFunctions::is_instance_valid(link_contorlers[p_link])) {
+			return link_contorlers[p_link->get_source()];
+		}
+	}
+	return nullptr;
+}
+
+LinkControler *LinkerEditorLayout::get_link_controler(Ref<LinkerLink> p_link) {
+	if (link_contorlers.has(p_link)) {
+		if (VariantUtilityFunctions::is_instance_valid(link_contorlers[p_link])) {
+			return link_contorlers[p_link];
+		}
+	}
+	if (p_link->controler_at_source()) {
+		LinkControler *controler = get_link_source_controler(p_link);
+		if (controler) {
+			return controler;
+		}
+	}
+	return make_link_controler(p_link);
+}
+
 void LinkerEditorLayout::update_graph() {
 	EditorGraph graph;
 	if (!script.is_valid()) {
@@ -224,10 +245,10 @@ void LinkerEditorLayout::update_graph() {
 		}
 	}
 
-	for (const KeyValue<LinkerLink *, Vector2> &E : graph.get_linker_link_positions()) {
-		LinkerLink *link = E.key;
-		if (link) {
-			LinkControler *controler = get_linker_controler(link);
+	for (const KeyValue<Ref<LinkerLink>, Vector2> &E : graph.get_linker_link_positions()) {
+		Ref<LinkerLink> link = E.key;
+		if (link.is_valid()) {
+			LinkControler *controler = get_link_controler(link);
 			controler->set_position(E.value);
 		}
 	}
