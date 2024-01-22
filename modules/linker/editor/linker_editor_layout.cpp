@@ -1,4 +1,5 @@
 #include "linker_editor_layout.h"
+#include "link_controler.h"
 
 static Node *_find_script_node(Node *p_edited_scene, Node *p_current_node, const Ref<Script> &script) {
 	if (p_edited_scene != p_current_node && p_current_node->get_owner() != p_edited_scene) {

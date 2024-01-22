@@ -28,6 +28,7 @@ protected:
 
 	HashMap<int, LinkerLinkInstance *> link_instances;
 
+	Ref<LinkerLink> source;
 	Vector<Ref<LinkerLink>> pull_links;
 	Vector<Ref<LinkerLink>> push_links;
 
@@ -41,6 +42,8 @@ public:
 	void set_host(LinkerScript *p_host);
 	LinkerScript *get_host() const { return host; }
 	virtual void set_source(Ref<LinkerLink> p_source);
+	bool has_source() const { return !source.is_null(); }
+	Ref<LinkerLink> get_source() const { return source; }
 	void set_index(StringName p_index) { index = p_index; }
 	StringName get_index() const { return index; }
 	void set_owner(LinkerLink *p_link);

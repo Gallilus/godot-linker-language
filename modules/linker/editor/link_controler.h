@@ -4,6 +4,8 @@
 #include "../language/linker_link.h"
 #include "../language/linker_script.h"
 
+#include "link_connection.h"
+
 #include "editor/editor_node.h"
 #include "scene/gui/button.h"
 #include "scene/gui/control.h"
@@ -16,6 +18,7 @@ class LinkControler : public MarginContainer {
 	Ref<LinkerLink> link;
 
 	Button *button = nullptr;
+	LinkConnection *connection = nullptr;
 
 protected:
 	static void _bind_methods() {}
@@ -42,7 +45,7 @@ public:
 	int get_link_idx() const { return link->get_link_idx(); }
 
 	LinkControler();
-	~LinkControler() {}
+	~LinkControler();
 };
 
 #endif // LINK_CONTROLER_H

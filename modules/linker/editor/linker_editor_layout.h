@@ -5,8 +5,6 @@
 #include "../language/linker_language.h"
 #include "../language/linker_scene_refrence.h"
 #include "../language/linker_script.h"
-#include "editor_graph.h"
-#include "link_controler.h"
 
 #include "core/variant/variant_utility.h"
 #include "editor/editor_interface.h"
@@ -22,6 +20,8 @@
 #include "scene/gui/texture_rect.h"
 #include "scene/gui/tree.h"
 #include "scene/main/window.h"
+
+class LinkControler;
 
 class LinkerEditorLayout : public Control {
 	GDCLASS(LinkerEditorLayout, Control);

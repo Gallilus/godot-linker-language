@@ -3,6 +3,8 @@
 #include "core/config/engine.h"
 #include "core/object/class_db.h"
 
+#include "editor/link_connection.h"
+#include "editor/link_controler.h"
 #include "editor/linker_editor.h"
 #include "editor/linker_editor_layout.h"
 #include "editor/linker_editor_selector.h"
@@ -49,6 +51,8 @@ void initialize_linker_module(ModuleInitializationLevel p_level) {
 	}
 	if (p_level == GDEXTENSION_INITIALIZATION_EDITOR) {
 		LinkerEditor::register_editor();
+		GDREGISTER_CLASS(LinkConnection);
+		GDREGISTER_CLASS(LinkControler);
 		GDREGISTER_CLASS(LinkerEditorSelector);
 		GDREGISTER_CLASS(LinkerEditorLayout);
 	}
