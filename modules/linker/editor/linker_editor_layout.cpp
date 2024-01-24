@@ -1,5 +1,6 @@
 #include "linker_editor_layout.h"
 #include "editor_graph.h"
+#include "link_connection.h"
 #include "link_controler.h"
 
 static Node *_find_script_node(Node *p_edited_scene, Node *p_current_node, const Ref<Script> &script) {
@@ -39,7 +40,7 @@ LinkControler *LinkerEditorLayout::make_link_controler(Ref<LinkerLink> p_link) {
 	LinkControler *controler = memnew(LinkControler);
 	link_contorlers[p_link] = controler;
 	controler->set_link(p_link);
-	controler->set_layout(this);
+	// controler->set_layout(this);
 	add_child(controler);
 	return controler;
 }
@@ -216,7 +217,7 @@ void LinkerEditorLayout::update_graph() {
 	script->for_every_link(callable_mp(&graph, &EditorGraph::add_vertex));
 	script->for_every_pulled(callable_mp(&graph, &EditorGraph::add_pull_edge));
 	script->for_every_sequenced(callable_mp(&graph, &EditorGraph::add_sequence_edge));
-	
+
 	for (const KeyValue<Ref<LinkerLink>, Vector2> &E : graph.get_linker_link_positions()) {
 		Ref<LinkerLink> link = E.key;
 		if (link.is_valid()) {
@@ -224,6 +225,33 @@ void LinkerEditorLayout::update_graph() {
 			controler->set_position(E.value);
 		}
 	}
+
+	for (int i = 0; i < link_connections.size(); i++) {
+		if (!link_connections[i]) {
+			continue;
+		}
+		//	link_connections[i]->queue_free();
+	}
+	script->for_every_pulled(callable_mp(this, &LinkerEditorLayout::add_pull_connection));
+	script->for_every_sequenced(callable_mp(this, &LinkerEditorLayout::add_sequence_connection));
+}
+
+void LinkerEditorLayout::add_pull_connection(Ref<LinkerLink> pulled_link, Ref<LinkerLink> owner_link) {
+	LinkConnection *connection = memnew(LinkConnection);
+	add_child(connection);
+	connection->connection_type = LinkConnection::CONNECTION_TYPE_SOURCE;
+	connection->set_start(get_link_controler(pulled_link));
+	connection->set_end(get_link_controler(owner_link));
+	link_connections.push_back(connection);
+}
+
+void LinkerEditorLayout::add_sequence_connection(Ref<LinkerLink> source_link, Ref<LinkerLink> destination_link) {
+	LinkConnection *connection = memnew(LinkConnection);
+	add_child(connection);
+	connection->connection_type = LinkConnection::CONNECTION_TYPE_SEQUENCE;
+	connection->set_start(get_link_controler(source_link));
+	connection->set_end(get_link_controler(destination_link));
+	link_connections.push_back(connection);
 }
 
 LinkerEditorLayout::LinkerEditorLayout() {

@@ -22,6 +22,7 @@
 #include "scene/main/window.h"
 
 class LinkControler;
+class LinkConnection;
 class EditorGraph;
 
 class LinkerEditorLayout : public Control {
@@ -29,6 +30,7 @@ class LinkerEditorLayout : public Control {
 	Ref<LinkerScript> script;
 
 	HashMap<Ref<LinkerLink>, LinkControler *> link_contorlers;
+	Vector<LinkConnection *> link_connections;
 
 	bool updating_members = true;
 	VBoxContainer *members_section = nullptr;
@@ -62,6 +64,8 @@ public:
 	LinkControler *get_link_controler(Ref<LinkerLink> p_link);
 
 	void update_graph();
+	void add_pull_connection(Ref<LinkerLink> pulled_link, Ref<LinkerLink> owner_link);
+	void add_sequence_connection(Ref<LinkerLink> source_link, Ref<LinkerLink> destination_link);
 
 	LinkerEditorLayout();
 	~LinkerEditorLayout() {}

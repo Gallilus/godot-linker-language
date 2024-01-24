@@ -16,10 +16,10 @@ class LinkConnection;
 class LinkControler : public MarginContainer {
 	GDCLASS(LinkControler, MarginContainer);
 
-	LinkerEditorLayout *layout = nullptr;
-	LinkConnection *source_connection = nullptr;
-	LinkConnection *sequence_connection = nullptr;
-	LinkConnection *refrence_connection = nullptr;
+	// LinkerEditorLayout *layout = nullptr;
+	// LinkConnection *source_connection = nullptr;
+	// LinkConnection *sequence_connection = nullptr;
+	// LinkConnection *refrence_connection = nullptr;
 
 	Ref<LinkerLink> link;
 
@@ -44,7 +44,7 @@ protected:
 	void _set_margin(HorizontalAlignment p_align);
 
 public:
-	void set_layout(LinkerEditorLayout *p_layout) { layout = p_layout; }
+	// void set_layout(LinkerEditorLayout *p_layout) { layout = p_layout; }
 
 	virtual void gui_input(const Ref<InputEvent> &p_event) override;
 

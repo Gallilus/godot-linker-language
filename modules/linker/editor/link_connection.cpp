@@ -48,7 +48,8 @@ void LinkConnection::set_start(LinkControler *p_source) {
 		return;
 	}
 	start = p_source;
-	start->connect("item_rect_changed", callable_mp(this, &LinkConnection::_update_connection));
+	start->connect("item_rect_changed", callable_mp(this, &LinkConnection::_update_connection), CONNECT_DEFERRED);
+	// start->connect("free", callable_mp(this, &Node::queue_free));
 	if (end) {
 		_update_connection();
 	}
@@ -58,8 +59,8 @@ void LinkConnection::set_end(LinkControler *p_target) {
 		return;
 	}
 	end = p_target;
-	end->connect("item_rect_changed", callable_mp(this, &LinkConnection::_update_connection));
-	// select_virtual_method->connect("id_pressed", callable_mp(this, &MembersSection::_on_virtual_method_selected));
+	end->connect("item_rect_changed", callable_mp(this, &LinkConnection::_update_connection), CONNECT_DEFERRED);
+	// end->connect("free", callable_mp(this, &Node::queue_free));
 	if (start) {
 		_update_connection();
 	}
