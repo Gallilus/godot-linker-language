@@ -20,6 +20,14 @@ protected:
 	void _update_connection();
 
 public:
+	enum ConnectioType {
+		CONNECTION_TYPE_SOURCE,
+		CONNECTION_TYPE_SEQUENCE,
+		CONNECTION_TYPE_REFRENCE,
+	};
+
+	ConnectioType connection_type;
+
 	void set_start(LinkControler *p_source);
 	void set_end(LinkControler *p_target);
 

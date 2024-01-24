@@ -17,7 +17,9 @@ class LinkControler : public MarginContainer {
 	GDCLASS(LinkControler, MarginContainer);
 
 	LinkerEditorLayout *layout = nullptr;
-	LinkConnection *connection = nullptr;
+	LinkConnection *source_connection = nullptr;
+	LinkConnection *sequence_connection = nullptr;
+	LinkConnection *refrence_connection = nullptr;
 
 	Ref<LinkerLink> link;
 
@@ -32,8 +34,7 @@ protected:
 	static void _bind_methods() {}
 	void _notification(int p_what);
 
-	virtual void _instantiate(); // use on_ready() and  update controle-SORT_CHILDREN
-	virtual void update_connection();
+	virtual void _instantiate();
 
 	virtual void on_size_changed();
 

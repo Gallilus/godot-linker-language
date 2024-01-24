@@ -30,14 +30,27 @@ void LinkControler::_instantiate() {
 	button->set_mouse_filter(Control::MOUSE_FILTER_PASS);
 
 	_set_margin(_get_icon_h_alignement(link.ptr()));
-}
 
-void LinkControler::update_connection() {
 	if (link->has_source()) {
-		connection = memnew(LinkConnection);
-		get_parent()->add_child(connection);
-		connection->set_start(layout->get_link_source_controler(link));
-		connection->set_end(this);
+		source_connection = memnew(LinkConnection);
+		layout->add_child(source_connection);
+		source_connection->connection_type = LinkConnection::CONNECTION_TYPE_SOURCE;
+		source_connection->set_start(layout->get_link_source_controler(link));
+		source_connection->set_end(this);
+	}
+	LinkControler *last_controler = this;
+	for (int i = 0; i < link->get_push_link_refs().size(); i++) {
+		Ref<LinkerLink> push_link = link->get_push_link_refs()[i];
+		LinkControler *controler = layout->get_link_controler(push_link);
+		if (controler) {
+			LinkConnection *connection = memnew(LinkConnection);
+			layout->add_child(connection);
+			connection->connection_type = LinkConnection::CONNECTION_TYPE_SEQUENCE;
+			connection->set_start(last_controler);
+			connection->set_end(controler);
+			sequence_connection = connection;
+			last_controler = controler;
+		}
 	}
 }
 
@@ -94,8 +107,8 @@ void LinkControler::_set_margin(HorizontalAlignment p_align) {
 		margin_bottom = 1;
 	}
 	add_theme_constant_override(SNAME("margin_left"), margin_left);
-	add_theme_constant_override(SNAME("margin_right"), margin_right);
 	add_theme_constant_override(SNAME("margin_top"), margin_top);
+	add_theme_constant_override(SNAME("margin_right"), margin_right);
 	add_theme_constant_override(SNAME("margin_bottom"), margin_bottom);
 }
 
@@ -153,6 +166,7 @@ void LinkControler::drop_data(const Point2 &p_point, const Variant &p_data) {
 
 void LinkControler::set_link(Ref<LinkerLink> p_link) {
 	link = p_link;
+
 	link->connect("removed_from_script", Callable(this, "queue_free"));
 	// connect signals, selected, etc.
 	// dragging = gostline
@@ -201,7 +215,13 @@ LinkControler::LinkControler() {
 }
 
 LinkControler::~LinkControler() {
-	if (connection) {
-		connection->queue_free();
+	if (source_connection) {
+		source_connection->queue_free();
+	}
+	if (sequence_connection) {
+		sequence_connection->queue_free();
+	}
+	if (refrence_connection) {
+		refrence_connection->queue_free();
 	}
 }

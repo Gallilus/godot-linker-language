@@ -37,10 +37,10 @@ void LinkerEditorLayout::_bind_methods() {
 
 LinkControler *LinkerEditorLayout::make_link_controler(Ref<LinkerLink> p_link) {
 	LinkControler *controler = memnew(LinkControler);
-	controler->set_layout(this);
-	controler->set_link(p_link);
-	add_child(controler);
 	link_contorlers[p_link] = controler;
+	controler->set_link(p_link);
+	controler->set_layout(this);
+	add_child(controler);
 	return controler;
 }
 
@@ -182,10 +182,8 @@ void LinkerEditorLayout::drop_data(const Point2 &p_point, const Variant &p_data)
 }
 
 LinkControler *LinkerEditorLayout::get_link_source_controler(Ref<LinkerLink> p_link) {
-	if (link_contorlers.has(p_link->get_source())) {
-		if (VariantUtilityFunctions::is_instance_valid(link_contorlers[p_link])) {
-			return link_contorlers[p_link->get_source()];
-		}
+	if (p_link->has_source()) {
+		return get_link_controler(p_link->get_source());
 	}
 	return nullptr;
 }
@@ -197,9 +195,13 @@ LinkControler *LinkerEditorLayout::get_link_controler(Ref<LinkerLink> p_link) {
 		}
 	}
 	if (p_link->controler_at_source()) {
-		LinkControler *controler = get_link_source_controler(p_link);
-		if (controler) {
-			return controler;
+		for (const KeyValue<Ref<LinkerLink>, LinkControler *> &E : link_contorlers) {
+			if (E.key.is_valid() && E.key.ptr() == p_link.ptr()) {
+				if (VariantUtilityFunctions::is_instance_valid(E.value)) {
+					link_contorlers[p_link] = E.value;
+					return link_contorlers[p_link];
+				}
+			}
 		}
 	}
 	return make_link_controler(p_link);
