@@ -6,6 +6,31 @@ void LinkControler::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_READY: {
 			_instantiate();
+			queue_redraw();
+			break;
+		}
+		case NOTIFICATION_DRAG_BEGIN: {
+			dragging = mouse_inside;
+			queue_redraw();
+			break;
+		}
+		case NOTIFICATION_DRAG_END: {
+			dragging = false;
+			queue_redraw();
+			break;
+		}
+		case NOTIFICATION_MOUSE_ENTER: {
+			mouse_inside = true;
+			queue_redraw();
+			break;
+		}
+		case NOTIFICATION_MOUSE_EXIT: {
+			mouse_inside = false;
+			queue_redraw();
+			break;
+		}
+		case NOTIFICATION_DRAW: {
+			_draw_debug();
 			break;
 		}
 	}
@@ -88,6 +113,12 @@ void LinkControler::_set_margin(HorizontalAlignment p_align) {
 	add_theme_constant_override(SNAME("margin_top"), margin_top);
 	add_theme_constant_override(SNAME("margin_right"), margin_right);
 	add_theme_constant_override(SNAME("margin_bottom"), margin_bottom);
+}
+
+void LinkControler::_draw_debug() {
+	if (debug_drag_and_drop && (mouse_inside || dragging)) {
+		draw_rect(Rect2(Vector2(0.0, 0.0), get_size()), Color(0.5, 1, 1, 0.3), false, 1.0);
+	}
 }
 
 void LinkControler::gui_input(const Ref<InputEvent> &p_event) {

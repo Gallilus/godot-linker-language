@@ -16,10 +16,9 @@ class LinkConnection;
 class LinkControler : public MarginContainer {
 	GDCLASS(LinkControler, MarginContainer);
 
-	// LinkerEditorLayout *layout = nullptr;
-	// LinkConnection *source_connection = nullptr;
-	// LinkConnection *sequence_connection = nullptr;
-	// LinkConnection *refrence_connection = nullptr;
+	bool debug_drag_and_drop = true;
+	bool mouse_inside = false;
+	bool dragging = false;
 
 	Ref<LinkerLink> link;
 
@@ -42,6 +41,8 @@ protected:
 	HorizontalAlignment _get_icon_h_alignement(LinkerLink *p_link) const;
 	String _get_text(LinkerLink *p_link) const;
 	void _set_margin(HorizontalAlignment p_align);
+
+	void _draw_debug();
 
 public:
 	// void set_layout(LinkerEditorLayout *p_layout) { layout = p_layout; }
