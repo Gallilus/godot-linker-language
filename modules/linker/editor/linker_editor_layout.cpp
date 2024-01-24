@@ -36,13 +36,38 @@ void LinkerEditorLayout::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("inspect_links_request", PropertyInfo(Variant::ARRAY, "links"), PropertyInfo(Variant::VECTOR2, "glob_pos")));
 }
 
+void LinkerEditorLayout::_store_connection(Ref<LinkerLink> p_source, Ref<LinkerLink> p_destination, LinkConnection *p_connection) {
+	if (!connections_map.has(p_source)) {
+		connections_map[p_source] = HashMap<Ref<LinkerLink>, LinkConnection *>();
+	} else if (connections_map[p_source].has(p_destination)) {
+		connections_map[p_source][p_destination]->queue_free();
+	}
+	connections_map[p_source][p_destination] = p_connection;
+}
+
+bool LinkerEditorLayout::_has_connection(Ref<LinkerLink> p_source, Ref<LinkerLink> p_destination) const {
+	if (connections_map.has(p_source)) {
+		if (connections_map[p_source].has(p_destination)) {
+			return bool(connections_map[p_source][p_destination]);
+		}
+	}
+	return false;
+}
+
 LinkControler *LinkerEditorLayout::make_link_controler(Ref<LinkerLink> p_link) {
 	LinkControler *controler = memnew(LinkControler);
 	link_contorlers[p_link] = controler;
 	controler->set_link(p_link);
-	// controler->set_layout(this);
 	add_child(controler);
 	return controler;
+}
+
+LinkConnection *LinkerEditorLayout::make_link_connection(Ref<LinkerLink> p_source, Ref<LinkerLink> p_destination) {
+	LinkConnection *connection = memnew(LinkConnection);
+	add_child(connection);
+	connection->set_start(get_link_controler(p_source));
+	connection->set_end(get_link_controler(p_destination));
+	return connection;
 }
 
 void LinkerEditorLayout::gui_input(const Ref<InputEvent> &p_event) {
@@ -210,13 +235,14 @@ LinkControler *LinkerEditorLayout::get_link_controler(Ref<LinkerLink> p_link) {
 
 void LinkerEditorLayout::update_graph() {
 	EditorGraph graph;
+	_graph = &graph;
 	if (!script.is_valid()) {
 		return;
 	}
 
-	script->for_every_link(callable_mp(&graph, &EditorGraph::add_vertex));
-	script->for_every_pulled(callable_mp(&graph, &EditorGraph::add_pull_edge));
-	script->for_every_sequenced(callable_mp(&graph, &EditorGraph::add_sequence_edge));
+	script->for_every_link(callable_mp(this, &LinkerEditorLayout::add_link));
+	script->for_every_pulled(callable_mp(this, &LinkerEditorLayout::add_pull_connection));
+	script->for_every_sequenced(callable_mp(this, &LinkerEditorLayout::add_sequence_connection));
 
 	for (const KeyValue<Ref<LinkerLink>, Vector2> &E : graph.get_linker_link_positions()) {
 		Ref<LinkerLink> link = E.key;
@@ -225,33 +251,29 @@ void LinkerEditorLayout::update_graph() {
 			controler->set_position(E.value);
 		}
 	}
+}
 
-	for (int i = 0; i < link_connections.size(); i++) {
-		if (!link_connections[i]) {
-			continue;
-		}
-		//	link_connections[i]->queue_free();
-	}
-	script->for_every_pulled(callable_mp(this, &LinkerEditorLayout::add_pull_connection));
-	script->for_every_sequenced(callable_mp(this, &LinkerEditorLayout::add_sequence_connection));
+void LinkerEditorLayout::add_link(Ref<LinkerLink> p_link) {
+	_graph->add_vertex(p_link);
+	get_link_controler(p_link); // create the controler
 }
 
 void LinkerEditorLayout::add_pull_connection(Ref<LinkerLink> pulled_link, Ref<LinkerLink> owner_link) {
-	LinkConnection *connection = memnew(LinkConnection);
-	add_child(connection);
-	connection->connection_type = LinkConnection::CONNECTION_TYPE_SOURCE;
-	connection->set_start(get_link_controler(pulled_link));
-	connection->set_end(get_link_controler(owner_link));
-	link_connections.push_back(connection);
+	_graph->add_pull_edge(pulled_link, owner_link);
+	if (!_has_connection(pulled_link, owner_link)) {
+		LinkConnection *connection = make_link_connection(pulled_link, owner_link);
+		connection->connection_type = LinkConnection::CONNECTION_TYPE_SOURCE;
+		_store_connection(pulled_link, owner_link, connection);
+	}
 }
 
 void LinkerEditorLayout::add_sequence_connection(Ref<LinkerLink> source_link, Ref<LinkerLink> destination_link) {
-	LinkConnection *connection = memnew(LinkConnection);
-	add_child(connection);
-	connection->connection_type = LinkConnection::CONNECTION_TYPE_SEQUENCE;
-	connection->set_start(get_link_controler(source_link));
-	connection->set_end(get_link_controler(destination_link));
-	link_connections.push_back(connection);
+	_graph->add_sequence_edge(source_link, destination_link);
+	if (!_has_connection(source_link, destination_link)) {
+		LinkConnection *connection = make_link_connection(source_link, destination_link);
+		connection->connection_type = LinkConnection::CONNECTION_TYPE_SEQUENCE;
+		_store_connection(source_link, destination_link, connection);
+	}
 }
 
 LinkerEditorLayout::LinkerEditorLayout() {

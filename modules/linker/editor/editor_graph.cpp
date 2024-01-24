@@ -15,6 +15,10 @@ int EditorGraph::get_vertex_id(Ref<LinkerLink> p_linker_link) const {
 	return -1;
 }
 
+void EditorGraph::clear() {
+	igraph_error_t err = igraph_empty(&graph, 0, IGRAPH_DIRECTED);
+}
+
 HashMap<Ref<LinkerLink>, Vector2> EditorGraph::get_linker_link_positions() {
 	HashMap<Ref<LinkerLink>, Vector2> positions;
 	igraph_matrix_t pos_matrix;

@@ -28,9 +28,11 @@ class EditorGraph;
 class LinkerEditorLayout : public Control {
 	GDCLASS(LinkerEditorLayout, Control);
 	Ref<LinkerScript> script;
+	EditorGraph *_graph = nullptr;
 
 	HashMap<Ref<LinkerLink>, LinkControler *> link_contorlers;
 	Vector<LinkConnection *> link_connections;
+	HashMap<Ref<LinkerLink>, HashMap<Ref<LinkerLink>, LinkConnection *>> connections_map;
 
 	bool updating_members = true;
 	VBoxContainer *members_section = nullptr;
@@ -40,7 +42,11 @@ class LinkerEditorLayout : public Control {
 protected:
 	static void _bind_methods();
 
+	void _store_connection(Ref<LinkerLink> p_source, Ref<LinkerLink> p_destination, LinkConnection *p_connection);
+	bool _has_connection(Ref<LinkerLink> p_source, Ref<LinkerLink> p_destination) const;
+
 	LinkControler *make_link_controler(Ref<LinkerLink> p_link);
+	LinkConnection *make_link_connection(Ref<LinkerLink> p_source, Ref<LinkerLink> p_destination);
 
 public:
 	struct DropData {
@@ -64,6 +70,7 @@ public:
 	LinkControler *get_link_controler(Ref<LinkerLink> p_link);
 
 	void update_graph();
+	void add_link(Ref<LinkerLink> p_link);
 	void add_pull_connection(Ref<LinkerLink> pulled_link, Ref<LinkerLink> owner_link);
 	void add_sequence_connection(Ref<LinkerLink> source_link, Ref<LinkerLink> destination_link);
 

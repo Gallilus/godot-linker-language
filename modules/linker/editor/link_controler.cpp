@@ -30,28 +30,6 @@ void LinkControler::_instantiate() {
 	button->set_mouse_filter(Control::MOUSE_FILTER_PASS);
 
 	_set_margin(_get_icon_h_alignement(link.ptr()));
-
-	// if (link->has_source()) {
-	// 	source_connection = memnew(LinkConnection);
-	// 	layout->add_child(source_connection);
-	// 	source_connection->connection_type = LinkConnection::CONNECTION_TYPE_SOURCE;
-	// 	source_connection->set_start(layout->get_link_source_controler(link));
-	// 	source_connection->set_end(this);
-	// }
-	// LinkControler *last_controler = this;
-	// for (int i = 0; i < link->get_push_link_refs().size(); i++) {
-	// 	Ref<LinkerLink> push_link = link->get_push_link_refs()[i];
-	// 	LinkControler *controler = layout->get_link_controler(push_link);
-	// 	if (controler) {
-	// 		LinkConnection *connection = memnew(LinkConnection);
-	// 		layout->add_child(connection);
-	// 		connection->connection_type = LinkConnection::CONNECTION_TYPE_SEQUENCE;
-	// 		connection->set_start(last_controler);
-	// 		connection->set_end(controler);
-	// 		sequence_connection = connection;
-	// 		last_controler = controler;
-	// 	}
-	// }
 }
 
 void LinkControler::on_size_changed() {
@@ -215,13 +193,4 @@ LinkControler::LinkControler() {
 }
 
 LinkControler::~LinkControler() {
-	// if (source_connection) {
-	// 	source_connection->queue_free();
-	// }
-	// if (sequence_connection) {
-	// 	sequence_connection->queue_free();
-	// }
-	// if (refrence_connection) {
-	// 	refrence_connection->queue_free();
-	// }
 }

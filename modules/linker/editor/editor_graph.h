@@ -19,6 +19,7 @@ protected:
 	int get_vertex_id(Ref<LinkerLink> p_linker_link) const;
 
 public:
+	void clear();
 	HashMap<Ref<LinkerLink>, Vector2> get_linker_link_positions();
 	void add_vertex(Ref<LinkerLink> p_link);
 	void add_edge(Ref<LinkerLink> p_link_from, Ref<LinkerLink> p_link_to, String p_edge_category);
