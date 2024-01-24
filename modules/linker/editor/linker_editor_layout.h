@@ -31,7 +31,6 @@ class LinkerEditorLayout : public Control {
 	EditorGraph *_graph = nullptr;
 
 	HashMap<Ref<LinkerLink>, LinkControler *> link_contorlers;
-	Vector<LinkConnection *> link_connections;
 	HashMap<Ref<LinkerLink>, HashMap<Ref<LinkerLink>, LinkConnection *>> connections_map;
 
 	bool updating_members = true;

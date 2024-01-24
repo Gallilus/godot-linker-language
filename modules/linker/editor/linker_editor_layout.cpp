@@ -240,6 +240,23 @@ void LinkerEditorLayout::update_graph() {
 		return;
 	}
 
+	{ // clear layout
+		for (const KeyValue<Ref<LinkerLink>, HashMap<Ref<LinkerLink>, LinkConnection *>> &E : connections_map) {
+		for (const KeyValue<Ref<LinkerLink>, LinkConnection *> &F : E.value) {
+			if (F.value) {
+				F.value->queue_free();
+			}
+		}
+		}
+		connections_map.clear();
+		for (const KeyValue<Ref<LinkerLink>, LinkControler *> &E : link_contorlers) {
+			if (E.value) {
+				E.value->queue_free();
+			}
+		}
+		link_contorlers.clear();
+	}
+
 	script->for_every_link(callable_mp(this, &LinkerEditorLayout::add_link));
 	script->for_every_pulled(callable_mp(this, &LinkerEditorLayout::add_pull_connection));
 	script->for_every_sequenced(callable_mp(this, &LinkerEditorLayout::add_sequence_connection));
