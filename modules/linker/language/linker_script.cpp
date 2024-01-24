@@ -605,6 +605,38 @@ int LinkerScript::get_link_idx(const LinkerLink *p_link) const {
 	return -1;
 }
 
+void LinkerScript::for_every_link(const Callable &p_callable) const {
+	for (int i = 0; i < links.size(); i++) {
+		p_callable.call(links[i]);
+	}
+}
+
+void LinkerScript::for_every_pulled(const Callable &p_callable) const {
+	for (int i = 0; i < links.size(); i++) {
+		if (links[i].is_valid()) {
+			for (int j = 0; j < links[i]->get_pull_link_refs().size(); j++) {
+				if (links[i]->get_pull_link_refs()[j].is_valid()) {
+					p_callable.call(links[i]->get_pull_link_refs()[j], links[i]);
+				}
+			}
+		}
+	}
+}
+
+void LinkerScript::for_every_sequenced(const Callable &p_callable) const {
+	for (int i = 0; i < links.size(); i++) {
+		if (links[i].is_valid()) {
+			Ref<LinkerLink> last_sequenced = links[i];
+			for (int j = 0; j < links[i]->get_push_link_refs().size(); j++) {
+				if (links[i]->get_push_link_refs()[j].is_valid()) {
+					p_callable.call(last_sequenced, links[i]->get_push_link_refs()[j]);
+					last_sequenced = links[i]->get_push_link_refs()[j];
+				}
+			}
+		}
+	}
+}
+
 LinkerScript::LinkerScript() :
 		script_list(this) {
 	{

@@ -213,40 +213,10 @@ void LinkerEditorLayout::update_graph() {
 		return;
 	}
 
-	TypedArray<LinkerLink> links = script->get_links();
-
-	// add vertices
-	for (int i = 0; i < links.size(); i++) {
-		LinkerLink *link = Object::cast_to<LinkerLink>(links[i]);
-		if (!link) {
-			continue;
-		}
-		graph.add_linker_link(Ref<LinkerLink>(link));
-	}
-
-	// add edges
-	for (int i = 0; i < links.size(); i++) {
-		LinkerLink *link = Object::cast_to<LinkerLink>(links[i]);
-		if (!link) {
-			continue;
-		}
-		StringName category = link->get_graph_category();
-		Vector<Ref<LinkerLink>> args = link->get_pull_link_refs();
-		if (category == "graph_data" || category == "graph_output") {
-			for (int j = 0; j < args.size(); j++) {
-				Ref<LinkerLink> arg = args[j];
-				graph.add_edge(arg, link, "edge_data");
-			}
-		}
-		Vector<Ref<LinkerLink>> folowing = link->get_push_link_refs();
-		if (category != "graph_data" || category == "graph_input") {
-			for (int j = 0; j < folowing.size(); j++) {
-				Ref<LinkerLink> next = folowing[j];
-				graph.add_edge(link, next, "edge_sequence");
-			}
-		}
-	}
-
+	script->for_every_link(callable_mp(&graph, &EditorGraph::add_vertex));
+	script->for_every_pulled(callable_mp(&graph, &EditorGraph::add_pull_edge));
+	script->for_every_sequenced(callable_mp(&graph, &EditorGraph::add_sequence_edge));
+	
 	for (const KeyValue<Ref<LinkerLink>, Vector2> &E : graph.get_linker_link_positions()) {
 		Ref<LinkerLink> link = E.key;
 		if (link.is_valid()) {

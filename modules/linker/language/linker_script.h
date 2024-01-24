@@ -257,10 +257,15 @@ public:
 	void remove_scene_refrence(StringName relative_path);
 
 	TypedArray<LinkerLink> get_links() const;
+	Vector<Ref<LinkerLink>> get_link_refs() const { return links; }
 	void add_link(Ref<LinkerLink> p_link);
 	void remove_link(Ref<LinkerLink> p_link);
 	Ref<LinkerLink> get_link(int p_index) const { return links[p_index]; }
 	int get_link_idx(const LinkerLink *p_link) const;
+
+	void for_every_link(const Callable &p_callable) const;
+	void for_every_pulled(const Callable &p_callable) const;
+	void for_every_sequenced(const Callable &p_callable) const;
 
 	LinkerScript();
 	~LinkerScript() {}
