@@ -9,6 +9,7 @@
 #include "core/variant/variant_utility.h"
 #include "editor/editor_interface.h"
 #include "editor/editor_node.h"
+#include "scene/animation/tween.h"
 #include "scene/gui/box_container.h"
 #include "scene/gui/control.h"
 #include "scene/gui/grid_container.h"
@@ -41,11 +42,7 @@ class LinkerEditorLayout : public Control {
 protected:
 	static void _bind_methods();
 
-	void _store_connection(Ref<LinkerLink> p_source, Ref<LinkerLink> p_destination, LinkConnection *p_connection);
-	bool _has_connection(Ref<LinkerLink> p_source, Ref<LinkerLink> p_destination) const;
-
 	LinkControler *make_link_controler(Ref<LinkerLink> p_link);
-	LinkConnection *make_link_connection(Ref<LinkerLink> p_source, Ref<LinkerLink> p_destination);
 
 public:
 	struct DropData {
@@ -67,6 +64,7 @@ public:
 
 	LinkControler *get_link_source_controler(Ref<LinkerLink> p_link);
 	LinkControler *get_link_controler(Ref<LinkerLink> p_link);
+	LinkConnection *get_link_connection(Ref<LinkerLink> source_link, Ref<LinkerLink> destination_link, int p_connection_type);
 
 	void update_graph();
 	void add_link(Ref<LinkerLink> p_link);

@@ -36,38 +36,12 @@ void LinkerEditorLayout::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("inspect_links_request", PropertyInfo(Variant::ARRAY, "links"), PropertyInfo(Variant::VECTOR2, "glob_pos")));
 }
 
-void LinkerEditorLayout::_store_connection(Ref<LinkerLink> p_source, Ref<LinkerLink> p_destination, LinkConnection *p_connection) {
-	if (!connections_map.has(p_source)) {
-		connections_map[p_source] = HashMap<Ref<LinkerLink>, LinkConnection *>();
-	} else if (connections_map[p_source].has(p_destination)) {
-		connections_map[p_source][p_destination]->queue_free();
-	}
-	connections_map[p_source][p_destination] = p_connection;
-}
-
-bool LinkerEditorLayout::_has_connection(Ref<LinkerLink> p_source, Ref<LinkerLink> p_destination) const {
-	if (connections_map.has(p_source)) {
-		if (connections_map[p_source].has(p_destination)) {
-			return bool(connections_map[p_source][p_destination]);
-		}
-	}
-	return false;
-}
-
 LinkControler *LinkerEditorLayout::make_link_controler(Ref<LinkerLink> p_link) {
 	LinkControler *controler = memnew(LinkControler);
 	link_contorlers[p_link] = controler;
 	controler->set_link(p_link);
 	add_child(controler);
 	return controler;
-}
-
-LinkConnection *LinkerEditorLayout::make_link_connection(Ref<LinkerLink> p_source, Ref<LinkerLink> p_destination) {
-	LinkConnection *connection = memnew(LinkConnection);
-	add_child(connection);
-	connection->set_start(get_link_controler(p_source));
-	connection->set_end(get_link_controler(p_destination));
-	return connection;
 }
 
 void LinkerEditorLayout::gui_input(const Ref<InputEvent> &p_event) {
@@ -239,6 +213,40 @@ LinkControler *LinkerEditorLayout::get_link_controler(Ref<LinkerLink> p_link) {
 	return make_link_controler(p_link);
 }
 
+LinkConnection *LinkerEditorLayout::get_link_connection(Ref<LinkerLink> source_link, Ref<LinkerLink> destination_link, int p_connection_type) {
+	if (!source_link.is_valid() || !destination_link.is_valid()) {
+		return nullptr;
+	}
+	// get connection
+	if (connections_map.has(source_link)) {
+		if (connections_map[source_link].has(destination_link)) {
+			if (VariantUtilityFunctions::is_instance_valid(connections_map[source_link][destination_link])) {
+				if (connections_map[source_link][destination_link]->connection_type != p_connection_type) {
+					ERR_PRINT("connection type overriden");
+					connections_map[source_link][destination_link]->connection_type = static_cast<LinkConnection::ConnectionType>(p_connection_type);
+				}
+				return connections_map[source_link][destination_link];
+			}
+		}
+	}
+
+	// create connection
+	LinkConnection *connection = memnew(LinkConnection);
+	add_child(connection);
+	connection->set_start(get_link_controler(source_link));
+	connection->set_end(get_link_controler(destination_link));
+	connection->connection_type = static_cast<LinkConnection::ConnectionType>(p_connection_type);
+
+	// store connection
+	if (!connections_map.has(source_link)) {
+		connections_map[source_link] = HashMap<Ref<LinkerLink>, LinkConnection *>();
+	} else if (connections_map[source_link].has(destination_link)) {
+		connections_map[source_link][destination_link]->queue_free();
+	}
+	connections_map[source_link][destination_link] = connection;
+	return connections_map[source_link][destination_link];
+}
+
 void LinkerEditorLayout::update_graph() {
 	EditorGraph graph;
 	_graph = &graph;
@@ -247,20 +255,11 @@ void LinkerEditorLayout::update_graph() {
 	}
 
 	{ // clear layout
-		for (const KeyValue<Ref<LinkerLink>, HashMap<Ref<LinkerLink>, LinkConnection *>> &E : connections_map) {
-			for (const KeyValue<Ref<LinkerLink>, LinkConnection *> &F : E.value) {
-				if (F.value) {
-					F.value->queue_free();
-				}
-			}
-		}
-		connections_map.clear();
 		for (const KeyValue<Ref<LinkerLink>, LinkControler *> &E : link_contorlers) {
 			if (E.value) {
-				E.value->queue_free();
+				E.value->set_visible(false);
 			}
 		}
-		link_contorlers.clear();
 	}
 
 	script->for_every_link(callable_mp(this, &LinkerEditorLayout::add_link));
@@ -271,7 +270,9 @@ void LinkerEditorLayout::update_graph() {
 		Ref<LinkerLink> link = E.key;
 		if (link.is_valid()) {
 			LinkControler *controler = get_link_controler(link);
-			controler->set_position(E.value);
+			controler->set_visible(true);
+			Ref<Tween> tween = create_tween();
+			tween->tween_property(controler, NodePath("position"), E.value, 0.5);
 		}
 	}
 }
@@ -283,20 +284,12 @@ void LinkerEditorLayout::add_link(Ref<LinkerLink> p_link) {
 
 void LinkerEditorLayout::add_pull_connection(Ref<LinkerLink> pulled_link, Ref<LinkerLink> owner_link) {
 	_graph->add_pull_edge(pulled_link, owner_link);
-	if (!_has_connection(pulled_link, owner_link)) {
-		LinkConnection *connection = make_link_connection(pulled_link, owner_link);
-		connection->connection_type = LinkConnection::CONNECTION_TYPE_SOURCE;
-		_store_connection(pulled_link, owner_link, connection);
-	}
+	get_link_connection(pulled_link, owner_link, LinkConnection::CONNECTION_TYPE_SOURCE); // create the connection
 }
 
 void LinkerEditorLayout::add_sequence_connection(Ref<LinkerLink> source_link, Ref<LinkerLink> destination_link) {
 	_graph->add_sequence_edge(source_link, destination_link);
-	if (!_has_connection(source_link, destination_link)) {
-		LinkConnection *connection = make_link_connection(source_link, destination_link);
-		connection->connection_type = LinkConnection::CONNECTION_TYPE_SEQUENCE;
-		_store_connection(source_link, destination_link, connection);
-	}
+	get_link_connection(source_link, destination_link, LinkConnection::CONNECTION_TYPE_SEQUENCE); // create the connection
 }
 
 LinkerEditorLayout::LinkerEditorLayout() {
