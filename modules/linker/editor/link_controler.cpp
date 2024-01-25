@@ -119,6 +119,11 @@ void LinkControler::_draw_debug() {
 	if (debug_drag_and_drop && (mouse_inside || dragging)) {
 		draw_rect(Rect2(Vector2(0.0, 0.0), get_size()), Color(0.5, 1, 1, 0.3), false, 1.0);
 	}
+	if (debug_node_id) {
+		Ref<Font> font = get_theme_font(SNAME("font"), SNAME("Label"));
+		int font_size = get_theme_font_size(SNAME("font_size"), SNAME("Label"));
+		draw_string(font, get_size() / 2, itos(link->get_link_idx()), HORIZONTAL_ALIGNMENT_CENTER, -1, font_size, Color(0, 0, 0, 1));
+	}
 }
 
 void LinkControler::gui_input(const Ref<InputEvent> &p_event) {
