@@ -208,6 +208,9 @@ void LinkerEditorLayout::drop_data(const Point2 &p_point, const Variant &p_data)
 }
 
 LinkControler *LinkerEditorLayout::get_link_source_controler(Ref<LinkerLink> p_link) {
+	if (!p_link.is_valid()) {
+		return nullptr;
+	}
 	if (p_link->has_source()) {
 		return get_link_controler(p_link->get_source());
 	}
@@ -215,6 +218,9 @@ LinkControler *LinkerEditorLayout::get_link_source_controler(Ref<LinkerLink> p_l
 }
 
 LinkControler *LinkerEditorLayout::get_link_controler(Ref<LinkerLink> p_link) {
+	if (!p_link.is_valid()) {
+		return nullptr;
+	}
 	if (link_contorlers.has(p_link)) {
 		if (VariantUtilityFunctions::is_instance_valid(link_contorlers[p_link])) {
 			return link_contorlers[p_link];
@@ -242,11 +248,11 @@ void LinkerEditorLayout::update_graph() {
 
 	{ // clear layout
 		for (const KeyValue<Ref<LinkerLink>, HashMap<Ref<LinkerLink>, LinkConnection *>> &E : connections_map) {
-		for (const KeyValue<Ref<LinkerLink>, LinkConnection *> &F : E.value) {
-			if (F.value) {
-				F.value->queue_free();
+			for (const KeyValue<Ref<LinkerLink>, LinkConnection *> &F : E.value) {
+				if (F.value) {
+					F.value->queue_free();
+				}
 			}
-		}
 		}
 		connections_map.clear();
 		for (const KeyValue<Ref<LinkerLink>, LinkControler *> &E : link_contorlers) {
