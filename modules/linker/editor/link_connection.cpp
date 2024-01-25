@@ -5,6 +5,7 @@ void LinkConnection::_update_connection() {
 	if (!start || !end) {
 		return;
 	}
+	Color connection_color;
 	switch (connection_type) {
 		case CONNECTION_TYPE_SOURCE: {
 			curve.clear_points();
@@ -17,7 +18,7 @@ void LinkConnection::_update_connection() {
 			distance_x = distance_x / 3;
 			curve.add_point(start_pos, Vector2(-distance_x, 0), Vector2(distance_x, 0));
 			curve.add_point(end_pos, Vector2(-distance_x, 0), Vector2(distance_x, 0));
-			set_default_color(Color(0.1, 0.9, 0.1, 0.9));
+			connection_color = Color::named("SPRING_GREEN");
 			set_width(2);
 			break;
 		}
@@ -32,13 +33,36 @@ void LinkConnection::_update_connection() {
 			distance_y = distance_y * 0.75;
 			curve.add_point(start_pos, Vector2(0, -distance_y), Vector2(0, distance_y));
 			curve.add_point(end_pos, Vector2(0, -distance_y), Vector2(0, distance_y));
-			set_default_color(Color(0.9, 0.9, 0.9, 0.3));
+			connection_color = Color::named("WHITE_SMOKE");
 			set_width(4);
 			break;
 		}
 		case CONNECTION_TYPE_REFRENCE: {
 			break;
 		}
+	}
+	{
+		set_visible(true);
+		Ref<Gradient> gradiant;
+		gradiant.instantiate();
+		if (start->is_visible() && end->is_visible()) {
+			connection_color *= Color(1.0, 1.0, 1.0, 0.3);
+			gradiant->set_color(0, connection_color);
+			gradiant->set_color(1, connection_color);
+		} else if (start->is_visible()) {
+			connection_color *= Color(1.0, 1.0, 1.0, 0.3);
+			gradiant->set_color(0, connection_color);
+			connection_color *= Color(1.0, 1.0, 1.0, 0.0);
+			gradiant->set_color(1, connection_color);
+		} else if (end->is_visible()) {
+			connection_color *= Color(1.0, 1.0, 1.0, 0.0);
+			gradiant->set_color(0, connection_color);
+			connection_color *= Color(1.0, 1.0, 1.0, 0.3);
+			gradiant->set_color(1, connection_color);
+		} else {
+			set_visible(false);
+		}
+		set_gradient(gradiant);
 	}
 	set_points(curve.get_baked_points());
 }
