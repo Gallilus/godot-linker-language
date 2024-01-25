@@ -16,7 +16,9 @@ class LinkConnection;
 class LinkControler : public MarginContainer {
 	GDCLASS(LinkControler, MarginContainer);
 
-	bool debug_node_id = true;
+	bool debug_node_id = false;
+	bool debug_ref_id = false;
+	bool debug_controler_id = false;
 	bool debug_drag_and_drop = true;
 	bool mouse_inside = false;
 	bool dragging = false;
