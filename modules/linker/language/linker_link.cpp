@@ -101,6 +101,7 @@ void LinkerLink::add_push_link_ref(Ref<LinkerLink> p_link) {
 	if (p_link.is_valid()) {
 		push_links.append(p_link);
 		p_link->set_owner(this);
+		add_link_ref_to_script(p_link);
 		emit_signal("changed");
 	}
 }
@@ -131,6 +132,10 @@ void LinkerLink::set_link_refrences() {
 			set_owner(link.ptr());
 		}
 	}
+}
+
+void LinkerLink::add_link_ref_to_script(Ref<LinkerLink> p_link) {
+	host->add_link(p_link);
 }
 
 PropertyInfo LinkerLink::get_output_info() {

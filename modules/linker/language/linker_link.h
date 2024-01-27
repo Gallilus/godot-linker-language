@@ -59,6 +59,7 @@ public:
 	int get_owner_idx() const;
 	void set_owner_idx(int p_idx) { owner_links_idx = p_idx; }
 	void set_link_refrences(); // called when loading file after all links are loaded
+	void add_link_ref_to_script(Ref<LinkerLink> p_link);
 
 	virtual Variant get_placeholder_value() const = 0;
 	virtual Dictionary get_placeholder_info() const = 0;
