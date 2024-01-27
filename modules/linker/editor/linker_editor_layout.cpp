@@ -220,11 +220,11 @@ LinkConnection *LinkerEditorLayout::get_link_connection(Ref<LinkerLink> source_l
 	// get connection
 	if (connections_map.has(source_link)) {
 		if (connections_map[source_link].has(destination_link)) {
-			Vector<LinkConnection *> connections = connections_map[source_link][destination_link];
-			for (int i = 0; i < connections.size(); i++) {
-				if (VariantUtilityFunctions::is_instance_valid(connections[i])) {
-					if (connections[i]->connection_type == p_connection_type) {
-						return connections[i];
+			Vector<LinkConnection *> _connections = connections_map[source_link][destination_link];
+			for (int i = 0; i < _connections.size(); i++) {
+				if (VariantUtilityFunctions::is_instance_valid(_connections[i])) {
+					if (_connections[i]->connection_type == p_connection_type) {
+						return _connections[i];
 					}
 				}
 			}
