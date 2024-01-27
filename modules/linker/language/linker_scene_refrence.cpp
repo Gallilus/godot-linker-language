@@ -1,4 +1,5 @@
 #include "linker_scene_refrence.h"
+#include "linker_script.h"
 
 void LinkerSceneRefrence::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_node_class_name", "node_class_name"), &LinkerSceneRefrence::set_node_class_name);
@@ -44,6 +45,8 @@ void LinkerSceneRefrence::_initialize_instance(LinkerLinkInstance *link, LinkerS
 			ERR_PRINT(String(push_links[i]->get_class_name()) + ": instance is null");
 		}
 	}
+
+	instance->node_path = NodePath(node_scene_relative_path);
 }
 
 Variant LinkerSceneRefrence::get_placeholder_value() const {
@@ -95,11 +98,21 @@ void LinkerSceneRefrence::drop_data(Ref<LinkerLink> dropped_link) {
 	dropped_link->set_source(this);
 }
 
+LinkerLinkInstance *LinkerSceneRefrence::get_instance(LinkerScriptInstance *p_host, int p_stack_size) {
+	if (!link_instances.has(p_stack_size)) {
+		LinkerSceneRefrenceInstance *instance = new LinkerSceneRefrenceInstance();
+		link_instances.insert(p_stack_size, p_host->add_link_instance(instance));
+		_initialize_instance(link_instances[p_stack_size], p_host, p_stack_size);
+	}
+	return link_instances[p_stack_size];
+}
+
 ////////////////////////////////////////////////////////////////////////
 //////////////////////////////  INSTANCE  //////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
 int LinkerSceneRefrenceInstance::_step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) {
-	value = memnew(Variant);
+	Node *owner_node = Object::cast_to<Node>(host->get_owner());
+	value = Variant(owner_node->get_node(node_path));
 	return STEP_COMPLETE;
 }

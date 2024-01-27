@@ -47,7 +47,7 @@ public:
 	virtual bool can_drop(Ref<LinkerLink> drag_link) const override;
 	virtual void drop_data(Ref<LinkerLink> dropped_link) override;
 
-	virtual LinkerLinkInstance *get_instance(LinkerScriptInstance *p_host, int p_stack_size) override { return nullptr; }
+	virtual LinkerLinkInstance *get_instance(LinkerScriptInstance *p_host, int p_stack_size) override;
 	virtual void remove_instance(LinkerScriptInstance *p_host, int p_stack_size) override {}
 };
 
@@ -57,6 +57,8 @@ public:
 
 class LinkerSceneRefrenceInstance : public LinkerLinkInstance {
 	friend class LinkerSceneRefrence;
+
+	NodePath node_path;
 
 protected:
 	virtual int _step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) override;
