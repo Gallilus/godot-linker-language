@@ -48,7 +48,9 @@ void LinkerLink::set_source(Ref<LinkerLink> p_source) {
 	} else {
 		pull_links.set(0, p_source);
 	}
-	host->emit_signal("changed");
+	if (host) {
+		host->emit_signal("changed");
+	}
 }
 
 Ref<LinkerLink> LinkerLink::get_source() const {
@@ -174,22 +176,32 @@ void LinkerLink::remove_from_script(bool p_force) {
 ////////////////////////////////////////////////////////////////////////
 
 int LinkerLinkInstance::step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) {
+	ERR_PRINT(String(index) + "::step  " + itos(p_start_mode) + "  " + itos(step_count));
+
 	int step_state;
-	if (running) {
+
+	if (stepped && StartMode::START_MODE_BEGIN == p_start_mode) {
+		return STEP_COMPLETE;
+	}
+
+	if (running && StartMode::START_MODE_BEGIN == p_start_mode) {
 		r_error_str = "Step called while running, recursive connections are not allowed";
 		return STEP_ERROR;
 	}
+
 	running = true;
+
 	while (true) {
 		if (step_count < pull_count) {
 			step_state = pull_links[step_count]->step(p_start_mode, r_error, r_error_str);
 		} else if (step_count == pull_count && !stepped) {
-			step_state = step(p_start_mode, r_error, r_error_str);
+			step_state = _step(p_start_mode, r_error, r_error_str);
 			if (step_state & STEP_COMPLETE) {
 				stepped = true;
+				step_state = STEP_OK;
 			}
 		} else if (step_count < pull_count + push_count) {
-			step_state = push_links[step_count - pull_count]->_step(p_start_mode, r_error, r_error_str);
+			step_state = push_links[step_count - pull_count]->step(p_start_mode, r_error, r_error_str);
 		} else {
 			break;
 		}
@@ -210,7 +222,7 @@ int LinkerLinkInstance::step(StartMode p_start_mode, Callable::CallError &r_erro
 }
 
 LinkerLinkInstance::~LinkerLinkInstance() {
-	if (value) {
-		memdelete(value);
-	}
+	// if (value) {
+	// 	memdelete(value);
+	// }
 }
