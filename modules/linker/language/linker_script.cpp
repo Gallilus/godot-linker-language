@@ -754,7 +754,7 @@ Variant LinkerScriptInstance::_call_internal(const StringName &p_method, int p_s
 
 		if (ret & LinkerLinkInstance::STEP_COMPLETE) {
 			// reevalute current_node_id for debug errors
-			return_value = *link->get_value();
+			return_value = link->get_value();
 			break;
 		}
 	}

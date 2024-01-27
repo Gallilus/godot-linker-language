@@ -33,7 +33,7 @@ public:
 class LinkerIndexCallInstance : public LinkerLinkInstance {
 	friend class LinkerIndexCall;
 
-	const Variant **input_args = nullptr;
+	Vector<Variant> input_args;
 
 protected:
 	virtual int _step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) override;

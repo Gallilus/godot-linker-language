@@ -176,8 +176,6 @@ void LinkerLink::remove_from_script(bool p_force) {
 ////////////////////////////////////////////////////////////////////////
 
 int LinkerLinkInstance::step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) {
-	ERR_PRINT(String(index) + "::step  " + itos(p_start_mode) + "  " + itos(step_count));
-
 	int step_state;
 
 	if (stepped && StartMode::START_MODE_BEGIN == p_start_mode) {

@@ -9,8 +9,6 @@ void LinkerIndexCall::_initialize_instance(LinkerLinkInstance *link, LinkerScrip
 	instance->pull_count = pull_links.size();
 	instance->push_count = push_links.size();
 
-	instance->input_args = new const Variant *[instance->pull_count];
-
 	for (int i = 0; i < instance->pull_count; i++) {
 		LinkerLinkInstance *_link = pull_links[i]->get_instance(p_host, p_stack_size);
 		if (_link) {
@@ -67,14 +65,18 @@ void LinkerIndexCall::remove_instance(LinkerScriptInstance *p_host, int p_stack_
 ////////////////////////////////////////////////////////////////////////
 
 int LinkerIndexCallInstance::_step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) {
-	ERR_PRINT("LinkerIndexCallInstance::step: " + String(index));
+	input_args.clear();
+	Vector<const Variant *> argp;
+	input_args.resize(pull_count);
+	argp.resize(pull_count);
 
 	for (int i = 0; i < pull_count; i++) {
-		input_args[i] = pull_links[i]->get_value();
-		ERR_PRINT("LinkerIndexCallInstance::step: input_args[" + itos(i) + "] = " + String(*input_args[i]));
+		input_args.write[i] = pull_links[i]->get_value();
+		argp.write[i] = &input_args[i];
 	}
 
-	host->callp(index, input_args, pull_count, r_error);
+	//value = host->get_owner()->callp(index, (const Variant **)argp.ptr(), argp.size(), r_error);
+	print_line(pull_links[0]->get_value()); // built in functions
 
 	if (r_error.error != Callable::CallError::CALL_OK) {
 		return STEP_ERROR;
@@ -83,5 +85,4 @@ int LinkerIndexCallInstance::_step(StartMode p_start_mode, Callable::CallError &
 }
 
 LinkerIndexCallInstance::~LinkerIndexCallInstance() {
-	delete[] input_args;
 }

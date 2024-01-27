@@ -3,13 +3,12 @@
 #include "linker_index_get.h"
 #include "linker_script.h"
 
-
 void LinkerFunction::_set_owned_links() {
 	if (pull_links.size() == 0) {
 		// only when using editor. so this needs to be triggerd on created by layout
-		Ref<LinkerIndexGet> return_link = memnew(LinkerIndexGet);
-		host->add_link(return_link);
-		add_push_link_ref(return_link);
+		// Ref<LinkerIndexGet> return_link = memnew(LinkerIndexGet);
+		// host->add_link(return_link);
+		// add_push_link_ref(return_link);
 	}
 }
 
@@ -105,8 +104,6 @@ void LinkerFunction::remove_instance(LinkerScriptInstance *p_host, int p_stack_s
 int LinkerFunctionInstance::_step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) {
 	if (pull_count > 0) {
 		value = pull_links[0]->get_value();
-	} else {
-		value = memnew(Variant);
 	}
 	return STEP_COMPLETE;
 }

@@ -103,7 +103,7 @@ protected:
 	Vector<LinkerLinkInstance *> pull_links;
 	Vector<LinkerLinkInstance *> push_links;
 
-	Variant *value = nullptr;
+	Variant value;
 	int pull_count = 0;
 	int push_count = 0;
 	int step_count = 0;
@@ -115,7 +115,7 @@ protected:
 
 public:
 	int step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str); // full step
-	Variant *get_value() const { return value; }
+	Variant get_value() const { return value; }
 
 	~LinkerLinkInstance();
 };

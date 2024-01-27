@@ -45,7 +45,7 @@ bool LinkerIndexGet::can_drop(Ref<LinkerLink> drag_link) const {
 	if (drag_link.is_null()) {
 		return false;
 	}
-	if (	drag_link->get_class() == "LinkerIndexGet" &&
+	if (drag_link->get_class() == "LinkerIndexGet" &&
 			drag_link != this) {
 		return true;
 	}
@@ -81,9 +81,7 @@ void LinkerIndexGet::remove_instance(LinkerScriptInstance *p_host, int p_stack_s
 
 int LinkerIndexGetInstance::_step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) {
 	if (pull_count > 0) {
-		value = pull_links[0]->get_value();
-	} else {
-		value = memnew(Variant);
+		value = pull_links[0]->get_value().get(index);
 	}
 	return STEP_COMPLETE;
 }
