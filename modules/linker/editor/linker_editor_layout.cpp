@@ -220,12 +220,13 @@ LinkConnection *LinkerEditorLayout::get_link_connection(Ref<LinkerLink> source_l
 	// get connection
 	if (connections_map.has(source_link)) {
 		if (connections_map[source_link].has(destination_link)) {
-			if (VariantUtilityFunctions::is_instance_valid(connections_map[source_link][destination_link])) {
-				if (connections_map[source_link][destination_link]->connection_type != p_connection_type) {
-					ERR_PRINT("connection type overriden");
-					connections_map[source_link][destination_link]->connection_type = static_cast<LinkConnection::ConnectionType>(p_connection_type);
+			Vector<LinkConnection *> connections = connections_map[source_link][destination_link];
+			for (int i = 0; i < connections.size(); i++) {
+				if (VariantUtilityFunctions::is_instance_valid(connections[i])) {
+					if (connections[i]->connection_type == p_connection_type) {
+						return connections[i];
+					}
 				}
-				return connections_map[source_link][destination_link];
 			}
 		}
 	}
@@ -239,12 +240,10 @@ LinkConnection *LinkerEditorLayout::get_link_connection(Ref<LinkerLink> source_l
 
 	// store connection
 	if (!connections_map.has(source_link)) {
-		connections_map[source_link] = HashMap<Ref<LinkerLink>, LinkConnection *>();
-	} else if (connections_map[source_link].has(destination_link)) {
-		connections_map[source_link][destination_link]->queue_free();
+		connections_map[source_link] = HashMap<Ref<LinkerLink>, Vector<LinkConnection *>>();
 	}
-	connections_map[source_link][destination_link] = connection;
-	return connections_map[source_link][destination_link];
+	connections_map[source_link][destination_link].append(connection);
+	return connection;
 }
 
 void LinkerEditorLayout::update_graph() {

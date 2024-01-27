@@ -15,7 +15,6 @@ void LinkerEditorSelector::inspect_links(const Array &p_links, const Vector2 &p_
 			Ref<LinkerIndexCall> call;
 			call.instantiate();
 			call->set_index(StringName("print"));
-			script->add_link(call);
 			link->add_push_link_ref(call);
 		}
 	}

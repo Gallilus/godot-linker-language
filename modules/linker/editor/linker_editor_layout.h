@@ -32,7 +32,7 @@ class LinkerEditorLayout : public Control {
 	EditorGraph *_graph = nullptr;
 
 	HashMap<Ref<LinkerLink>, LinkControler *> link_contorlers;
-	HashMap<Ref<LinkerLink>, HashMap<Ref<LinkerLink>, LinkConnection *>> connections_map;
+	HashMap<Ref<LinkerLink>, HashMap<Ref<LinkerLink>, Vector<LinkConnection *>>> connections_map;
 
 	bool updating_members = true;
 	VBoxContainer *members_section = nullptr;

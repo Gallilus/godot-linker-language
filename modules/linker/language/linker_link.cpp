@@ -45,10 +45,10 @@ void LinkerLink::set_host(LinkerScript *p_host) {
 void LinkerLink::set_source(Ref<LinkerLink> p_source) {
 	if (pull_links.is_empty()) {
 		pull_links.append(p_source);
-		emit_signal("changed");
 	} else {
 		pull_links.set(0, p_source);
 	}
+	host->emit_signal("changed");
 }
 
 Ref<LinkerLink> LinkerLink::get_source() const {
