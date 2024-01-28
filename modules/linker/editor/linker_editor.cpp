@@ -1,4 +1,5 @@
 #include "linker_editor.h"
+#include "editor/editor_undo_redo_manager.h"
 
 void LinkerEditor::_update_graph() {
 	if (is_updating) {
@@ -162,6 +163,17 @@ void LinkerEditor::register_editor() {
 void LinkerEditor::test() {
 	ERR_PRINT("test button pressed");
 	script->set_member_variable(PropertyInfo(Variant::STRING, "test"), Variant());
+
+	// EditorUndoRedoManager *undo_redo = EditorUndoRedoManager::get_singleton();
+	// // undo_redo->create_action(TTR("test button pressed"), UndoRedo::MERGE_DISABLE, script.ptr());
+	// undo_redo->create_action(TTR("test button pressed"));
+	// undo_redo->add_do_method(this, "script_changed");
+	// undo_redo->add_do_method(script.ptr(), "set_member_variable", PropertyInfo(Variant::STRING, "test2"), Variant());
+	// //undo_redo->add_do_method(callable_mp(script.ptr(), &LinkerScript::set_member_variable).bind(PropertyInfo(Variant::STRING, "test2"), Variant()));
+
+	// undo_redo->add_undo_method(script.ptr(), "remove_property", PropertyInfo(Variant::STRING, "test2"));
+	// undo_redo->add_undo_method(script.ptr(), "remove_property", PropertyInfo(Variant::STRING, "test"));
+	// undo_redo->commit_action();
 }
 
 void LinkerEditor::script_changed() {
