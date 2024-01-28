@@ -135,11 +135,8 @@ void LinkerEditorLayout::drop_data(const Point2 &p_point, const Variant &p_data)
 			Array links;
 			links.append(d["link_idx"]);
 			// emit inspect link+pos
-			emit_signal("inspect_links_request", links, Vector2(p_point));
-
-			// editor inspector for return type
-			// editor inspector for next function
-			// higlight compatible links
+			//	emit_signal("inspect_links_request", links, Vector2(p_point));
+			connect_next->dropped(drop_data.links[0], p_point);
 		}
 	}
 
@@ -295,4 +292,62 @@ LinkerEditorLayout::LinkerEditorLayout() {
 	set_v_size_flags(SIZE_EXPAND_FILL);
 	set_h_size_flags(SIZE_EXPAND_FILL);
 	set_focus_mode(Control::FOCUS_ALL);
+	connect_next = memnew(ConnectNext);
+	add_child(connect_next);
+}
+
+void ConnectNext::_notification(int p_what) {
+	switch (p_what) {
+		case NOTIFICATION_READY: {
+			close_button->set_icon(Control::get_theme_icon(SNAME("Close"), EditorStringName(EditorIcons)));
+		} break;
+		case NOTIFICATION_MOUSE_ENTER: {
+			mouse_inside = true;
+			queue_redraw();
+			break;
+		}
+		case NOTIFICATION_MOUSE_EXIT: {
+			mouse_inside = false;
+			queue_redraw();
+			break;
+		}
+		case NOTIFICATION_DRAW: {
+			_draw_debug();
+			break;
+		}
+	}
+}
+
+void ConnectNext::_draw_debug() {
+	if (debug_mouse_inside && mouse_inside) {
+		draw_rect(Rect2(Vector2(), get_size()), Color(0.5, 1, 1, 0.3), false, 1.0);
+	}
+}
+
+void ConnectNext::dropped(Ref<LinkerLink> p_link, const Point2 &p_point) {
+	popup(p_point);
+}
+
+void ConnectNext::popup(const Vector2 &p_pos) {
+	set_visible(true);
+	set_position(p_pos);
+	set_size(Vector2(100, 100));
+}
+
+void ConnectNext::close() {
+	set_visible(false);
+}
+
+ConnectNext::ConnectNext() {
+	menu_bar = memnew(HBoxContainer);
+	add_child(menu_bar);
+	menu_bar->set_alignment(BoxContainer::ALIGNMENT_END);
+	close_button = memnew(Button);
+	menu_bar->add_child(close_button);
+	close_button->set_flat(true);
+	close_button->connect("pressed", callable_mp(this, &ConnectNext::close));
+	close();
+}
+
+ConnectNext::~ConnectNext() {
 }

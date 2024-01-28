@@ -15,6 +15,7 @@
 #include "scene/gui/grid_container.h"
 #include "scene/gui/item_list.h"
 #include "scene/gui/label.h"
+#include "scene/gui/margin_container.h"
 #include "scene/gui/panel.h"
 #include "scene/gui/scroll_container.h"
 #include "scene/gui/split_container.h"
@@ -25,6 +26,7 @@
 class LinkControler;
 class LinkConnection;
 class EditorGraph;
+class ConnectNext;
 
 class LinkerEditorLayout : public Control {
 	GDCLASS(LinkerEditorLayout, Control);
@@ -37,6 +39,7 @@ class LinkerEditorLayout : public Control {
 	bool updating_members = true;
 	VBoxContainer *members_section = nullptr;
 	Tree *members = nullptr;
+	ConnectNext *connect_next = nullptr;
 	void _update_members();
 
 protected:
@@ -73,6 +76,54 @@ public:
 
 	LinkerEditorLayout();
 	~LinkerEditorLayout() {}
+};
+
+class ConnectNext : public VBoxContainer {
+	GDCLASS(ConnectNext, VBoxContainer);
+	
+	bool debug_mouse_inside = true;
+	bool mouse_inside = true;
+
+	HBoxContainer *menu_bar = nullptr;
+	Button *close_button = nullptr;
+
+	enum ScopeFlags {
+		SCOPE_BASE = 1 << 0,
+		SCOPE_INHERITERS = 1 << 1,
+		SCOPE_UNRELATED = 1 << 2,
+		SCOPE_RELATED = SCOPE_BASE | SCOPE_INHERITERS,
+		SCOPE_ALL = SCOPE_BASE | SCOPE_INHERITERS | SCOPE_UNRELATED
+	};
+
+	enum SearchFlags {
+		SEARCH_CLASSES = 1 << 0,
+		SEARCH_CONSTRUCTORS = 1 << 1,
+		SEARCH_METHODS = 1 << 2,
+		SEARCH_OPERATORS = 1 << 3,
+		SEARCH_SIGNALS = 1 << 4,
+		SEARCH_CONSTANTS = 1 << 5,
+		SEARCH_PROPERTIES = 1 << 6,
+		SEARCH_THEME_ITEMS = 1 << 7,
+		SEARCH_ALL = SEARCH_CLASSES | SEARCH_CONSTRUCTORS | SEARCH_METHODS |
+				SEARCH_OPERATORS | SEARCH_SIGNALS | SEARCH_CONSTANTS |
+				SEARCH_PROPERTIES | SEARCH_THEME_ITEMS,
+		SEARCH_CASE_SENSITIVE = 1 << 29,
+		SEARCH_SHOW_HIERARCHY = 1 << 30,
+	};
+
+protected:
+	static void _bind_methods() {}
+	void _notification(int p_what);
+	
+	void _draw_debug();
+
+public:
+	void dropped(Ref<LinkerLink> p_link, const Point2 &p_point);
+	void popup(const Vector2 &p_pos);
+	void close();
+
+	ConnectNext();
+	~ConnectNext();
 };
 
 #endif // EDITOR_LAYOUT_H
