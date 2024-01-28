@@ -165,7 +165,7 @@ Ref<Script> LinkerLanguage::make_template(const String &p_template, const String
 	return scr;
 }
 
-Vector<ScriptLanguage::ScriptTemplate> LinkerLanguage::get_built_in_templates(StringName p_object) {
+Vector<ScriptLanguage::ScriptTemplate> LinkerLanguage::get_built_in_templates(const StringName &p_object) {
 	Vector<ScriptLanguage::ScriptTemplate> templates;
 #ifdef TOOLS_ENABLED
 	/*for (int i = 0; i < TEMPLATES_ARRAY_SIZE; i++) {

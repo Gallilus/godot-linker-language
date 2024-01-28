@@ -40,7 +40,7 @@ public:
 	virtual void get_doc_comment_delimiters(List<String> *p_delimiters) const override;
 	virtual void get_string_delimiters(List<String> *p_delimiters) const override;
 	virtual Ref<Script> make_template(const String &p_template, const String &p_class_name, const String &p_base_class_name) const override;
-	virtual Vector<ScriptTemplate> get_built_in_templates(StringName p_object) override;
+	virtual Vector<ScriptTemplate> get_built_in_templates(const StringName &p_object) override;
 	virtual bool is_using_templates() { return false; }
 	virtual bool validate(const String &p_script, const String &p_path = "", List<String> *r_functions = nullptr, List<ScriptError> *r_errors = nullptr, List<Warning> *r_warnings = nullptr, HashSet<int> *r_safe_lines = nullptr) const override;
 	//virtual String validate_path(const String &p_path) const { return ""; }
@@ -77,6 +77,7 @@ public:
 	virtual Vector<StackInfo> debug_get_current_stack_info() { return Vector<StackInfo>(); }
 
 	virtual void reload_all_scripts() override {}
+	virtual void reload_scripts(const Array &p_scripts, bool p_soft_reload) override {} // new in 4.3
 	virtual void reload_tool_script(const Ref<Script> &p_script, bool p_soft_reload) override {}
 	/* LOADER FUNCTIONS */
 
@@ -87,6 +88,7 @@ public:
 
 	virtual void profiling_start() override {}
 	virtual void profiling_stop() override {}
+	virtual void profiling_set_save_native_calls(bool p_enable) override {} // new in 4.3
 
 	virtual int profiling_get_accumulated_data(ProfilingInfo *p_info_arr, int p_info_max) override { return 0; }
 	virtual int profiling_get_frame_data(ProfilingInfo *p_info_arr, int p_info_max) override { return 0; }
