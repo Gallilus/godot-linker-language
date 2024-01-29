@@ -55,6 +55,7 @@ void initialize_linker_module(ModuleInitializationLevel p_level) {
 		GDREGISTER_CLASS(LinkControler);
 		GDREGISTER_CLASS(LinkerEditorSelector);
 		GDREGISTER_CLASS(LinkerEditorLayout);
+		GDREGISTER_CLASS(ResultTree);
 		GDREGISTER_CLASS(ConnectNext);
 	}
 }

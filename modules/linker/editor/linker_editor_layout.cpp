@@ -296,6 +296,71 @@ LinkerEditorLayout::LinkerEditorLayout() {
 	add_child(connect_next);
 }
 
+void ResultTree::add_source_info(const PropertyInfo &p_info) {
+	source_info.push_back(p_info);
+}
+
+void ResultTree::set_case_sensitive(bool p_case_sensitive) {
+	if (p_case_sensitive) {
+		//	search_flags |= SEARCH_CASE_SENSITIVE;
+	} else {
+		// search_flags &= ~SEARCH_CASE_SENSITIVE;
+	}
+}
+
+void ResultTree::set_show_hierarchy(bool p_show_hierarchy) {
+	if (p_show_hierarchy) {
+		// search_flags |= SEARCH_SHOW_HIERARCHY;
+	} else {
+		// search_flags &= ~SEARCH_SHOW_HIERARCHY;
+	}
+}
+
+void ResultTree::update_results(const String &p_search_term) {
+	search_term = p_search_term;
+	update_results();
+}
+
+void ResultTree::update_results() {
+	clear();
+	ERR_PRINT(search_term);
+	List<MethodInfo> m;
+	ClassDB::get_method_list(search_term, &m);
+	for (List<MethodInfo>::Element *E = m.front(); E; E = E->next()) {
+		if (E->get().name.begins_with("get_")) {
+			print_line(E->get().name);
+		}
+	}
+}
+
+void ConnectNext::source_flag_pressed(int p_flag) {
+	int flag_pressed = 1 << p_flag;
+	if (Input::get_singleton()->is_key_pressed(Key::CTRL)) {
+		source_flags = SOURCE_NONE;
+	}
+	source_flags = static_cast<ConnectNext::SourceFlags>(static_cast<int>(source_flags) ^ flag_pressed);
+
+	source_menu->get_popup()->set_item_checked(0, source_flags & SOURCE_BUILT_IN);
+	source_menu->get_popup()->set_item_checked(1, source_flags & SOURCE_HOST);
+	source_menu->get_popup()->set_item_checked(2, source_flags & SOURCE_LINK);
+
+	if (source_flags == SOURCE_NONE) {
+		source_menu->set_text("_"); // place holder art
+	} else if (source_flags == SOURCE_BUILT_IN) {
+		source_menu->set_text("\\/"); // place holder art
+	} else if (source_flags == SOURCE_HOST) {
+		source_menu->set_text("|>"); // place holder art
+	} else if (source_flags == SOURCE_LINK) {
+		source_menu->set_text("->"); // place holder art
+	} else {
+		source_menu->set_text("*");
+	}
+}
+
+void ConnectNext::popup_closed() {
+	ERR_PRINT("update_results");
+}
+
 void ConnectNext::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_READY: {
@@ -326,6 +391,7 @@ void ConnectNext::_draw_debug() {
 
 void ConnectNext::dropped(Ref<LinkerLink> p_link, const Point2 &p_point) {
 	popup(p_point);
+	// get link return data and find some stuff
 }
 
 void ConnectNext::popup(const Vector2 &p_pos) {
@@ -335,17 +401,54 @@ void ConnectNext::popup(const Vector2 &p_pos) {
 }
 
 void ConnectNext::close() {
+	// callable_mp(results_tree, &ResultTree::clear).call_deferred(); // Wait for the Tree's mouse event propagation.
 	set_visible(false);
 }
 
 ConnectNext::ConnectNext() {
 	menu_bar = memnew(HBoxContainer);
 	add_child(menu_bar);
+
+	source_menu = memnew(MenuButton);
+	menu_bar->add_child(source_menu);
+	source_menu->set_text("*");
+	source_menu->get_popup()->add_radio_check_item(TTR("from built-in")); // SOURCE_BUILT_IN
+	source_menu->get_popup()->add_radio_check_item(TTR("from script")); // SOURCE_HOST
+	source_menu->get_popup()->add_radio_check_item(TTR("from link")); // SOURCE_LINK
+	source_menu->get_popup()->set_hide_on_checkable_item_selection(false);
+	source_menu->get_popup()->connect("id_pressed", callable_mp(this, &ConnectNext::source_flag_pressed));
+	source_menu->get_popup()->connect("popup_hide", callable_mp(this, &ConnectNext::popup_closed)); // update results
+
 	menu_bar->set_alignment(BoxContainer::ALIGNMENT_END);
 	close_button = memnew(Button);
 	menu_bar->add_child(close_button);
 	close_button->set_flat(true);
 	close_button->connect("pressed", callable_mp(this, &ConnectNext::close));
+
+	search_tekst = memnew(LineEdit);
+	add_child(search_tekst);
+	search_tekst->set_tooltip_text(TTR("Enter \" \" to show all filtered options\nEnter \".\" to show all filtered methods, operators and constructors\nUse CTRL_KEY to drop property setters"));
+	search_tekst->set_h_size_flags(Control::SIZE_EXPAND_FILL);
+	// search_box->connect("text_changed", callable_mp(this, &VisualScriptPropertySelector::_update_results_s));
+	// search_box->connect("gui_input", callable_mp(this, &VisualScriptPropertySelector::_sbox_input));
+
+	results_tree = memnew(ResultTree);
+	add_child(results_tree);
+	results_tree->set_v_size_flags(Control::SIZE_EXPAND_FILL);
+	results_tree->set_columns(2);
+	results_tree->set_column_title(0, TTR("Name"));
+	results_tree->set_column_clip_content(0, true);
+	results_tree->set_column_title(1, TTR("Member Type"));
+	results_tree->set_column_expand(1, false);
+	results_tree->set_column_custom_minimum_width(1, 150 * EDSCALE);
+	results_tree->set_column_clip_content(1, true);
+	results_tree->set_custom_minimum_size(Size2(0, 100) * EDSCALE);
+	results_tree->set_hide_root(true);
+	results_tree->set_select_mode(Tree::SELECT_ROW);
+	results_tree->update_results("Node");
+	// results_tree->connect("item_activated", callable_mp(this, &EditorHelpSearch::_confirmed));
+	// results_tree->connect("item_selected", callable_mp((BaseButton *)get_ok_button(), &BaseButton::set_disabled).bind(false));
+
 	close();
 }
 

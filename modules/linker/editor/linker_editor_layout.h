@@ -9,13 +9,16 @@
 #include "core/variant/variant_utility.h"
 #include "editor/editor_interface.h"
 #include "editor/editor_node.h"
+#include "editor/themes/editor_scale.h"
 #include "scene/animation/tween.h"
 #include "scene/gui/box_container.h"
 #include "scene/gui/control.h"
 #include "scene/gui/grid_container.h"
 #include "scene/gui/item_list.h"
 #include "scene/gui/label.h"
+#include "scene/gui/line_edit.h"
 #include "scene/gui/margin_container.h"
+#include "scene/gui/menu_button.h"
 #include "scene/gui/panel.h"
 #include "scene/gui/scroll_container.h"
 #include "scene/gui/split_container.h"
@@ -78,14 +81,8 @@ public:
 	~LinkerEditorLayout() {}
 };
 
-class ConnectNext : public VBoxContainer {
-	GDCLASS(ConnectNext, VBoxContainer);
-	
-	bool debug_mouse_inside = true;
-	bool mouse_inside = true;
-
-	HBoxContainer *menu_bar = nullptr;
-	Button *close_button = nullptr;
+class ResultTree : public Tree {
+	GDCLASS(ResultTree, Tree);
 
 	enum ScopeFlags {
 		SCOPE_BASE = 1 << 0,
@@ -111,11 +108,58 @@ class ConnectNext : public VBoxContainer {
 		SEARCH_SHOW_HIERARCHY = 1 << 30,
 	};
 
+	ScopeFlags scope_flags = SCOPE_ALL;
+	SearchFlags search_flags = SEARCH_ALL;
+
+	Vector<PropertyInfo> source_info;
+	String search_term;
+
+protected:
+	static void _bind_methods() {}
+	void _notification(int p_what) {}
+
+public:
+	void add_source_info(const PropertyInfo &p_info);
+	void set_case_sensitive(bool p_case_sensitive);
+	void set_show_hierarchy(bool p_show_hierarchy);
+
+	void update_results(const String &p_search_term);
+	void update_results();
+
+	ResultTree() {}
+	~ResultTree() {}
+};
+
+class ConnectNext : public VBoxContainer {
+	GDCLASS(ConnectNext, VBoxContainer);
+
+	enum SourceFlags {
+		SOURCE_NONE = 0,
+		SOURCE_BUILT_IN = 1 << 0,
+		SOURCE_HOST = 1 << 1,
+		SOURCE_LINK = 1 << 2,
+		SOURCE_ALL = SOURCE_BUILT_IN | SOURCE_HOST | SOURCE_LINK
+	};
+
+	bool debug_mouse_inside = true;
+	bool mouse_inside = true;
+
+	HBoxContainer *menu_bar = nullptr;
+	Button *close_button = nullptr;
+	MenuButton *source_menu = nullptr;
+	SourceFlags source_flags = SOURCE_NONE;
+	void source_flag_pressed(int p_flag);
+	void popup_closed();
+
+	LineEdit *search_tekst = nullptr;
+	ResultTree *results_tree = nullptr;
+
 protected:
 	static void _bind_methods() {}
 	void _notification(int p_what);
-	
+
 	void _draw_debug();
+	void _update_results();
 
 public:
 	void dropped(Ref<LinkerLink> p_link, const Point2 &p_point);
