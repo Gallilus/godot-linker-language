@@ -89,7 +89,7 @@ class ResultTree : public Tree {
 	int search_flags = SEARCH_ALL;
 
 	Vector<PropertyInfo> source_info;
-	String search_term;
+	String search_term = "";
 	String class_hint = "Node";
 
 protected:
@@ -117,6 +117,9 @@ public:
 		SEARCH_ALL = SEARCH_CLASSES | SEARCH_CONSTRUCTORS | SEARCH_METHODS |
 				SEARCH_OPERATORS | SEARCH_SIGNALS | SEARCH_CONSTANTS |
 				SEARCH_PROPERTIES | SEARCH_THEME_ITEMS,
+		SEARCH_INSIDE_CLASS = SEARCH_CONSTRUCTORS | SEARCH_METHODS |
+				SEARCH_OPERATORS | SEARCH_SIGNALS | SEARCH_CONSTANTS |
+				SEARCH_PROPERTIES,
 		SEARCH_EXLUDE_FROM_PROPERTIES = 1 << 28,
 		SEARCH_CASE_SENSITIVE = 1 << 29,
 		SEARCH_SHOW_HIERARCHY = 1 << 30,
@@ -165,7 +168,7 @@ class ConnectNext : public VBoxContainer {
 	void refresh_search_menu();
 	void popup_closed();
 
-	LineEdit *search_tekst = nullptr;
+	LineEdit *search_text = nullptr;
 	ResultTree *results_tree = nullptr;
 
 protected:
@@ -175,6 +178,7 @@ protected:
 	void _update_icons();
 	void _draw_debug();
 	void _update_results(const String &p_search_term);
+	void _class_from_search_therm();
 
 public:
 	void dropped(Ref<LinkerLink> p_link, const Point2 &p_point);

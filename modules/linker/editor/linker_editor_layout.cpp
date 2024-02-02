@@ -504,12 +504,46 @@ void ConnectNext::_draw_debug() {
 }
 
 void ConnectNext::_update_results(const String &p_search_term) {
-	results_tree->update_results(p_search_term);
+	if (search_text->get_text().find("::") != -1) {
+		_class_from_search_therm();
+		_update_icons();
+		results_tree->update_results(search_text->get_text());
+	} else {
+		results_tree->update_results(p_search_term);
+	}
+}
+
+void ConnectNext::_class_from_search_therm() {
+	PackedStringArray split = search_text->get_text().split("::");
+	int carot_col = search_text->get_caret_column();
+	int old_text_length = search_text->get_text().length();
+	int valid_splits = search_text->get_text().count("::");
+	int last_valid_split = -1;
+
+	for (int i = 0; i < valid_splits; i++) {
+		if (ClassDB::class_exists(StringName(split[i]))) {
+			results_tree->class_hint = split[i];
+			results_tree->search_flags = ResultTree::SEARCH_INSIDE_CLASS;
+			results_tree->scope_flags = ResultTree::SCOPE_BASE;
+			last_valid_split = i;
+		}
+	}
+
+	String new_search_text = search_text->get_text();
+	for (int i = 0; i <= last_valid_split; i++) {
+		new_search_text = new_search_text.trim_prefix(split[i] + "::");
+	}
+
+	search_text->set_text(new_search_text);
+	search_text->set_caret_column(carot_col + new_search_text.length() - old_text_length);
 }
 
 void ConnectNext::dropped(Ref<LinkerLink> p_link, const Point2 &p_point) {
+	PropertyInfo pi = p_link->get_output_info();
+	results_tree->class_hint = pi.class_name;
+	ERR_PRINT(pi.class_name);
 	popup(p_point);
-	// get link return data and find some stuff
+	results_tree->update_results();
 }
 
 void ConnectNext::popup(const Vector2 &p_pos) {
@@ -551,11 +585,11 @@ ConnectNext::ConnectNext() {
 	close_button->set_flat(true);
 	close_button->connect("pressed", callable_mp(this, &ConnectNext::close));
 
-	search_tekst = memnew(LineEdit);
-	add_child(search_tekst);
-	search_tekst->set_tooltip_text(TTR("Enter \" \" to show all filtered options\nEnter \".\" to show all filtered methods, operators and constructors\nUse CTRL_KEY to drop property setters"));
-	search_tekst->set_h_size_flags(Control::SIZE_EXPAND_FILL);
-	search_tekst->connect("text_changed", callable_mp(this, &ConnectNext::_update_results));
+	search_text = memnew(LineEdit);
+	add_child(search_text);
+	search_text->set_tooltip_text(TTR("Enter \" \" to show all filtered options\nEnter \".\" to show all filtered methods, operators and constructors\nUse CTRL_KEY to drop property setters"));
+	search_text->set_h_size_flags(Control::SIZE_EXPAND_FILL);
+	search_text->connect("text_changed", callable_mp(this, &ConnectNext::_update_results));
 
 	results_tree = memnew(ResultTree);
 	add_child(results_tree);
