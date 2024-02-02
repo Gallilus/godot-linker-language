@@ -343,7 +343,8 @@ void ResultTree::update_results() {
 		ti->set_text(1, E->get().name);
 		ti->set_tooltip_text(1, E->get().name);
 		ti->set_icon(1, icon);
-		ti->set_meta("method", Dictionary(E->get()));
+		ti->set_meta("MethodInfo", Dictionary(E->get()));
+		ti->set_meta("type", "MethodInfo");
 	}
 }
 
@@ -543,20 +544,49 @@ void ConnectNext::_class_from_search_therm() {
 
 void ConnectNext::_tree_confirmed() {
 	TreeItem *ti = results_tree->get_selected();
+
 	if (!ti) {
 		return;
 	}
-	MethodInfo mi = MethodInfo::from_dict(ti->get_meta("method"));
-	if (mi.name != "") {
-		ERR_PRINT(String(ti->get_meta("method")));
-		close();
+
+	if (ti->get_meta("type") == "MethodInfo") {
+		_method_info_confirmed(ti->get_meta("MethodInfo"));
+	} // else if MethodInfo
+
+	close();
+}
+
+void ConnectNext::_method_info_confirmed(Dictionary p_info) {
+	MethodInfo mi = MethodInfo::from_dict(p_info);
+	ERR_PRINT(mi.name);
+	// create the new links and refs.
+}
+
+void ConnectNext::_move_source_to_argument() {
+	if (source_link) {
+		argument_links.insert(0, source_link);
+		source_link = nullptr;
+		_update_link_infos();
+	}
+}
+
+void ConnectNext::_update_link_infos() {
+	if (source_link) {
+		source_info = source_link->get_output_info();
+	} else {
+		source_info = PropertyInfo();
+	}
+	arguments_info.clear();
+	for (int i = 0; i < argument_links.size(); i++) {
+		arguments_info.push_back(argument_links[i]->get_output_info());
 	}
 }
 
 void ConnectNext::dropped(Ref<LinkerLink> p_link, const Point2 &p_point) {
-	PropertyInfo pi = p_link->get_output_info();
-	ERR_PRINT(String(pi.class_name) + " " + String(pi.name));
-	results_tree->class_hint = pi.class_name;
+	dropped_link = p_link.ptr();
+	source_link = p_link.ptr();
+	_update_link_infos();
+	results_tree->class_hint = source_info.class_name;
 	search_text->set_text("");
 	popup(p_point);
 	results_tree->update_results("");

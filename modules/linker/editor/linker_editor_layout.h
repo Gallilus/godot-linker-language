@@ -151,6 +151,12 @@ class ConnectNext : public VBoxContainer {
 	bool debug_mouse_inside = true;
 	bool mouse_inside = true;
 
+	LinkerLink *dropped_link;
+	LinkerLink *source_link;
+	Vector<LinkerLink *> argument_links;
+	PropertyInfo source_info;
+	Vector<PropertyInfo> arguments_info;
+
 	HBoxContainer *menu_bar = nullptr;
 	Button *close_button = nullptr;
 	MenuButton *source_menu = nullptr;
@@ -180,6 +186,9 @@ protected:
 	void _update_results(const String &p_search_term);
 	void _class_from_search_therm();
 	void _tree_confirmed();
+	void _method_info_confirmed(Dictionary p_info);
+	void _move_source_to_argument();
+	void _update_link_infos();
 
 public:
 	void dropped(Ref<LinkerLink> p_link, const Point2 &p_point);
