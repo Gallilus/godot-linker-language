@@ -333,14 +333,17 @@ void ResultTree::update_results(const String &p_search_term) {
 void ResultTree::update_results() {
 	get_root()->clear_children();
 	List<MethodInfo> m;
-	ERR_PRINT(search_term);
 	ClassDB::get_method_list(class_hint, &m, scope_flags & SCOPE_INHERITERS, search_flags & SEARCH_EXLUDE_FROM_PROPERTIES);
+	Ref<Texture2D> icon = Control::get_theme_icon(SNAME("MemberMethod"), EditorStringName(EditorIcons));
 	for (List<MethodInfo>::Element *E = m.front(); E; E = E->next()) {
 		if (E->get().name.find(search_term) == -1) {
 			continue;
 		}
 		TreeItem *ti = get_root()->create_child();
 		ti->set_text(1, E->get().name);
+		ti->set_tooltip_text(1, E->get().name);
+		ti->set_icon(1, icon);
+		ti->set_meta("method", Dictionary(E->get()));
 	}
 }
 
@@ -538,10 +541,21 @@ void ConnectNext::_class_from_search_therm() {
 	search_text->set_caret_column(carot_col + new_search_text.length() - old_text_length);
 }
 
+void ConnectNext::_tree_confirmed() {
+	TreeItem *ti = results_tree->get_selected();
+	if (!ti) {
+		return;
+	}
+	MethodInfo mi = MethodInfo::from_dict(ti->get_meta("method"));
+	if (mi.name != "") {
+		ERR_PRINT(String(ti->get_meta("method")));
+		close();
+	}
+}
+
 void ConnectNext::dropped(Ref<LinkerLink> p_link, const Point2 &p_point) {
 	PropertyInfo pi = p_link->get_output_info();
 	results_tree->class_hint = pi.class_name;
-	ERR_PRINT(pi.class_name);
 	popup(p_point);
 	results_tree->update_results();
 }
@@ -604,6 +618,7 @@ ConnectNext::ConnectNext() {
 	results_tree->set_custom_minimum_size(Size2(0, 100) * EDSCALE);
 	results_tree->set_hide_root(true);
 	results_tree->set_select_mode(Tree::SELECT_ROW);
+	results_tree->connect("item_activated", callable_mp(this, &ConnectNext::_tree_confirmed));
 	// results_tree->connect("item_activated", callable_mp(this, &EditorHelpSearch::_confirmed));
 	// results_tree->connect("item_selected", callable_mp((BaseButton *)get_ok_button(), &BaseButton::set_disabled).bind(false));
 

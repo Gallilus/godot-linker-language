@@ -179,6 +179,7 @@ protected:
 	void _draw_debug();
 	void _update_results(const String &p_search_term);
 	void _class_from_search_therm();
+	void _tree_confirmed();
 
 public:
 	void dropped(Ref<LinkerLink> p_link, const Point2 &p_point);
