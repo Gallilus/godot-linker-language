@@ -83,7 +83,20 @@ public:
 
 class ResultTree : public Tree {
 	GDCLASS(ResultTree, Tree);
+	friend class ConnectNext;
 
+	int scope_flags = SCOPE_ALL;
+	int search_flags = SEARCH_ALL;
+
+	Vector<PropertyInfo> source_info;
+	String search_term;
+	String class_hint = "Node";
+
+protected:
+	static void _bind_methods() {}
+	void _notification(int p_what) {}
+
+public:
 	enum ScopeFlags {
 		SCOPE_BASE = 1 << 0,
 		SCOPE_INHERITERS = 1 << 1,
@@ -104,29 +117,20 @@ class ResultTree : public Tree {
 		SEARCH_ALL = SEARCH_CLASSES | SEARCH_CONSTRUCTORS | SEARCH_METHODS |
 				SEARCH_OPERATORS | SEARCH_SIGNALS | SEARCH_CONSTANTS |
 				SEARCH_PROPERTIES | SEARCH_THEME_ITEMS,
+		SEARCH_EXLUDE_FROM_PROPERTIES = 1 << 28,
 		SEARCH_CASE_SENSITIVE = 1 << 29,
 		SEARCH_SHOW_HIERARCHY = 1 << 30,
 	};
 
-	ScopeFlags scope_flags = SCOPE_ALL;
-	SearchFlags search_flags = SEARCH_ALL;
-
-	Vector<PropertyInfo> source_info;
-	String search_term;
-
-protected:
-	static void _bind_methods() {}
-	void _notification(int p_what) {}
-
-public:
 	void add_source_info(const PropertyInfo &p_info);
 	void set_case_sensitive(bool p_case_sensitive);
 	void set_show_hierarchy(bool p_show_hierarchy);
+	void set_show_setters_getters(bool p_show_setters_getters);
 
 	void update_results(const String &p_search_term);
 	void update_results();
 
-	ResultTree() {}
+	ResultTree();
 	~ResultTree() {}
 };
 
@@ -147,8 +151,18 @@ class ConnectNext : public VBoxContainer {
 	HBoxContainer *menu_bar = nullptr;
 	Button *close_button = nullptr;
 	MenuButton *source_menu = nullptr;
-	SourceFlags source_flags = SOURCE_NONE;
+	int source_flags = SOURCE_NONE;
+	MenuButton *scope_menu = nullptr;
+	int scope_flags = ResultTree::SCOPE_ALL;
+	MenuButton *search_menu = nullptr;
+	int search_flags = ResultTree::SEARCH_ALL;
+
 	void source_flag_pressed(int p_flag);
+	void refresh_source_menu();
+	void scope_flag_pressed(int p_flag);
+	void refresh_scope_menu();
+	void search_flag_pressed(int p_flag);
+	void refresh_search_menu();
 	void popup_closed();
 
 	LineEdit *search_tekst = nullptr;
@@ -158,8 +172,9 @@ protected:
 	static void _bind_methods() {}
 	void _notification(int p_what);
 
+	void _update_icons();
 	void _draw_debug();
-	void _update_results();
+	void _update_results(const String &p_search_term);
 
 public:
 	void dropped(Ref<LinkerLink> p_link, const Point2 &p_point);

@@ -1,4 +1,5 @@
 #include "linker_editor_layout.h"
+// #include "editor/editor_string_names.h"
 #include "editor_graph.h"
 #include "link_connection.h"
 #include "link_controler.h"
@@ -302,17 +303,25 @@ void ResultTree::add_source_info(const PropertyInfo &p_info) {
 
 void ResultTree::set_case_sensitive(bool p_case_sensitive) {
 	if (p_case_sensitive) {
-		//	search_flags |= SEARCH_CASE_SENSITIVE;
+		search_flags |= SEARCH_CASE_SENSITIVE;
 	} else {
-		// search_flags &= ~SEARCH_CASE_SENSITIVE;
+		search_flags &= ~SEARCH_CASE_SENSITIVE;
 	}
 }
 
 void ResultTree::set_show_hierarchy(bool p_show_hierarchy) {
 	if (p_show_hierarchy) {
-		// search_flags |= SEARCH_SHOW_HIERARCHY;
+		search_flags |= SEARCH_SHOW_HIERARCHY;
 	} else {
-		// search_flags &= ~SEARCH_SHOW_HIERARCHY;
+		search_flags &= ~SEARCH_SHOW_HIERARCHY;
+	}
+}
+
+void ResultTree::set_show_setters_getters(bool p_show_setters_getters) {
+	if (p_show_setters_getters) {
+		search_flags &= ~SEARCH_EXLUDE_FROM_PROPERTIES;
+	} else {
+		search_flags |= SEARCH_EXLUDE_FROM_PROPERTIES;
 	}
 }
 
@@ -322,49 +331,130 @@ void ResultTree::update_results(const String &p_search_term) {
 }
 
 void ResultTree::update_results() {
-	clear();
-	ERR_PRINT(search_term);
+	get_root()->clear_children();
 	List<MethodInfo> m;
-	ClassDB::get_method_list(search_term, &m);
+	ERR_PRINT(search_term);
+	ClassDB::get_method_list(class_hint, &m, scope_flags & SCOPE_INHERITERS, search_flags & SEARCH_EXLUDE_FROM_PROPERTIES);
 	for (List<MethodInfo>::Element *E = m.front(); E; E = E->next()) {
-		if (E->get().name.begins_with("get_")) {
-			print_line(E->get().name);
+		if (E->get().name.find(search_term) == -1) {
+			continue;
 		}
+		TreeItem *ti = get_root()->create_child();
+		ti->set_text(1, E->get().name);
 	}
+}
+
+ResultTree::ResultTree() {
+	create_item(); // create root
 }
 
 void ConnectNext::source_flag_pressed(int p_flag) {
 	int flag_pressed = 1 << p_flag;
 	if (Input::get_singleton()->is_key_pressed(Key::CTRL)) {
-		source_flags = SOURCE_NONE;
+		source_flags = 0;
 	}
-	source_flags = static_cast<ConnectNext::SourceFlags>(static_cast<int>(source_flags) ^ flag_pressed);
+	source_flags ^= flag_pressed;
+	refresh_source_menu();
+}
 
+void ConnectNext::refresh_source_menu() {
 	source_menu->get_popup()->set_item_checked(0, source_flags & SOURCE_BUILT_IN);
 	source_menu->get_popup()->set_item_checked(1, source_flags & SOURCE_HOST);
 	source_menu->get_popup()->set_item_checked(2, source_flags & SOURCE_LINK);
 
 	if (source_flags == SOURCE_NONE) {
-		source_menu->set_text("_"); // place holder art
+		source_menu->set_icon(Control::get_theme_icon(SNAME("GuiVisibilityHidden"), EditorStringName(EditorIcons)));
+		source_menu->set_text("");
 	} else if (source_flags == SOURCE_BUILT_IN) {
-		source_menu->set_text("\\/"); // place holder art
+		source_menu->set_icon(Control::get_theme_icon(SNAME("ExternalLink"), EditorStringName(EditorIcons)));
 	} else if (source_flags == SOURCE_HOST) {
-		source_menu->set_text("|>"); // place holder art
+		source_menu->set_icon(Control::get_theme_icon(SNAME("Script"), EditorStringName(EditorIcons)));
 	} else if (source_flags == SOURCE_LINK) {
-		source_menu->set_text("->"); // place holder art
+		source_menu->set_icon(Control::get_theme_icon(SNAME("Unlinked"), EditorStringName(EditorIcons)));
 	} else {
-		source_menu->set_text("*");
+		source_menu->set_icon(Control::get_theme_icon(SNAME("GuiVisibilityVisible"), EditorStringName(EditorIcons)));
+	}
+}
+
+void ConnectNext::scope_flag_pressed(int p_flag) {
+	int flag_pressed = 1 << p_flag;
+	if (Input::get_singleton()->is_key_pressed(Key::CTRL)) {
+		scope_flags = 0;
+	}
+	scope_flags ^= flag_pressed;
+	refresh_scope_menu();
+}
+
+void ConnectNext::refresh_scope_menu() {
+	scope_menu->get_popup()->set_item_checked(0, scope_flags & ResultTree::SCOPE_BASE);
+	scope_menu->get_popup()->set_item_checked(1, scope_flags & ResultTree::SCOPE_INHERITERS);
+	scope_menu->get_popup()->set_item_checked(2, scope_flags & ResultTree::SCOPE_UNRELATED);
+
+	if (scope_flags == 0) {
+		scope_menu->set_icon(Control::get_theme_icon(SNAME("GuiVisibilityHidden"), EditorStringName(EditorIcons)));
+	} else if (scope_flags == ResultTree::SCOPE_BASE) {
+		scope_menu->set_icon(Control::get_theme_icon(SNAME("CollapseTree"), EditorStringName(EditorIcons)));
+	} else if (scope_flags == ResultTree::SCOPE_INHERITERS) {
+		scope_menu->set_icon(Control::get_theme_icon(SNAME("FileTree"), EditorStringName(EditorIcons)));
+	} else if (scope_flags == ResultTree::SCOPE_UNRELATED) {
+		scope_menu->set_icon(Control::get_theme_icon(SNAME("ExpandTree"), EditorStringName(EditorIcons)));
+	} else {
+		scope_menu->set_icon(Control::get_theme_icon(SNAME("GuiVisibilityVisible"), EditorStringName(EditorIcons)));
+	}
+}
+
+void ConnectNext::search_flag_pressed(int p_flag) {
+	int flag_pressed = 1 << p_flag;
+	if (Input::get_singleton()->is_key_pressed(Key::CTRL)) {
+		search_flags = 0;
+	}
+	search_flags ^= flag_pressed;
+	refresh_search_menu();
+}
+
+void ConnectNext::refresh_search_menu() {
+	search_menu->get_popup()->set_item_checked(0, search_flags & ResultTree::SEARCH_CLASSES);
+	search_menu->get_popup()->set_item_checked(1, search_flags & ResultTree::SEARCH_CONSTRUCTORS);
+	search_menu->get_popup()->set_item_checked(2, search_flags & ResultTree::SEARCH_METHODS);
+	search_menu->get_popup()->set_item_checked(3, search_flags & ResultTree::SEARCH_OPERATORS);
+	search_menu->get_popup()->set_item_checked(4, search_flags & ResultTree::SEARCH_SIGNALS);
+	search_menu->get_popup()->set_item_checked(5, search_flags & ResultTree::SEARCH_CONSTANTS);
+	search_menu->get_popup()->set_item_checked(6, search_flags & ResultTree::SEARCH_PROPERTIES);
+	search_menu->get_popup()->set_item_checked(7, search_flags & ResultTree::SEARCH_THEME_ITEMS);
+
+	if (search_flags == 0) {
+		search_menu->set_icon(Control::get_theme_icon(SNAME("GuiVisibilityHidden"), EditorStringName(EditorIcons)));
+	} else if (search_flags == ResultTree::SEARCH_CLASSES) {
+		search_menu->set_icon(Control::get_theme_icon(SNAME("Object"), EditorStringName(EditorIcons)));
+	} else if (search_flags == ResultTree::SEARCH_CONSTRUCTORS) {
+		search_menu->set_icon(Control::get_theme_icon(SNAME("ResourcePreloader"), EditorStringName(EditorIcons)));
+	} else if (search_flags == ResultTree::SEARCH_METHODS) {
+		search_menu->set_icon(Control::get_theme_icon(SNAME("MemberMethod"), EditorStringName(EditorIcons)));
+	} else if (search_flags == ResultTree::SEARCH_OPERATORS) {
+		search_menu->set_icon(Control::get_theme_icon(SNAME("Add"), EditorStringName(EditorIcons)));
+	} else if (search_flags == ResultTree::SEARCH_SIGNALS) {
+		search_menu->set_icon(Control::get_theme_icon(SNAME("MemberSignal"), EditorStringName(EditorIcons)));
+	} else if (search_flags == ResultTree::SEARCH_CONSTANTS) {
+		search_menu->set_icon(Control::get_theme_icon(SNAME("MemberConstant"), EditorStringName(EditorIcons)));
+	} else if (search_flags == ResultTree::SEARCH_PROPERTIES) {
+		search_menu->set_icon(Control::get_theme_icon(SNAME("MemberProperty"), EditorStringName(EditorIcons)));
+	} else if (search_flags == ResultTree::SEARCH_THEME_ITEMS) {
+		search_menu->set_icon(Control::get_theme_icon(SNAME("MemberTheme"), EditorStringName(EditorIcons)));
+	} else {
+		search_menu->set_icon(Control::get_theme_icon(SNAME("GuiVisibilityVisible"), EditorStringName(EditorIcons)));
 	}
 }
 
 void ConnectNext::popup_closed() {
-	ERR_PRINT("update_results");
+	results_tree->search_flags = search_flags;
+	results_tree->scope_flags = scope_flags;
+	results_tree->update_results();
 }
 
 void ConnectNext::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_READY: {
-			close_button->set_icon(Control::get_theme_icon(SNAME("Close"), EditorStringName(EditorIcons)));
+			_update_icons();
 		} break;
 		case NOTIFICATION_MOUSE_ENTER: {
 			mouse_inside = true;
@@ -383,10 +473,38 @@ void ConnectNext::_notification(int p_what) {
 	}
 }
 
+void ConnectNext::_update_icons() {
+	close_button->set_icon(Control::get_theme_icon(SNAME("Close"), EditorStringName(EditorIcons)));
+
+	source_menu->get_popup()->add_icon_radio_check_item(Control::get_theme_icon(SNAME("ExternalLink"), EditorStringName(EditorIcons)), TTR("from built-in")); // SOURCE_BUILT_IN
+	source_menu->get_popup()->add_icon_radio_check_item(Control::get_theme_icon(SNAME("Script"), EditorStringName(EditorIcons)), TTR("from script")); // SOURCE_HOST
+	source_menu->get_popup()->add_icon_radio_check_item(Control::get_theme_icon(SNAME("Unlinked"), EditorStringName(EditorIcons)), TTR("from link")); // SOURCE_LINK
+	refresh_source_menu();
+
+	scope_menu->get_popup()->add_icon_radio_check_item(Control::get_theme_icon(SNAME("CollapseTree"), EditorStringName(EditorIcons)), TTR("base")); // SCOPE_BASE
+	scope_menu->get_popup()->add_icon_radio_check_item(Control::get_theme_icon(SNAME("FileTree"), EditorStringName(EditorIcons)), TTR("inheriters")); // SCOPE_INHERITERS
+	scope_menu->get_popup()->add_icon_radio_check_item(Control::get_theme_icon(SNAME("ExpandTree"), EditorStringName(EditorIcons)), TTR("unrelated")); // SCOPE_UNRELATED
+	refresh_scope_menu();
+
+	search_menu->get_popup()->add_icon_radio_check_item(Control::get_theme_icon(SNAME("Object"), EditorStringName(EditorIcons)), TTR("classes")); // SEARCH_CONSTRUCTORS
+	search_menu->get_popup()->add_icon_radio_check_item(Control::get_theme_icon(SNAME("ResourcePreloader"), EditorStringName(EditorIcons)), TTR("constructors")); // SEARCH_CONSTRUCTORS
+	search_menu->get_popup()->add_icon_radio_check_item(Control::get_theme_icon(SNAME("MemberMethod"), EditorStringName(EditorIcons)), TTR("methods")); // SEARCH_METHODS
+	search_menu->get_popup()->add_icon_radio_check_item(Control::get_theme_icon(SNAME("Add"), EditorStringName(EditorIcons)), TTR("operators")); // SEARCH_OPERATORS
+	search_menu->get_popup()->add_icon_radio_check_item(Control::get_theme_icon(SNAME("MemberSignal"), EditorStringName(EditorIcons)), TTR("signals")); // SEARCH_SIGNALS
+	search_menu->get_popup()->add_icon_radio_check_item(Control::get_theme_icon(SNAME("MemberConstant"), EditorStringName(EditorIcons)), TTR("constants")); // SEARCH_CONSTANTS
+	search_menu->get_popup()->add_icon_radio_check_item(Control::get_theme_icon(SNAME("MemberProperty"), EditorStringName(EditorIcons)), TTR("properties")); // SEARCH_PROPERTIES
+	search_menu->get_popup()->add_icon_radio_check_item(Control::get_theme_icon(SNAME("MemberTheme"), EditorStringName(EditorIcons)), TTR("theme items")); // SEARCH_THEME_ITEMS
+	refresh_search_menu();
+}
+
 void ConnectNext::_draw_debug() {
 	if (debug_mouse_inside && mouse_inside) {
 		draw_rect(Rect2(Vector2(), get_size()), Color(0.5, 1, 1, 0.3), false, 1.0);
 	}
+}
+
+void ConnectNext::_update_results(const String &p_search_term) {
+	results_tree->update_results(p_search_term);
 }
 
 void ConnectNext::dropped(Ref<LinkerLink> p_link, const Point2 &p_point) {
@@ -397,7 +515,7 @@ void ConnectNext::dropped(Ref<LinkerLink> p_link, const Point2 &p_point) {
 void ConnectNext::popup(const Vector2 &p_pos) {
 	set_visible(true);
 	set_position(p_pos);
-	set_size(Vector2(100, 100));
+	set_size(Vector2(150, 100));
 }
 
 void ConnectNext::close() {
@@ -408,18 +526,26 @@ void ConnectNext::close() {
 ConnectNext::ConnectNext() {
 	menu_bar = memnew(HBoxContainer);
 	add_child(menu_bar);
+	menu_bar->set_alignment(BoxContainer::ALIGNMENT_END);
 
 	source_menu = memnew(MenuButton);
 	menu_bar->add_child(source_menu);
-	source_menu->set_text("*");
-	source_menu->get_popup()->add_radio_check_item(TTR("from built-in")); // SOURCE_BUILT_IN
-	source_menu->get_popup()->add_radio_check_item(TTR("from script")); // SOURCE_HOST
-	source_menu->get_popup()->add_radio_check_item(TTR("from link")); // SOURCE_LINK
 	source_menu->get_popup()->set_hide_on_checkable_item_selection(false);
 	source_menu->get_popup()->connect("id_pressed", callable_mp(this, &ConnectNext::source_flag_pressed));
 	source_menu->get_popup()->connect("popup_hide", callable_mp(this, &ConnectNext::popup_closed)); // update results
 
-	menu_bar->set_alignment(BoxContainer::ALIGNMENT_END);
+	scope_menu = memnew(MenuButton);
+	menu_bar->add_child(scope_menu);
+	scope_menu->get_popup()->set_hide_on_checkable_item_selection(false);
+	scope_menu->get_popup()->connect("id_pressed", callable_mp(this, &ConnectNext::scope_flag_pressed));
+	scope_menu->get_popup()->connect("popup_hide", callable_mp(this, &ConnectNext::popup_closed)); // update results
+
+	search_menu = memnew(MenuButton);
+	menu_bar->add_child(search_menu);
+	search_menu->get_popup()->set_hide_on_checkable_item_selection(false);
+	search_menu->get_popup()->connect("id_pressed", callable_mp(this, &ConnectNext::search_flag_pressed));
+	search_menu->get_popup()->connect("popup_hide", callable_mp(this, &ConnectNext::popup_closed)); // update results
+
 	close_button = memnew(Button);
 	menu_bar->add_child(close_button);
 	close_button->set_flat(true);
@@ -429,8 +555,7 @@ ConnectNext::ConnectNext() {
 	add_child(search_tekst);
 	search_tekst->set_tooltip_text(TTR("Enter \" \" to show all filtered options\nEnter \".\" to show all filtered methods, operators and constructors\nUse CTRL_KEY to drop property setters"));
 	search_tekst->set_h_size_flags(Control::SIZE_EXPAND_FILL);
-	// search_box->connect("text_changed", callable_mp(this, &VisualScriptPropertySelector::_update_results_s));
-	// search_box->connect("gui_input", callable_mp(this, &VisualScriptPropertySelector::_sbox_input));
+	search_tekst->connect("text_changed", callable_mp(this, &ConnectNext::_update_results));
 
 	results_tree = memnew(ResultTree);
 	add_child(results_tree);
@@ -445,7 +570,6 @@ ConnectNext::ConnectNext() {
 	results_tree->set_custom_minimum_size(Size2(0, 100) * EDSCALE);
 	results_tree->set_hide_root(true);
 	results_tree->set_select_mode(Tree::SELECT_ROW);
-	results_tree->update_results("Node");
 	// results_tree->connect("item_activated", callable_mp(this, &EditorHelpSearch::_confirmed));
 	// results_tree->connect("item_selected", callable_mp((BaseButton *)get_ok_button(), &BaseButton::set_disabled).bind(false));
 
