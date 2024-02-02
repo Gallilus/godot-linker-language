@@ -55,15 +55,13 @@ Variant LinkerSceneRefrence::get_placeholder_value() const {
 }
 
 Dictionary LinkerSceneRefrence::get_placeholder_info() const {
+	// if classname == property name object is class
 	Dictionary d;
 	d["type"] = "PropertyInfo";
-
 	PropertyInfo pi;
 	pi.type = Variant::OBJECT;
-	pi.name = node_name;
 	pi.class_name = node_class_name;
 	d["value"] = Dictionary(pi);
-
 	return d;
 }
 

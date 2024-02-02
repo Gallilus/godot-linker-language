@@ -336,7 +336,7 @@ void ResultTree::update_results() {
 	ClassDB::get_method_list(class_hint, &m, scope_flags & SCOPE_INHERITERS, search_flags & SEARCH_EXLUDE_FROM_PROPERTIES);
 	Ref<Texture2D> icon = Control::get_theme_icon(SNAME("MemberMethod"), EditorStringName(EditorIcons));
 	for (List<MethodInfo>::Element *E = m.front(); E; E = E->next()) {
-		if (E->get().name.find(search_term) == -1) {
+		if (search_term != "" && E->get().name.find(search_term) == -1) {
 			continue;
 		}
 		TreeItem *ti = get_root()->create_child();
@@ -555,9 +555,11 @@ void ConnectNext::_tree_confirmed() {
 
 void ConnectNext::dropped(Ref<LinkerLink> p_link, const Point2 &p_point) {
 	PropertyInfo pi = p_link->get_output_info();
+	ERR_PRINT(String(pi.class_name) + " " + String(pi.name));
 	results_tree->class_hint = pi.class_name;
+	search_text->set_text("");
 	popup(p_point);
-	results_tree->update_results();
+	results_tree->update_results("");
 }
 
 void ConnectNext::popup(const Vector2 &p_pos) {

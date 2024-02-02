@@ -36,9 +36,16 @@ Variant LinkerIndexGet::get_placeholder_value() const {
 }
 
 Dictionary LinkerIndexGet::get_placeholder_info() const {
-	// prefix dictionary with type PropertyInfo
-	// keys (type, value)
-	return Dictionary(/*get the object index info*/);
+	PropertyInfo pi;
+	if (!get_source().is_valid()) {
+		return Dictionary();
+	}
+	pi = get_source()->get_output_info();
+	ClassDB::get_property_info(pi.class_name, index, &pi);
+	Dictionary d;
+	d["type"] = "PropertyInfo";
+	d["value"] = Dictionary(pi);
+	return d;
 }
 
 bool LinkerIndexGet::can_drop(Ref<LinkerLink> drag_link) const {
