@@ -82,10 +82,10 @@ bool LinkerSceneRefrence::can_drop(Ref<LinkerLink> drag_link) const {
 	if (drag_link.is_null()) {
 		return false;
 	}
-	if (drag_link->get_class() == "LinkerIndexGet") {
-		return true;
+	if (drag_link->get_graph_category() == "graph_input") {
+		return false;
 	}
-	return false;
+	return true;
 }
 
 void LinkerSceneRefrence::drop_data(Ref<LinkerLink> dropped_link) {

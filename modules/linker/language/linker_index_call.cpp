@@ -52,7 +52,7 @@ bool LinkerIndexCall::can_drop(Ref<LinkerLink> drag_link) const {
 	if (drag_link->get_class() == "LinkerIndexGet") {
 		return true;
 	}
-	return false;
+	return true; // for now allow any link
 }
 
 void LinkerIndexCall::drop_data(Ref<LinkerLink> dropped_link) {
@@ -92,7 +92,11 @@ int LinkerIndexCallInstance::_step(StartMode p_start_mode, Callable::CallError &
 	}
 
 	//value = host->get_owner()->callp(index, (const Variant **)argp.ptr(), argp.size(), r_error);
-	print_line(pull_links[0]->get_value()); // built in functions
+	if (pull_links.is_empty()) {
+		print_error("there is a call without arguments"); // temp code
+	} else {
+		print_line(pull_links[0]->get_value()); // built in functions
+	}
 
 	if (r_error.error != Callable::CallError::CALL_OK) {
 		return STEP_ERROR;
