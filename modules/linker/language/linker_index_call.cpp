@@ -28,6 +28,22 @@ void LinkerIndexCall::_initialize_instance(LinkerLinkInstance *link, LinkerScrip
 	}
 }
 
+Dictionary LinkerIndexCall::get_placeholder_info() const {
+	PropertyInfo pi;
+	if (!get_source().is_valid()) {
+		return Dictionary();
+	}
+	pi = get_source()->get_output_info();
+
+	MethodInfo mi;
+	ClassDB::get_method_info(pi.class_name, index, &mi);
+	pi = mi.return_val;
+	Dictionary d;
+	d["type"] = "PropertyInfo";
+	d["value"] = Dictionary(pi);
+	return d;
+}
+
 bool LinkerIndexCall::can_drop(Ref<LinkerLink> drag_link) const {
 	if (drag_link.is_null() ||
 			drag_link == this) {
