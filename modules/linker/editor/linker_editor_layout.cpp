@@ -25,14 +25,6 @@ static Node *_find_script_node(Node *p_edited_scene, Node *p_current_node, const
 	return nullptr;
 }
 
-static void _get_node_data(Node *p_node, Ref<LinkerSceneRefrence> p_node_info, Node *p_scripted_node = nullptr) {
-	p_node_info->set_node_class_name(p_node->get_class_name());
-	p_node_info->set_node_name(p_node->get_name());
-	p_node_info->set_node_scene_path(EditorInterface::get_singleton()->get_edited_scene_root()->get_path_to(p_node));
-	p_node_info->set_node_script_file_path(p_node->get_scene_file_path());
-	p_node_info->set_node_scene_relative_path(StringName(p_scripted_node->get_path_to(p_node)));
-}
-
 void LinkerEditorLayout::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("inspect_links_request", PropertyInfo(Variant::ARRAY, "links"), PropertyInfo(Variant::VECTOR2, "glob_pos")));
 }
@@ -101,8 +93,7 @@ void LinkerEditorLayout::drop_data(const Point2 &p_point, const Variant &p_data)
 			drop_data.object_class_name = obj->get_class_name();
 			Node *node = Object::cast_to<Node>(d["object"]);
 			if (node) {
-				Ref<LinkerSceneRefrence> node_info = memnew(LinkerSceneRefrence);
-				_get_node_data(node, node_info, scripted_node);
+				Ref<LinkerSceneRefrence> node_info = LinkerEditorLayout::create_scenerefrence(node, scripted_node);
 				drop_data.nodes.append(node_info);
 			}
 		}
@@ -124,9 +115,8 @@ void LinkerEditorLayout::drop_data(const Point2 &p_point, const Variant &p_data)
 			NodePath node_path = nodes[i];
 			Node *node = get_node(node_path);
 			if (node) {
-				Ref<LinkerSceneRefrence> node_info = memnew(LinkerSceneRefrence);
-				_get_node_data(node, node_info, scripted_node);
-				drop_data.nodes.append(node_info);
+				Ref<LinkerSceneRefrence> scene_ref = LinkerEditorLayout::create_scenerefrence(node, scripted_node);
+				drop_data.nodes.append(scene_ref);
 			}
 		}
 	}
@@ -144,12 +134,10 @@ void LinkerEditorLayout::drop_data(const Point2 &p_point, const Variant &p_data)
 	if (String(d["type"]) == "obj_property") {
 		if (drop_data.nodes.size() == 1) {
 			StringName rel_path = drop_data.nodes[0]->get_node_scene_relative_path();
-			Ref<LinkerSceneRefrence> node_info = drop_data.nodes[0];
-			script->add_link(node_info);
-			node_info = script->get_scene_refrence(rel_path);
-			Ref<LinkerIndexGet> index_get = memnew(LinkerIndexGet);
-			index_get->set_index(drop_data.property_name);
-			index_get->set_source(node_info);
+			Ref<LinkerSceneRefrence> scene_ref = drop_data.nodes[0];
+			script->add_link(scene_ref);
+			scene_ref = script->get_scene_refrence(rel_path);
+			Ref<LinkerIndexGet> index_get = LinkerEditorLayout::create_index_get(drop_data.property_name, scene_ref);
 			script->add_link(index_get);
 		}
 	}
@@ -289,6 +277,17 @@ void LinkerEditorLayout::add_sequence_connection(Ref<LinkerLink> source_link, Re
 	get_link_connection(source_link, destination_link, LinkConnection::CONNECTION_TYPE_SEQUENCE); // create the connection
 }
 
+Ref<LinkerLink> LinkerEditorLayout::create_scenerefrence(Node *to_node, Node *p_scripted_node) {
+	Ref<LinkerSceneRefrence> scene_refrence;
+	scene_refrence.instantiate();
+	scene_refrence->set_node_class_name(to_node->get_class_name());
+	scene_refrence->set_node_name(to_node->get_name());
+	scene_refrence->set_node_scene_path(EditorInterface::get_singleton()->get_edited_scene_root()->get_path_to(to_node));
+	scene_refrence->set_node_script_file_path(to_node->get_scene_file_path());
+	scene_refrence->set_node_scene_relative_path(StringName(p_scripted_node->get_path_to(to_node)));
+	return scene_refrence;
+}
+
 Ref<LinkerLink> LinkerEditorLayout::create_index_get(const String &index, const Ref<LinkerLink> &p_source_link) {
 	Ref<LinkerIndexGet> index_get;
 	index_get.instantiate();
@@ -302,7 +301,7 @@ Ref<LinkerLink> LinkerEditorLayout::create_index_call(const String &index, const
 	index_call.instantiate();
 	index_call->set_index(index);
 	index_call->set_source(p_source_link);
-
+	// add arguments
 	return index_call;
 }
 

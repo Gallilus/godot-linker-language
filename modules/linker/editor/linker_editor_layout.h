@@ -78,6 +78,7 @@ public:
 	void add_pull_connection(Ref<LinkerLink> pulled_link, Ref<LinkerLink> owner_link);
 	void add_sequence_connection(Ref<LinkerLink> source_link, Ref<LinkerLink> destination_link);
 
+	static Ref<LinkerLink> create_scenerefrence(Node *to_node, Node *p_scripted_node = nullptr);
 	static Ref<LinkerLink> create_index_get(const String &index, const Ref<LinkerLink> &p_source_link);
 	static Ref<LinkerLink> create_index_call(const String &index, const Ref<LinkerLink> &p_source_link, const Vector<Ref<LinkerLink>> &p_arguments);
 
