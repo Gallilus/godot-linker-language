@@ -289,6 +289,23 @@ void LinkerEditorLayout::add_sequence_connection(Ref<LinkerLink> source_link, Re
 	get_link_connection(source_link, destination_link, LinkConnection::CONNECTION_TYPE_SEQUENCE); // create the connection
 }
 
+Ref<LinkerLink> LinkerEditorLayout::create_index_get(const String &index, const Ref<LinkerLink> &p_source_link) {
+	Ref<LinkerIndexGet> index_get;
+	index_get.instantiate();
+	index_get->set_index(index);
+	index_get->set_source(p_source_link);
+	return index_get;
+}
+
+Ref<LinkerLink> LinkerEditorLayout::create_index_call(const String &index, const Ref<LinkerLink> &p_source_link, const Vector<Ref<LinkerLink>> &p_arguments) {
+	Ref<LinkerIndexCall> index_call;
+	index_call.instantiate();
+	index_call->set_index(index);
+	index_call->set_source(p_source_link);
+
+	return index_call;
+}
+
 LinkerEditorLayout::LinkerEditorLayout() {
 	set_v_size_flags(SIZE_EXPAND_FILL);
 	set_h_size_flags(SIZE_EXPAND_FILL);
@@ -558,12 +575,14 @@ void ConnectNext::_tree_confirmed() {
 
 void ConnectNext::_method_info_confirmed(Dictionary p_info) {
 	MethodInfo mi = MethodInfo::from_dict(p_info);
+	Ref<LinkerLink> link = LinkerEditorLayout::create_index_call(mi.name, source_link, argument_links);
+	dropped_link->get_host()->add_link(link);
 	ERR_PRINT(mi.name);
 	// create the new links and refs.
 }
 
 void ConnectNext::_move_source_to_argument() {
-	if (source_link) {
+	if (source_link.is_valid()) {
 		argument_links.insert(0, source_link);
 		source_link = nullptr;
 		_update_link_infos();
@@ -571,7 +590,7 @@ void ConnectNext::_move_source_to_argument() {
 }
 
 void ConnectNext::_update_link_infos() {
-	if (source_link) {
+	if (source_link.is_valid()) {
 		source_info = source_link->get_output_info();
 	} else {
 		source_info = PropertyInfo();
@@ -583,8 +602,8 @@ void ConnectNext::_update_link_infos() {
 }
 
 void ConnectNext::dropped(Ref<LinkerLink> p_link, const Point2 &p_point) {
-	dropped_link = p_link.ptr();
-	source_link = p_link.ptr();
+	dropped_link = p_link;
+	source_link = p_link;
 	_update_link_infos();
 	results_tree->class_hint = source_info.class_name;
 	search_text->set_text("");

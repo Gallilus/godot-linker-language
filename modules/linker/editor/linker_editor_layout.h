@@ -1,6 +1,7 @@
 #ifndef EDITOR_LAYOUT_H
 #define EDITOR_LAYOUT_H
 
+#include "../language/linker_index_call.h"
 #include "../language/linker_index_get.h"
 #include "../language/linker_language.h"
 #include "../language/linker_scene_refrence.h"
@@ -77,6 +78,9 @@ public:
 	void add_pull_connection(Ref<LinkerLink> pulled_link, Ref<LinkerLink> owner_link);
 	void add_sequence_connection(Ref<LinkerLink> source_link, Ref<LinkerLink> destination_link);
 
+	static Ref<LinkerLink> create_index_get(const String &index, const Ref<LinkerLink> &p_source_link);
+	static Ref<LinkerLink> create_index_call(const String &index, const Ref<LinkerLink> &p_source_link, const Vector<Ref<LinkerLink>> &p_arguments);
+
 	LinkerEditorLayout();
 	~LinkerEditorLayout() {}
 };
@@ -151,9 +155,9 @@ class ConnectNext : public VBoxContainer {
 	bool debug_mouse_inside = true;
 	bool mouse_inside = true;
 
-	LinkerLink *dropped_link;
-	LinkerLink *source_link;
-	Vector<LinkerLink *> argument_links;
+	Ref<LinkerLink> dropped_link;
+	Ref<LinkerLink> source_link;
+	Vector<Ref<LinkerLink>> argument_links;
 	PropertyInfo source_info;
 	Vector<PropertyInfo> arguments_info;
 
