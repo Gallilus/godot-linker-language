@@ -203,12 +203,16 @@ LinkConnection *LinkerEditorLayout::get_link_connection(Ref<LinkerLink> source_l
 	if (!source_link.is_valid() || !destination_link.is_valid()) {
 		return nullptr;
 	}
+
 	// get connection
 	if (connections_map.has(source_link)) {
 		if (connections_map[source_link].has(destination_link)) {
 			Vector<LinkConnection *> _connections = connections_map[source_link][destination_link];
 			for (int i = 0; i < _connections.size(); i++) {
-				if (VariantUtilityFunctions::is_instance_valid(_connections[i])) {
+				if (!_connections[i]) {
+					ERR_PRINT("LinkerEditorLayout::get_link_connection() - _connections[i] is nullptr");
+				}
+				if (_connections[i] && VariantUtilityFunctions::is_instance_valid(_connections[i])) {
 					if (_connections[i]->connection_type == p_connection_type) {
 						return _connections[i];
 					}
@@ -240,9 +244,14 @@ void LinkerEditorLayout::update_graph() {
 	}
 
 	{ // clear layout
-		for (const KeyValue<Ref<LinkerLink>, LinkControler *> &E : link_contorlers) {
-			if (E.value) {
-				E.value->set_visible(false);
+		for (int i = 0; i < get_child_count(); i++) {
+			LinkConnection *connection = Object::cast_to<LinkConnection>(get_child(i));
+			if (connection) {
+				connection->check_validity();
+			}
+			LinkControler *controler = Object::cast_to<LinkControler>(get_child(i));
+			if (controler) {
+				controler->set_visible(false);
 			}
 		}
 	}

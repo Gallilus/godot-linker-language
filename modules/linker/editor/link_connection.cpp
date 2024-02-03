@@ -2,6 +2,10 @@
 #include "link_controler.h"
 
 void LinkConnection::_update_connection() {
+	if (!valid) {
+		set_visible(false);
+		return;
+	}
 	if (!start || !end) {
 		return;
 	}
@@ -88,4 +92,35 @@ void LinkConnection::set_end(LinkControler *p_target) {
 	if (start) {
 		_update_connection();
 	}
+}
+
+void LinkConnection::check_validity() {
+	if (!start || !end) {
+		valid = false;
+		return;
+	}
+
+	switch (connection_type) {
+		case CONNECTION_TYPE_SOURCE: {
+			Vector<Ref<LinkerLink>> pull_links = end->get_link()->get_pull_link_refs();
+			for (int i = 0; i < pull_links.size(); i++) {
+				if (pull_links[i].ptr() == start->get_link()) {
+					valid = true;
+					return;
+				}
+			}
+			break;
+		}
+		case CONNECTION_TYPE_SEQUENCE: {
+			Vector<Ref<LinkerLink>> push_links = start->get_link()->get_push_link_refs();
+			for (int i = 0; i < push_links.size(); i++) {
+				if (push_links[i].ptr() == end->get_link()) {
+					valid = true;
+					return;
+				}
+			}
+			break;
+		}
+	}
+	valid = false;
 }

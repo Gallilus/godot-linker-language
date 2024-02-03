@@ -17,6 +17,7 @@ protected:
 	LinkControler *end = nullptr;
 	Curve2D curve;
 
+	bool valid = true;
 	void _update_connection();
 
 public:
@@ -30,6 +31,7 @@ public:
 
 	void set_start(LinkControler *p_source);
 	void set_end(LinkControler *p_target);
+	void check_validity();
 
 	LinkConnection() {}
 	~LinkConnection() {}
