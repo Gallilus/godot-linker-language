@@ -631,6 +631,7 @@ void ConnectNext::close() {
 }
 
 ConnectNext::ConnectNext() {
+	set_z_index(10);
 	menu_bar = memnew(HBoxContainer);
 	add_child(menu_bar);
 	menu_bar->set_alignment(BoxContainer::ALIGNMENT_END);
