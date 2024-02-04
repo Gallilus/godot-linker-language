@@ -35,6 +35,7 @@ class LinkerEditor : public ScriptEditorBase {
 	//	Ref<EditorUndoRedoManager> undo_redo;
 	bool is_updating = false;
 	bool changed = false;
+	void _reload_graph();
 	void _update_graph();
 
 	MembersSection *members_section = nullptr;

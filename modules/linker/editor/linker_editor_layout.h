@@ -50,6 +50,8 @@ protected:
 	static void _bind_methods();
 
 	LinkControler *make_link_controler(Ref<LinkerLink> p_link);
+	void controler_started_edit_mode(LinkControler *p_controler);
+	bool controler_close_edit_mode();
 
 public:
 	struct DropData {
@@ -73,6 +75,7 @@ public:
 	LinkControler *get_link_controler(Ref<LinkerLink> p_link);
 	LinkConnection *get_link_connection(Ref<LinkerLink> source_link, Ref<LinkerLink> destination_link, int p_connection_type);
 
+	void clear_graph();
 	void update_graph();
 	void add_link(Ref<LinkerLink> p_link);
 	void add_pull_connection(Ref<LinkerLink> pulled_link, Ref<LinkerLink> owner_link);

@@ -2,11 +2,26 @@
 #include "link_connection.h"
 #include "linker_editor_layout.h"
 
+void LinkControler::_bind_methods() {
+	ADD_SIGNAL(MethodInfo("starting_edit_mode", PropertyInfo(Variant::OBJECT, "controler")));
+}
+
 void LinkControler::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_READY: {
 			_instantiate();
 			queue_redraw();
+			break;
+		}
+		case NOTIFICATION_PROCESS: {
+			if (!dragging && !mouse_inside) {
+				set_process(false);
+			}
+			if (mouse_inside && !edit_mode) {
+				if (OS::get_singleton()->get_ticks_msec() - last_mouse_enter > 1000) {
+					start_edit_mode();
+				}
+			}
 			break;
 		}
 		case NOTIFICATION_DRAG_BEGIN: {
@@ -20,6 +35,8 @@ void LinkControler::_notification(int p_what) {
 			break;
 		}
 		case NOTIFICATION_MOUSE_ENTER: {
+			last_mouse_enter = OS::get_singleton()->get_ticks_msec();
+			set_process(true);
 			mouse_inside = true;
 			queue_redraw();
 			break;
@@ -53,6 +70,12 @@ void LinkControler::_instantiate() {
 	button->set_drag_forwarding(callable_mp(this, &LinkControler::get_drag_data), callable_mp(this, &LinkControler::can_drop_data), callable_mp(this, &LinkControler::drop_data));
 	button->connect("resized", callable_mp(this, &LinkControler::on_size_changed), CONNECT_DEFERRED);
 	button->set_mouse_filter(Control::MOUSE_FILTER_PASS);
+	edit_index = memnew(LineEdit);
+	add_child(edit_index);
+	edit_index->hide();
+	edit_index->set_drag_forwarding(callable_mp(this, &LinkControler::get_drag_data), callable_mp(this, &LinkControler::can_drop_data), callable_mp(this, &LinkControler::drop_data));
+	edit_index->set_mouse_filter(Control::MOUSE_FILTER_PASS);
+	edit_index->connect("text_submitted", callable_mp(link.ptr(), &LinkerLink::set_index), CONNECT_DEFERRED);
 
 	_set_margin(_get_icon_h_alignement(link.ptr()));
 }
@@ -234,6 +257,35 @@ Vector2 LinkControler::get_connection_point_right() const {
 	int right = pos.x + size.x - margin_right;
 	int center = pos.y + margin_top + (size.y - margin_top - margin_bottom) / 2;
 	return Vector2(right, center);
+}
+
+void LinkControler::start_edit_mode() {
+	edit_mode = true;
+	emit_signal("starting_edit_mode", this);
+	edit_index->set_text(String(link->get_index()));
+	edit_index->show();
+	button->hide();
+	// add background panel
+	// add drag source
+	// add argument draggables
+	// add inspector
+	// add drop sequence box
+	// add select sequence box to access edit methods
+	// edit sequence order
+}
+
+void LinkControler::end_edit_mode() {
+	// hide the stuf from start_edit_mode
+	edit_index->hide();
+	button->show();
+	edit_mode = false;
+}
+
+void LinkControler::edit_mode_started(LinkControler *p_controler) {
+	if (this == p_controler) {
+		return;
+	}
+	end_edit_mode();
 }
 
 LinkControler::LinkControler() {

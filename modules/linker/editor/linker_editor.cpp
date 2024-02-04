@@ -1,6 +1,11 @@
 #include "linker_editor.h"
 #include "editor/editor_undo_redo_manager.h"
 
+void LinkerEditor::_reload_graph() {
+	base_editor->clear_graph();
+	_update_graph();
+}
+
 void LinkerEditor::_update_graph() {
 	if (is_updating) {
 		return;
@@ -97,7 +102,7 @@ void LinkerEditor::enable_editor(Control *p_shortcut_context) {
 	Button *_update_graph_button = memnew(Button);
 	top_menu->add_child(_update_graph_button);
 	_update_graph_button->set_text("update_graph");
-	_update_graph_button->connect("pressed", callable_mp(this, &LinkerEditor::_update_graph));
+	_update_graph_button->connect("pressed", callable_mp(this, &LinkerEditor::_reload_graph));
 
 	add_child(base_editor);
 

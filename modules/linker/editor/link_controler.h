@@ -7,6 +7,7 @@
 #include "editor/editor_node.h"
 #include "scene/gui/button.h"
 #include "scene/gui/control.h"
+#include "scene/gui/line_edit.h"
 #include "scene/gui/margin_container.h"
 #include "scene/main/viewport.h"
 
@@ -21,11 +22,13 @@ class LinkControler : public MarginContainer {
 	bool debug_controler_id = false;
 	bool debug_drag_and_drop = true;
 	bool mouse_inside = false;
+	uint64_t last_mouse_enter = 0;
 	bool dragging = false;
 
 	Ref<LinkerLink> link;
 
 	Button *button = nullptr;
+	LineEdit *edit_index = nullptr;
 
 	int margin_top = 0;
 	int margin_bottom = 0;
@@ -33,7 +36,7 @@ class LinkControler : public MarginContainer {
 	int margin_right = 0;
 
 protected:
-	static void _bind_methods() {}
+	static void _bind_methods();
 	void _notification(int p_what);
 
 	virtual void _instantiate();
@@ -48,6 +51,7 @@ protected:
 	void _draw_debug();
 
 public:
+	bool edit_mode = false;
 	// void set_layout(LinkerEditorLayout *p_layout) { layout = p_layout; }
 
 	virtual void gui_input(const Ref<InputEvent> &p_event) override;
@@ -63,6 +67,10 @@ public:
 	Vector2 get_connection_point_bottom() const;
 	Vector2 get_connection_point_left() const;
 	Vector2 get_connection_point_right() const;
+
+	void start_edit_mode();
+	void end_edit_mode();
+	void edit_mode_started(LinkControler *p_controler);
 
 	LinkControler();
 	~LinkControler();
