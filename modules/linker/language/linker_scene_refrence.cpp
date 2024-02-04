@@ -61,6 +61,7 @@ Dictionary LinkerSceneRefrence::get_placeholder_info() const {
 	PropertyInfo pi;
 	pi.type = Variant::OBJECT;
 	pi.class_name = node_class_name;
+	pi.hint_string = node_script_file_path;
 	d["value"] = Dictionary(pi);
 	return d;
 }

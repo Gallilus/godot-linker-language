@@ -41,8 +41,7 @@ void LinkerEditorLayout::gui_input(const Ref<InputEvent> &p_event) {
 	Ref<InputEventMouseButton> mb = p_event;
 	if (mb.is_valid()) {
 		if (mb->is_double_click()) {
-			// popup menu
-			ERR_PRINT("create popup");
+			connect_next->dropped(script, mb->get_position());
 			get_viewport()->set_input_as_handled();
 		}
 	}
@@ -292,7 +291,12 @@ Ref<LinkerLink> LinkerEditorLayout::create_scenerefrence(Node *to_node, Node *p_
 	scene_refrence->set_node_class_name(to_node->get_class_name());
 	scene_refrence->set_node_name(to_node->get_name());
 	scene_refrence->set_node_scene_path(EditorInterface::get_singleton()->get_edited_scene_root()->get_path_to(to_node));
-	scene_refrence->set_node_script_file_path(to_node->get_scene_file_path());
+	Script *script = Object::cast_to<Script>(to_node->get_script());
+	if (script) {
+		scene_refrence->set_node_script_file_path(script->get_path());
+	} else {
+		scene_refrence->set_node_script_file_path("");
+	}
 	scene_refrence->set_node_scene_relative_path(StringName(p_scripted_node->get_path_to(to_node)));
 	return scene_refrence;
 }
@@ -357,9 +361,19 @@ void ResultTree::update_results(const String &p_search_term) {
 
 void ResultTree::update_results() {
 	get_root()->clear_children();
-	List<MethodInfo> m;
-	ClassDB::get_method_list(class_hint, &m, scope_flags & SCOPE_INHERITERS, search_flags & SEARCH_EXLUDE_FROM_PROPERTIES);
 	Ref<Texture2D> icon = Control::get_theme_icon(SNAME("MemberMethod"), EditorStringName(EditorIcons));
+	List<MethodInfo> m;
+
+	if (ClassDB::class_exists(class_name)) {
+		ClassDB::get_method_list(class_name, &m, scope_flags & SCOPE_BASE, search_flags & SEARCH_EXLUDE_FROM_PROPERTIES);
+	}
+	if (hint_string.is_absolute_path()) {
+		Ref<Script> _script = ResourceLoader::load(hint_string);
+		if (_script.is_valid()) {
+			_script->get_script_method_list(&m);
+		}
+	}
+
 	for (List<MethodInfo>::Element *E = m.front(); E; E = E->next()) {
 		if (search_term != "" && E->get().name.find(search_term) == -1) {
 			continue;
@@ -551,7 +565,7 @@ void ConnectNext::_class_from_search_therm() {
 
 	for (int i = 0; i < valid_splits; i++) {
 		if (ClassDB::class_exists(StringName(split[i]))) {
-			results_tree->class_hint = split[i];
+			results_tree->class_name = split[i];
 			results_tree->search_flags = ResultTree::SEARCH_INSIDE_CLASS;
 			results_tree->scope_flags = ResultTree::SCOPE_BASE;
 			last_valid_split = i;
@@ -583,10 +597,31 @@ void ConnectNext::_tree_confirmed() {
 
 void ConnectNext::_method_info_confirmed(Dictionary p_info) {
 	MethodInfo mi = MethodInfo::from_dict(p_info);
-	Ref<LinkerLink> link = LinkerEditorLayout::create_index_call(mi.name, source_link, argument_links);
-	dropped_link->get_host()->add_link(link);
-	ERR_PRINT(mi.name);
-	// create the new links and refs.
+	if (source_link.is_valid()) { // scope link
+		StringName source_class = source_link->get_output_info().class_name;
+		if (ClassDB::has_method(source_class, mi.name)) {
+			Ref<LinkerLink> link = LinkerEditorLayout::create_index_call(mi.name, source_link, argument_links);
+			dropped_link->get_host()->add_link(link);
+			return;
+		}
+	} else if (dropped_script.is_valid()) { // scope script
+		if (dropped_script->has_method(mi.name)) {
+			Ref<LinkerLink> link = LinkerEditorLayout::create_index_call(mi.name, nullptr, argument_links);
+			dropped_script->add_link(link);
+			return;
+		}
+		// if (dropped_script->get_owner()->has_method(mi.name)) { // scope owner
+		// 	Ref<LinkerLink> link = LinkerEditorLayout::create_index_call(mi.name, nullptr, argument_links);
+		// 	dropped_script->add_link(link);
+		// 	return;
+		// }
+	} else { // scope built-in
+		// if (ClassDB::has_method(results_tree->class_name, mi.name)) {
+		// 	Ref<LinkerLink> link = LinkerEditorLayout::create_index_call(mi.name, nullptr, argument_links);
+		// 	dropped_script->add_link(link);
+		// 	return;
+		// }
+	}
 }
 
 void ConnectNext::_move_source_to_argument() {
@@ -609,11 +644,23 @@ void ConnectNext::_update_link_infos() {
 	}
 }
 
+void ConnectNext::dropped(Ref<LinkerScript> p_script, const Point2 &p_point) {
+	// source_flag_pressed(SOURCE_BUILT_IN || SOURCE_HOST);
+	dropped_script = p_script;
+	results_tree->class_name = dropped_script->get_path();
+	results_tree->hint_string = dropped_script->get_path();
+	search_text->set_text("");
+	popup(p_point);
+	results_tree->update_results("");
+}
+
 void ConnectNext::dropped(Ref<LinkerLink> p_link, const Point2 &p_point) {
+	// source_flag_pressed(SOURCE_LINK);
 	dropped_link = p_link;
 	source_link = p_link;
 	_update_link_infos();
-	results_tree->class_hint = source_info.class_name;
+	results_tree->class_name = source_info.class_name;
+	results_tree->hint_string = source_info.hint_string;
 	search_text->set_text("");
 	popup(p_point);
 	results_tree->update_results("");

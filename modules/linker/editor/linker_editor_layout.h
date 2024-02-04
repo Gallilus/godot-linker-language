@@ -95,7 +95,8 @@ class ResultTree : public Tree {
 
 	Vector<PropertyInfo> source_info;
 	String search_term = "";
-	String class_hint = "Node";
+	String class_name = "";
+	String hint_string = "";
 
 protected:
 	static void _bind_methods() {}
@@ -157,6 +158,7 @@ class ConnectNext : public VBoxContainer {
 	bool mouse_inside = true;
 
 	Ref<LinkerLink> dropped_link;
+	Ref<LinkerScript> dropped_script;
 	Ref<LinkerLink> source_link;
 	Vector<Ref<LinkerLink>> argument_links;
 	PropertyInfo source_info;
@@ -196,6 +198,7 @@ protected:
 	void _update_link_infos();
 
 public:
+	void dropped(Ref<LinkerScript> p_script, const Point2 &p_point);
 	void dropped(Ref<LinkerLink> p_link, const Point2 &p_point);
 	void popup(const Vector2 &p_pos);
 	void close();
