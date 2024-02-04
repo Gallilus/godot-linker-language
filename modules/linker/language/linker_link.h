@@ -46,6 +46,9 @@ public:
 	void set_index(StringName p_index) { index = p_index; }
 	StringName get_index() const { return index; }
 	void set_owner(LinkerLink *p_link);
+	bool is_pushed() const;
+	Ref<LinkerLink> get_push_link() const;
+	void disconnect_pushed_link(Ref<LinkerLink> p_link);
 
 	int get_link_idx() const;
 	void set_to_idx(int p_idx) { saved_links_idx = p_idx; }

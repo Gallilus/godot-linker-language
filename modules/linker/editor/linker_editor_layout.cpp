@@ -102,6 +102,14 @@ void LinkerEditorLayout::drop_data(const Point2 &p_point, const Variant &p_data)
 	if (d.has("link_idx")) {
 		Ref<LinkerLink> drag_link = script->get_link(d["link_idx"]);
 		drop_data.links.append(drag_link);
+
+		if (drag_link.is_valid() && drag_link->is_pushed()) { // ignore drop if disconnecting a sequenced link
+			Ref<LinkerLink> owner_link = drag_link->get_push_link();
+			if (owner_link.is_valid()) {
+				owner_link->disconnect_pushed_link(drag_link);
+				return;
+			}
+		}
 	}
 
 	if (d.has("object")) {

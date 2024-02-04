@@ -70,6 +70,34 @@ void LinkerLink::set_owner(LinkerLink *p_link) {
 	owner = p_link;
 }
 
+bool LinkerLink::is_pushed() const {
+	if (owner) {
+		for (int i = 0; i < owner->push_links.size(); i++) {
+			if (owner->push_links[i] == this) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+Ref<LinkerLink> LinkerLink::get_push_link() const {
+	if (owner) {
+		for (int i = 0; i < owner->push_links.size(); i++) {
+			if (owner->push_links[i] == this) {
+				return owner;
+			}
+		}
+	}
+	return Ref<LinkerLink>();
+}
+
+void LinkerLink::disconnect_pushed_link(Ref<LinkerLink> p_link) {
+	push_links.erase(p_link);
+	p_link->set_owner(nullptr);
+	emit_signal("changed");
+}
+
 int LinkerLink::get_link_idx() const {
 	if (host == nullptr) {
 		return -1;
