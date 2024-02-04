@@ -62,6 +62,7 @@ void LinkerEditorLayout::gui_input(const Ref<InputEvent> &p_event) {
 	Ref<InputEventMouseButton> mb = p_event;
 	if (mb.is_valid()) {
 		if (mb->is_double_click()) {
+			connect_next->close();
 			if (!controler_close_edit_mode()) {
 				connect_next->dropped(script, mb->get_position());
 			}
