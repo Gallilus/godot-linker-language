@@ -50,8 +50,6 @@ protected:
 	static void _bind_methods();
 
 	LinkControler *make_link_controler(Ref<LinkerLink> p_link);
-	void controler_started_edit_mode(LinkControler *p_controler);
-	bool controler_close_edit_mode();
 
 public:
 	struct DropData {

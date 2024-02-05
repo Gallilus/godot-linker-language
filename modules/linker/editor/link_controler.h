@@ -25,6 +25,13 @@ class LinkControler : public MarginContainer {
 	uint64_t last_mouse_enter = 0;
 	bool dragging = false;
 
+	Rect2 rect_source() const;
+	Rect2 rect_output() const;
+	Rect2 rect_link() const;
+	Rect2 rect_arg() const;
+	Rect2 rect_component() const;
+	Rect2 rect_push() const;
+
 	Ref<LinkerLink> link;
 
 	Button *button = nullptr;
@@ -32,8 +39,12 @@ class LinkControler : public MarginContainer {
 
 	int margin_top = 0;
 	int margin_bottom = 0;
+	int active_margin_bottom = 0;
 	int margin_left = 0;
 	int margin_right = 0;
+
+	bool dragging_from = false;
+	bool edit_mode_line_edit = false;
 
 protected:
 	static void _bind_methods();
@@ -47,6 +58,7 @@ protected:
 	HorizontalAlignment _get_icon_h_alignement(LinkerLink *p_link) const;
 	String _get_text(LinkerLink *p_link) const;
 	void _set_margin(HorizontalAlignment p_align);
+	void _update_margin();
 
 	void _draw_debug();
 
@@ -70,7 +82,6 @@ public:
 
 	void start_edit_mode();
 	void end_edit_mode();
-	void edit_mode_started(LinkControler *p_controler);
 
 	LinkControler();
 	~LinkControler();

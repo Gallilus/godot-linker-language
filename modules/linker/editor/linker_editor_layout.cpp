@@ -34,38 +34,14 @@ LinkControler *LinkerEditorLayout::make_link_controler(Ref<LinkerLink> p_link) {
 	link_contorlers[p_link] = controler;
 	controler->set_link(p_link);
 	add_child(controler);
-	controler->connect("starting_edit_mode", callable_mp(this, &LinkerEditorLayout::controler_started_edit_mode));
 	return controler;
-}
-
-void LinkerEditorLayout::controler_started_edit_mode(LinkControler *p_controler) {
-	for (int i = 0; i < get_child_count(); i++) {
-		LinkControler *controler = Object::cast_to<LinkControler>(get_child(i));
-		if (controler && controler->edit_mode) {
-			controler->edit_mode_started(p_controler);
-		}
-	}
-}
-
-bool LinkerEditorLayout::controler_close_edit_mode() {
-	for (int i = 0; i < get_child_count(); i++) {
-		LinkControler *controler = Object::cast_to<LinkControler>(get_child(i));
-		if (controler && controler->edit_mode) {
-			controler->end_edit_mode();
-			return true;
-		}
-	}
-	return false;
 }
 
 void LinkerEditorLayout::gui_input(const Ref<InputEvent> &p_event) {
 	Ref<InputEventMouseButton> mb = p_event;
 	if (mb.is_valid()) {
 		if (mb->is_double_click()) {
-			connect_next->close();
-			if (!controler_close_edit_mode()) {
-				connect_next->dropped(script, mb->get_position());
-			}
+			connect_next->dropped(script, mb->get_position());
 			get_viewport()->set_input_as_handled();
 		}
 	}

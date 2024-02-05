@@ -2,6 +2,53 @@
 #include "link_connection.h"
 #include "linker_editor_layout.h"
 
+Rect2 LinkControler::rect_source() const {
+	Rect2 r;
+	r.size = get_size();
+	r.size.x = margin_left;
+	r.size.y -= active_margin_bottom;
+	return r;
+}
+
+Rect2 LinkControler::rect_output() const {
+	Rect2 r;
+	r.size = get_size();
+	r.size.x = margin_right;
+	r.position.x = get_size().x - margin_right;
+	r.size.y -= active_margin_bottom;
+	return r;
+}
+
+Rect2 LinkControler::rect_link() const {
+	Rect2 r;
+	r.size = get_size();
+	r.position.x += margin_left;
+	r.size.x -= margin_right + margin_left;
+	r.size.y -= active_margin_bottom;
+	return r;
+}
+
+Rect2 LinkControler::rect_arg() const {
+	Rect2 r = rect_source();
+	r.position.y += r.size.y;
+	r.size.y = active_margin_bottom;
+	return r;
+}
+
+Rect2 LinkControler::rect_component() const {
+	Rect2 r = rect_output();
+	r.position.y += r.size.y;
+	r.size.y = active_margin_bottom;
+	return r;
+}
+
+Rect2 LinkControler::rect_push() const {
+	Rect2 r = rect_link();
+	r.position.y += r.size.y;
+	r.size.y = active_margin_bottom;
+	return r;
+}
+
 void LinkControler::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("starting_edit_mode", PropertyInfo(Variant::OBJECT, "controler")));
 }
@@ -18,10 +65,14 @@ void LinkControler::_notification(int p_what) {
 				set_process(false);
 			}
 			if (mouse_inside && !edit_mode) {
-				if (OS::get_singleton()->get_ticks_msec() - last_mouse_enter > 1000) {
+				if (OS::get_singleton()->get_ticks_msec() - last_mouse_enter > 750) {
 					start_edit_mode();
 				}
 			}
+			if (edit_mode && !mouse_inside) {
+				end_edit_mode();
+			}
+			queue_redraw();
 			break;
 		}
 		case NOTIFICATION_DRAG_BEGIN: {
@@ -38,11 +89,13 @@ void LinkControler::_notification(int p_what) {
 			last_mouse_enter = OS::get_singleton()->get_ticks_msec();
 			set_process(true);
 			mouse_inside = true;
+			dragging_from = Input::get_singleton()->is_mouse_button_pressed(MouseButton::LEFT);
 			queue_redraw();
 			break;
 		}
 		case NOTIFICATION_MOUSE_EXIT: {
 			mouse_inside = false;
+			dragging_from = false;
 			queue_redraw();
 			break;
 		}
@@ -132,10 +185,15 @@ void LinkControler::_set_margin(HorizontalAlignment p_align) {
 		margin_top = 1;
 		margin_bottom = 1;
 	}
+	active_margin_bottom = margin_bottom;
+	_update_margin();
+}
+
+void LinkControler::_update_margin() {
 	add_theme_constant_override(SNAME("margin_left"), margin_left);
 	add_theme_constant_override(SNAME("margin_top"), margin_top);
 	add_theme_constant_override(SNAME("margin_right"), margin_right);
-	add_theme_constant_override(SNAME("margin_bottom"), margin_bottom);
+	add_theme_constant_override(SNAME("margin_bottom"), active_margin_bottom);
 }
 
 void LinkControler::_draw_debug() {
@@ -160,6 +218,16 @@ void LinkControler::_draw_debug() {
 		Ref<Font> font = get_theme_font(SNAME("font"), SNAME("Label"));
 		int font_size = get_theme_font_size(SNAME("font_size"), SNAME("Label"));
 		draw_string(font, get_size() / 2, debug_string, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size, Color(0, 0, 0, 1));
+	}
+
+	if (dragging_from) {
+		Point2 mouse_pos = get_local_mouse_position();
+		draw_rect(rect_source(), Color(0.9, 0.1, 0.1, 0.3), rect_source().has_point(mouse_pos));
+		draw_rect(rect_link(), Color(0.1, 0.9, 0.1, 0.3), rect_link().has_point(mouse_pos));
+		draw_rect(rect_output(), Color(0.1, 0.1, 0.9, 0.3), rect_output().has_point(mouse_pos));
+		draw_rect(rect_arg(), Color(0.1, 0.9, 0.1, 0.3), rect_arg().has_point(mouse_pos));
+		draw_rect(rect_component(), Color(0.1, 0.1, 0.9, 0.3), rect_component().has_point(mouse_pos));
+		draw_rect(rect_push(), Color(0.9, 0.1, 0.1, 0.3), rect_push().has_point(mouse_pos));
 	}
 }
 
@@ -239,7 +307,7 @@ Vector2 LinkControler::get_connection_point_bottom() const {
 	Vector2 pos = get_position();
 	Vector2 size = get_size();
 	int center = pos.x + margin_left + (size.x - margin_left - margin_right) / 2;
-	int bottom = pos.y + size.y - margin_bottom;
+	int bottom = pos.y + size.y - active_margin_bottom;
 	return Vector2(center, bottom);
 }
 
@@ -247,7 +315,7 @@ Vector2 LinkControler::get_connection_point_left() const {
 	Vector2 pos = get_position();
 	Vector2 size = get_size();
 	int left = pos.x + margin_left;
-	int center = pos.y + margin_top + (size.y - margin_top - margin_bottom) / 2;
+	int center = pos.y + margin_top + (size.y - margin_top - active_margin_bottom) / 2;
 	return Vector2(left, center);
 }
 
@@ -255,37 +323,43 @@ Vector2 LinkControler::get_connection_point_right() const {
 	Vector2 pos = get_position();
 	Vector2 size = get_size();
 	int right = pos.x + size.x - margin_right;
-	int center = pos.y + margin_top + (size.y - margin_top - margin_bottom) / 2;
+	int center = pos.y + margin_top + (size.y - margin_top - active_margin_bottom) / 2;
 	return Vector2(right, center);
 }
 
 void LinkControler::start_edit_mode() {
 	edit_mode = true;
 	emit_signal("starting_edit_mode", this);
-	edit_index->set_text(String(link->get_index()));
-	edit_index->show();
-	button->hide();
+
+	edit_mode_line_edit = !dragging_from;
+
+	if (edit_mode_line_edit) {
+		edit_index->set_text(String(link->get_index()));
+		edit_index->show();
+		button->hide();
+	}
+	if (dragging_from) {
+		active_margin_bottom += 10;
+	}
+
 	// add background panel
-	// add drag source
 	// add argument draggables
 	// add inspector
 	// add drop sequence box
 	// add select sequence box to access edit methods
 	// edit sequence order
+	_update_margin();
 }
 
 void LinkControler::end_edit_mode() {
 	// hide the stuf from start_edit_mode
+	//if (edit_mode_line_edit) {
+	active_margin_bottom = margin_bottom;
 	edit_index->hide();
 	button->show();
 	edit_mode = false;
-}
-
-void LinkControler::edit_mode_started(LinkControler *p_controler) {
-	if (this == p_controler) {
-		return;
-	}
-	end_edit_mode();
+	// }
+	_update_margin();
 }
 
 LinkControler::LinkControler() {
