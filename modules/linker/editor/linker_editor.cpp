@@ -2,7 +2,7 @@
 #include "editor/editor_undo_redo_manager.h"
 
 void LinkerEditor::_reload_graph() {
-	base_editor->clear_graph();
+	base_editor->clear_layout();
 	_update_graph();
 }
 

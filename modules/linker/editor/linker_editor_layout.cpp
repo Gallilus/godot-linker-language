@@ -1,6 +1,5 @@
 #include "linker_editor_layout.h"
 // #include "editor/editor_string_names.h"
-#include "editor_graph.h"
 #include "link_connection.h"
 #include "link_controler.h"
 
@@ -27,6 +26,41 @@ static Node *_find_script_node(Node *p_edited_scene, Node *p_current_node, const
 
 void LinkerEditorLayout::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("inspect_links_request", PropertyInfo(Variant::ARRAY, "links"), PropertyInfo(Variant::VECTOR2, "glob_pos")));
+}
+
+void LinkerEditorLayout::_notification(int p_what) {
+	switch (p_what) {
+		case NOTIFICATION_SORT_CHILDREN: {
+			_sort_children();
+		} break;
+	}
+}
+
+void LinkerEditorLayout::_sort_children() {
+	PointRemapper point_map;
+	HashMap<LinkControler *, Vector2> controler_normalised_map;
+	// fill size with base values
+	for (const KeyValue<Ref<LinkerLink>, Vector2> &E : graph.get_linker_link_positions()) {
+		Ref<LinkerLink> link = E.key;
+		if (link.is_valid()) {
+			LinkControler *controler = get_link_controler(link);
+			controler_normalised_map[controler] = E.value;
+			point_map.add_point(E.value, controler->get_size(), controler->to_string(), link->get_link_idx());
+		} else {
+			point_map.add_point(E.value);
+		}
+	}
+
+	HashMap<Vector2, Vector2> size_map = point_map.get_point_map();
+
+	// apply real position size
+	for (const KeyValue<LinkControler *, Vector2> &E : controler_normalised_map) {
+		LinkControler *controler = E.key;
+		Vector2 norm_pos = E.value;
+		controler->set_visible(true);
+		Ref<Tween> tween = create_tween();
+		tween->tween_property(controler, NodePath("position"), size_map[norm_pos], 0.5);
+	}
 }
 
 LinkControler *LinkerEditorLayout::make_link_controler(Ref<LinkerLink> p_link) {
@@ -243,7 +277,7 @@ LinkConnection *LinkerEditorLayout::get_link_connection(Ref<LinkerLink> source_l
 	return connection;
 }
 
-void LinkerEditorLayout::clear_graph() {
+void LinkerEditorLayout::clear_layout() {
 	{
 		for (int i = 0; i < get_child_count(); i++) {
 			LinkConnection *connection = Object::cast_to<LinkConnection>(get_child(i));
@@ -261,11 +295,11 @@ void LinkerEditorLayout::clear_graph() {
 }
 
 void LinkerEditorLayout::update_graph() {
-	EditorGraph graph;
-	_graph = &graph;
 	if (!script.is_valid()) {
 		return;
 	}
+
+	graph = EditorGraph();
 
 	{ // clear layout
 		for (int i = 0; i < get_child_count(); i++) {
@@ -284,29 +318,21 @@ void LinkerEditorLayout::update_graph() {
 	script->for_every_pulled(callable_mp(this, &LinkerEditorLayout::add_pull_connection));
 	script->for_every_sequenced(callable_mp(this, &LinkerEditorLayout::add_sequence_connection));
 
-	for (const KeyValue<Ref<LinkerLink>, Vector2> &E : graph.get_linker_link_positions()) {
-		Ref<LinkerLink> link = E.key;
-		if (link.is_valid()) {
-			LinkControler *controler = get_link_controler(link);
-			controler->set_visible(true);
-			Ref<Tween> tween = create_tween();
-			tween->tween_property(controler, NodePath("position"), E.value, 0.5);
-		}
-	}
+	_sort_children();
 }
 
 void LinkerEditorLayout::add_link(Ref<LinkerLink> p_link) {
-	_graph->add_vertex(p_link);
+	graph.add_vertex(p_link);
 	get_link_controler(p_link); // create the controler
 }
 
 void LinkerEditorLayout::add_pull_connection(Ref<LinkerLink> pulled_link, Ref<LinkerLink> owner_link) {
-	_graph->add_pull_edge(pulled_link, owner_link);
+	graph.add_pull_edge(pulled_link, owner_link);
 	get_link_connection(pulled_link, owner_link, LinkConnection::CONNECTION_TYPE_SOURCE); // create the connection
 }
 
 void LinkerEditorLayout::add_sequence_connection(Ref<LinkerLink> source_link, Ref<LinkerLink> destination_link) {
-	_graph->add_sequence_edge(source_link, destination_link);
+	graph.add_sequence_edge(source_link, destination_link);
 	get_link_connection(source_link, destination_link, LinkConnection::CONNECTION_TYPE_SEQUENCE); // create the connection
 }
 

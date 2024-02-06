@@ -1,4 +1,4 @@
-#ifndef EDITOR_GRAPH_H
+#ifndef CLASSEDITOR_GRAPH_H_NAME_H
 #define CLASSEDITOR_GRAPH_H_NAME_H
 
 #include "..\language\linker_link.h"
@@ -7,6 +7,7 @@
 
 class EditorGraph : public RefCounted {
 	GDCLASS(EditorGraph, RefCounted);
+	friend class LinkerEditorLayout;
 
 	igraph_attribute_table_t graph_attributes;
 	igraph_t graph;
@@ -19,7 +20,6 @@ protected:
 	int get_vertex_id(Ref<LinkerLink> p_linker_link) const;
 
 public:
-	void clear();
 	HashMap<Ref<LinkerLink>, Vector2> get_linker_link_positions();
 	void add_vertex(Ref<LinkerLink> p_link);
 	void add_edge(Ref<LinkerLink> p_link_from, Ref<LinkerLink> p_link_to, String p_edge_category);
@@ -30,4 +30,4 @@ public:
 	~EditorGraph();
 };
 
-#endif // EDITOR_GRAPH_H
+#endif // CLASSEDITOR_GRAPH_H_NAME_H

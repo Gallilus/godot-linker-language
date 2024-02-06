@@ -1,11 +1,13 @@
 #ifndef EDITOR_LAYOUT_H
 #define EDITOR_LAYOUT_H
 
+#include "../classes/PointRemapper.h"
 #include "../language/linker_index_call.h"
 #include "../language/linker_index_get.h"
 #include "../language/linker_language.h"
 #include "../language/linker_scene_refrence.h"
 #include "../language/linker_script.h"
+#include "editor_graph.h"
 
 #include "core/variant/variant_utility.h"
 #include "editor/editor_interface.h"
@@ -13,6 +15,7 @@
 #include "editor/themes/editor_scale.h"
 #include "scene/animation/tween.h"
 #include "scene/gui/box_container.h"
+#include "scene/gui/container.h"
 #include "scene/gui/control.h"
 #include "scene/gui/grid_container.h"
 #include "scene/gui/item_list.h"
@@ -29,13 +32,24 @@
 
 class LinkControler;
 class LinkConnection;
-class EditorGraph;
 class ConnectNext;
 
-class LinkerEditorLayout : public Control {
-	GDCLASS(LinkerEditorLayout, Control);
+class LinkerEditorLayout : public Container {
+	GDCLASS(LinkerEditorLayout, Container);
+
+	struct XCompare {
+		bool operator()(const Vector2 &a, const Vector2 &b) const {
+			return a.x < b.x;
+		}
+	};
+	struct YCompare {
+		bool operator()(const Vector2 &a, const Vector2 &b) const {
+			return a.y < b.y;
+		}
+	};
+
 	Ref<LinkerScript> script;
-	EditorGraph *_graph = nullptr;
+	EditorGraph graph;
 
 	HashMap<Ref<LinkerLink>, LinkControler *> link_contorlers;
 	HashMap<Ref<LinkerLink>, HashMap<Ref<LinkerLink>, Vector<LinkConnection *>>> connections_map;
@@ -48,6 +62,8 @@ class LinkerEditorLayout : public Control {
 
 protected:
 	static void _bind_methods();
+	void _notification(int p_what);
+	void _sort_children();
 
 	LinkControler *make_link_controler(Ref<LinkerLink> p_link);
 
@@ -73,7 +89,7 @@ public:
 	LinkControler *get_link_controler(Ref<LinkerLink> p_link);
 	LinkConnection *get_link_connection(Ref<LinkerLink> source_link, Ref<LinkerLink> destination_link, int p_connection_type);
 
-	void clear_graph();
+	void clear_layout();
 	void update_graph();
 	void add_link(Ref<LinkerLink> p_link);
 	void add_pull_connection(Ref<LinkerLink> pulled_link, Ref<LinkerLink> owner_link);
