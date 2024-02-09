@@ -63,6 +63,8 @@ class LinkControler : public MarginContainer {
 protected:
 	static void _bind_methods();
 	void _notification(int p_what);
+	
+	int link_components = LinkerLink::LINK_COMPONENT_PULL;
 
 	virtual void _instantiate();
 
@@ -75,6 +77,7 @@ protected:
 	void _update_margin();
 
 	void _draw_debug();
+	
 
 public:
 	bool edit_mode = false;

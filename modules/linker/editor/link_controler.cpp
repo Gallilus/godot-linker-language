@@ -184,6 +184,11 @@ void LinkControler::_instantiate() {
 	edit_index->set_drag_forwarding(callable_mp(this, &LinkControler::get_drag_data), callable_mp(this, &LinkControler::can_drop_data), callable_mp(this, &LinkControler::drop_data));
 	edit_index->connect("text_submitted", callable_mp(link.ptr(), &LinkerLink::set_index), CONNECT_DEFERRED);
 	icon->set_drag_forwarding(callable_mp(this, &LinkControler::get_drag_data), callable_mp(this, &LinkControler::can_drop_data), callable_mp(this, &LinkControler::drop_data));
+
+	link_components = link->get_link_component_mask();
+	if (link_components & LinkerLink::LINK_COMPONENT_PULL) {
+		ERR_PRINT("pull");
+	}
 }
 
 void LinkControler::on_size_changed() {

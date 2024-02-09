@@ -23,6 +23,7 @@ private:
 protected:
 	LinkerScript *host = nullptr;
 	StringName index;
+	int link_component_mask = 0;
 
 	static void _bind_methods();
 
@@ -38,6 +39,12 @@ protected:
 	virtual void _initialize_instance(LinkerLinkInstance *link, LinkerScriptInstance *p_host, int p_stack_size) = 0;
 
 public:
+	enum LinkComponents {
+		LINK_COMPONENT_PULL = 1 << 0,
+		LINK_COMPONENT_PUSH = 1 << 1,
+		LINK_COMPONENT_OWNER = 1 << 2,
+	};
+
 	void set_host(LinkerScript *p_host);
 	LinkerScript *get_host() const { return host; }
 	virtual void set_source(Ref<LinkerLink> p_source);
@@ -75,6 +82,9 @@ public:
 
 	virtual LinkerLinkInstance *get_instance(LinkerScriptInstance *p_host, int p_stack_size) = 0;
 	virtual void remove_instance(LinkerScriptInstance *p_host, int p_stack_size) = 0;
+
+	void set_link_component_mask(int p_mask) { link_component_mask = p_mask; }
+	int get_link_component_mask() const { return link_component_mask; }
 
 	void remove_from_script(bool p_force = false);
 };
