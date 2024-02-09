@@ -191,6 +191,22 @@ bool LinkerLink::can_drop(Ref<LinkerLink> drag_link) const {
 	return false;
 }
 
+bool LinkerLink::can_drop_argument(Ref<LinkerLink> drag_link) const {
+	return false;
+}
+
+bool LinkerLink::can_drop_source(Ref<LinkerLink> drag_link) const {
+	return false;
+}
+
+bool LinkerLink::use_argument() const {
+	return true;
+}
+
+bool LinkerLink::use_source() const {
+	return true;
+}
+
 void LinkerLink::remove_from_script(bool p_force) {
 	if (!p_force && owner) {
 		return;

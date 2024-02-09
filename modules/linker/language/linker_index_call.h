@@ -19,11 +19,15 @@ public:
 	virtual Dictionary get_placeholder_info() const override;
 
 	virtual bool can_drop(Ref<LinkerLink> drag_link) const override;
+	virtual bool can_drop_argument(Ref<LinkerLink> drag_link) const override { return true; }
+	virtual bool can_drop_source(Ref<LinkerLink> drag_link) const override { return true; }
 	virtual void drop_data(Ref<LinkerLink> dropped_link) override;
 	virtual bool controler_at_source() const override { return false; }
 
 	virtual LinkerLinkInstance *get_instance(LinkerScriptInstance *p_host, int p_stack_size) override;
 	virtual void remove_instance(LinkerScriptInstance *p_host, int p_stack_size) override;
+
+	LinkerIndexCall();
 };
 
 ////////////////////////////////////////////////////////////////////////

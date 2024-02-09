@@ -30,10 +30,10 @@ Rect2 LinkControler::rect_arg() const {
 }
 
 Rect2 LinkControler::rect_set() const {
-	if (!set_rect->is_visible()) {
+	if (!component_set_rect->is_visible()) {
 		return Rect2();
 	}
-	Rect2 r = set_rect->get_rect();
+	Rect2 r = component_set_rect->get_rect();
 	r.position += value_rects->get_position();
 	return r;
 }
@@ -115,6 +115,9 @@ void LinkControler::_notification(int p_what) {
 					start_edit_mode();
 				}
 			}
+			if (mouse_inside && edit_mode) {
+				update_edit_mode();
+			}
 			if (edit_mode && !mouse_inside) {
 				end_edit_mode();
 			}
@@ -162,15 +165,8 @@ void LinkControler::_instantiate() {
 	controler_outputs->set_alignment(BoxContainer::ALIGNMENT_CENTER);
 	label->set_horizontal_alignment(HORIZONTAL_ALIGNMENT_CENTER);
 	edit_index->set_horizontal_alignment(HORIZONTAL_ALIGNMENT_CENTER);
-	set_rect->set_h_size_flags(SIZE_EXPAND_FILL);
+	component_set_rect->set_h_size_flags(SIZE_EXPAND_FILL);
 	component_rect->set_h_size_flags(SIZE_EXPAND_FILL);
-
-	source_rect->set_custom_minimum_size(CELL_SIZE);
-	arg_rect->set_custom_minimum_size(CELL_SIZE);
-	set_rect->set_custom_minimum_size(CELL_SIZE);
-	component_rect->set_custom_minimum_size(CELL_SIZE);
-	output_rect->set_custom_minimum_size(CELL_SIZE);
-	push_rect->set_custom_minimum_size(CELL_SIZE);
 
 	label->set_text(_get_text(link.ptr()));
 	label->set_tooltip_text(String(link->get_class()));
@@ -181,13 +177,38 @@ void LinkControler::_instantiate() {
 	icon->set_h_size_flags(SIZE_SHRINK_CENTER);
 
 	label->set_drag_forwarding(callable_mp(this, &LinkControler::get_drag_data), callable_mp(this, &LinkControler::can_drop_data), callable_mp(this, &LinkControler::drop_data));
-	edit_index->set_drag_forwarding(callable_mp(this, &LinkControler::get_drag_data), callable_mp(this, &LinkControler::can_drop_data), callable_mp(this, &LinkControler::drop_data));
-	edit_index->connect("text_submitted", callable_mp(link.ptr(), &LinkerLink::set_index), CONNECT_DEFERRED);
+	// edit_index->set_drag_forwarding(callable_mp(this, &LinkControler::get_drag_data), callable_mp(this, &LinkControler::can_drop_data), callable_mp(this, &LinkControler::drop_data));
 	icon->set_drag_forwarding(callable_mp(this, &LinkControler::get_drag_data), callable_mp(this, &LinkControler::can_drop_data), callable_mp(this, &LinkControler::drop_data));
+	source_rect->set_drag_forwarding(callable_mp(this, &LinkControler::get_drag_data), callable_mp(this, &LinkControler::can_drop_data), callable_mp(this, &LinkControler::drop_data));
+	arg_rect->set_drag_forwarding(callable_mp(this, &LinkControler::get_drag_data), callable_mp(this, &LinkControler::can_drop_data), callable_mp(this, &LinkControler::drop_data));
+	component_set_rect->set_drag_forwarding(callable_mp(this, &LinkControler::get_drag_data), callable_mp(this, &LinkControler::can_drop_data), callable_mp(this, &LinkControler::drop_data));
+	component_rect->set_drag_forwarding(callable_mp(this, &LinkControler::get_drag_data), callable_mp(this, &LinkControler::can_drop_data), callable_mp(this, &LinkControler::drop_data));
+	output_rect->set_drag_forwarding(callable_mp(this, &LinkControler::get_drag_data), callable_mp(this, &LinkControler::can_drop_data), callable_mp(this, &LinkControler::drop_data));
+	push_rect->set_drag_forwarding(callable_mp(this, &LinkControler::get_drag_data), callable_mp(this, &LinkControler::can_drop_data), callable_mp(this, &LinkControler::drop_data));
+	component_output_rect->set_drag_forwarding(callable_mp(this, &LinkControler::get_drag_data), callable_mp(this, &LinkControler::can_drop_data), callable_mp(this, &LinkControler::drop_data));
+
+	edit_index->connect("text_submitted", callable_mp(link.ptr(), &LinkerLink::set_index), CONNECT_DEFERRED);
 
 	link_components = link->get_link_component_mask();
-	if (link_components & LinkerLink::LINK_COMPONENT_PULL) {
-		ERR_PRINT("pull");
+
+	set_component_visibility();
+}
+
+void LinkControler::set_component_visibility() {
+	component_set_rect->set_custom_minimum_size(CELL_SIZE_SMAL);
+	component_rect->set_custom_minimum_size(CELL_SIZE_SMAL);
+	output_rect->set_custom_minimum_size(CELL_SIZE_SMAL);
+	push_rect->set_custom_minimum_size(CELL_SIZE_SMAL);
+
+	if (link->use_source()) {
+		source_rect->set_custom_minimum_size(CELL_SIZE_SMAL);
+	} else {
+		source_rect->set_custom_minimum_size(CELL_SIZE_HIDDEN);
+	}
+	if (link->use_argument()) {
+		arg_rect->set_custom_minimum_size(CELL_SIZE_SMAL);
+	} else {
+		arg_rect->set_custom_minimum_size(CELL_SIZE_HIDDEN);
 	}
 }
 
@@ -305,8 +326,21 @@ bool LinkControler::can_drop_data(const Point2 &p_point, const Variant &p_data) 
 			drag_link->get_host() != link->get_host()) {
 		return false;
 	}
-	if (link->can_drop(drag_link)) {
-		return true;
+	Point2 mouse_pos = get_local_mouse_position();
+	if (rect_source().has_point(mouse_pos)) {
+		return link->can_drop_source(drag_link);
+	} else if (rect_arg().has_point(mouse_pos)) {
+		return link->can_drop_argument(drag_link);
+	} else if (rect_set().has_point(mouse_pos)) {
+		return link->can_drop(drag_link);
+	} else if (rect_output().has_point(mouse_pos)) {
+		return link->can_drop(drag_link);
+	} else if (rect_push().has_point(mouse_pos)) {
+		return link->can_drop(drag_link);
+	} else if (rect_next().has_point(mouse_pos)) {
+		return link->can_drop(drag_link);
+	} else if (rect_this().has_point(mouse_pos)) {
+		return link->can_drop(drag_link);
 	}
 	return false;
 }
@@ -352,7 +386,7 @@ Vector2 LinkControler::get_connection_point_bottom() const {
 Vector2 LinkControler::get_connection_point_left() const {
 	Vector2 pos = get_position();
 	Vector2 size = get_size();
-	int center = pos.x + (size.x / 2);
+	int center = pos.y + (size.y / 2);
 	int left = pos.x;
 	return Vector2(left, center);
 }
@@ -360,7 +394,7 @@ Vector2 LinkControler::get_connection_point_left() const {
 Vector2 LinkControler::get_connection_point_right() const {
 	Vector2 pos = get_position();
 	Vector2 size = get_size();
-	int center = pos.x + (size.x / 2);
+	int center = pos.y + (size.y / 2);
 	int right = pos.x + size.x;
 	return Vector2(right, center);
 }
@@ -387,17 +421,37 @@ void LinkControler::start_edit_mode() {
 	// add drop sequence box
 	// add select sequence box to access edit methods
 	// edit sequence order
+	set_size(Vector2(0, 0));
+}
+
+void LinkControler::update_edit_mode() {
+	set_component_visibility();
+	Point2 mouse_pos = get_local_mouse_position();
+	if (rect_source().has_point(mouse_pos)) {
+		source_rect->set_custom_minimum_size(CELL_SIZE);
+	} else if (rect_arg().has_point(mouse_pos)) {
+		arg_rect->set_custom_minimum_size(CELL_SIZE);
+	} else if (rect_set().has_point(mouse_pos)) {
+		component_set_rect->set_custom_minimum_size(CELL_SIZE);
+	} else if (rect_output().has_point(mouse_pos)) {
+		output_rect->set_custom_minimum_size(CELL_SIZE);
+	} else if (rect_push().has_point(mouse_pos)) {
+		push_rect->set_custom_minimum_size(CELL_SIZE);
+	} else if (rect_next().has_point(mouse_pos)) {
+		component_output_rect->set_custom_minimum_size(CELL_SIZE);
+	}
+	set_size(Vector2(0, 0));
 }
 
 void LinkControler::end_edit_mode() {
 	edit_index->hide();
 	label->show();
 	edit_mode = false;
+	set_size(Vector2(0, 0));
 }
 
 LinkControler::LinkControler() {
-	set_v_size_flags(SIZE_EXPAND_FILL);
-	set_h_size_flags(SIZE_EXPAND_FILL);
+	set_mouse_filter(Control::MOUSE_FILTER_STOP);
 	set_focus_mode(Control::FOCUS_ALL);
 	controler = memnew(VBoxContainer);
 	add_child(controler);
@@ -428,12 +482,23 @@ LinkControler::LinkControler() {
 	push_rect = memnew(Control);
 	controler_outputs->add_child(push_rect);
 
-	set_rect = memnew(Control);
-	value_rects->add_child(set_rect);
+	component_set_rect = memnew(Control);
+	value_rects->add_child(component_set_rect);
 	component_rect = memnew(Control);
 	value_rects->add_child(component_rect);
 	component_output_rect = memnew(Control);
 	value_rects->add_child(component_output_rect);
+
+	label->set_mouse_filter(Control::MOUSE_FILTER_PASS);
+	// edit_index->set_mouse_filter(Control::MOUSE_FILTER_PASS);
+	icon->set_mouse_filter(Control::MOUSE_FILTER_PASS);
+	source_rect->set_mouse_filter(Control::MOUSE_FILTER_PASS);
+	arg_rect->set_mouse_filter(Control::MOUSE_FILTER_PASS);
+	component_set_rect->set_mouse_filter(Control::MOUSE_FILTER_PASS);
+	component_rect->set_mouse_filter(Control::MOUSE_FILTER_PASS);
+	output_rect->set_mouse_filter(Control::MOUSE_FILTER_PASS);
+	push_rect->set_mouse_filter(Control::MOUSE_FILTER_PASS);
+	component_output_rect->set_mouse_filter(Control::MOUSE_FILTER_PASS);
 }
 
 LinkControler::~LinkControler() {

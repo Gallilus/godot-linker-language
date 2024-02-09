@@ -23,7 +23,7 @@ private:
 protected:
 	LinkerScript *host = nullptr;
 	StringName index;
-	int link_component_mask = 0;
+	int link_component_mask = LINK_COMPONENT_DEFAULT;
 
 	static void _bind_methods();
 
@@ -42,7 +42,11 @@ public:
 	enum LinkComponents {
 		LINK_COMPONENT_PULL = 1 << 0,
 		LINK_COMPONENT_PUSH = 1 << 1,
-		LINK_COMPONENT_OWNER = 1 << 2,
+		LINK_COMPONENT_SOURCE = 1 << 2,
+		LINK_COMPONENT_INPUTS = 1 << 3,
+		LINK_COMPONENT_OUTPUT = 1 << 4,
+		LINK_COMPONENT_EDIT_VALUE = 1 << 5,
+		LINK_COMPONENT_DEFAULT = LINK_COMPONENT_SOURCE | LINK_COMPONENT_OUTPUT,
 	};
 
 	void set_host(LinkerScript *p_host);
@@ -78,7 +82,11 @@ public:
 	virtual bool controler_at_source() const = 0;
 	Variant get_drag_data() const;
 	virtual bool can_drop(Ref<LinkerLink> drag_link) const;
+	virtual bool can_drop_argument(Ref<LinkerLink> drag_link) const;
+	virtual bool can_drop_source(Ref<LinkerLink> drag_link) const;
 	virtual void drop_data(Ref<LinkerLink> dropped_link) {}
+	virtual bool use_argument() const;
+	virtual bool use_source() const;
 
 	virtual LinkerLinkInstance *get_instance(LinkerScriptInstance *p_host, int p_stack_size) = 0;
 	virtual void remove_instance(LinkerScriptInstance *p_host, int p_stack_size) = 0;

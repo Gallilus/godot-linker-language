@@ -18,6 +18,9 @@ class LinkControler : public MarginContainer {
 	GDCLASS(LinkControler, MarginContainer);
 
 	const Vector2 CELL_SIZE = Vector2(16, 16);
+	const Vector2 CELL_SIZE_SMAL = Vector2(12, 12);
+	const Vector2 CELL_SIZE_COLAPSED = CELL_SIZE / 4; // for components visible but not active like connected arguments
+	const Vector2 CELL_SIZE_HIDDEN = Vector2(0, 0);
 
 	bool debug_node_id = false;
 	bool debug_ref_id = false;
@@ -51,7 +54,7 @@ class LinkControler : public MarginContainer {
 	TextureRect *icon = nullptr;
 	Control *source_rect = nullptr;
 	Control *arg_rect = nullptr;
-	Control *set_rect = nullptr;
+	Control *component_set_rect = nullptr;
 	Control *component_rect = nullptr;
 	Control *output_rect = nullptr;
 	Control *push_rect = nullptr;
@@ -63,10 +66,11 @@ class LinkControler : public MarginContainer {
 protected:
 	static void _bind_methods();
 	void _notification(int p_what);
-	
+
 	int link_components = LinkerLink::LINK_COMPONENT_PULL;
 
 	virtual void _instantiate();
+	void set_component_visibility();
 
 	virtual void on_size_changed();
 
@@ -77,7 +81,6 @@ protected:
 	void _update_margin();
 
 	void _draw_debug();
-	
 
 public:
 	bool edit_mode = false;
@@ -98,6 +101,7 @@ public:
 	Vector2 get_connection_point_right() const;
 
 	void start_edit_mode();
+	void update_edit_mode();
 	void end_edit_mode();
 
 	LinkControler();
