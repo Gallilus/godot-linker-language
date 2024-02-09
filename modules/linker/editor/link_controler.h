@@ -17,6 +17,8 @@ class LinkConnection;
 class LinkControler : public MarginContainer {
 	GDCLASS(LinkControler, MarginContainer);
 
+	const Vector2 CELL_SIZE = Vector2(16, 16);
+
 	bool debug_node_id = false;
 	bool debug_ref_id = false;
 	bool debug_controler_id = false;
@@ -25,23 +27,35 @@ class LinkControler : public MarginContainer {
 	uint64_t last_mouse_enter = 0;
 	bool dragging = false;
 
+	Rect2 rect_this() const;
 	Rect2 rect_source() const;
-	Rect2 rect_output() const;
-	Rect2 rect_link() const;
 	Rect2 rect_arg() const;
+	Rect2 rect_set() const;
+	Rect2 rect_index() const;
+	Rect2 rect_icon() const;
 	Rect2 rect_component() const;
+	Rect2 rect_output() const;
 	Rect2 rect_push() const;
+	Rect2 rect_next() const;
 
 	Ref<LinkerLink> link;
 
-	Button *button = nullptr;
+	VBoxContainer *controler = nullptr;
+	HBoxContainer *link_rects = nullptr;
+	HBoxContainer *value_rects = nullptr;
+	VBoxContainer *controler_inputs = nullptr;
+	VBoxContainer *controler_core = nullptr;
+	VBoxContainer *controler_outputs = nullptr;
+	Label *label = nullptr;
 	LineEdit *edit_index = nullptr;
-
-	int margin_top = 0;
-	int margin_bottom = 0;
-	int active_margin_bottom = 0;
-	int margin_left = 0;
-	int margin_right = 0;
+	TextureRect *icon = nullptr;
+	Control *source_rect = nullptr;
+	Control *arg_rect = nullptr;
+	Control *set_rect = nullptr;
+	Control *component_rect = nullptr;
+	Control *output_rect = nullptr;
+	Control *push_rect = nullptr;
+	Control *component_output_rect = nullptr;
 
 	bool dragging_from = false;
 	bool edit_mode_line_edit = false;
