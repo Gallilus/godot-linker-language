@@ -193,8 +193,6 @@ void LinkControler::_instantiate() {
 }
 
 void LinkControler::set_component_visibility() {
-	component_set_rect->set_custom_minimum_size(CELL_SIZE_SMAL);
-	component_rect->set_custom_minimum_size(CELL_SIZE_SMAL);
 	output_rect->set_custom_minimum_size(CELL_SIZE_SMAL);
 	push_rect->set_custom_minimum_size(CELL_SIZE_SMAL);
 
@@ -208,6 +206,9 @@ void LinkControler::set_component_visibility() {
 	} else {
 		arg_rect->set_custom_minimum_size(CELL_SIZE_HIDDEN);
 	}
+	component_set_rect->set_custom_minimum_size(CELL_SIZE_HIDDEN);
+	component_rect->set_custom_minimum_size(CELL_SIZE_HIDDEN);
+	component_output_rect->set_custom_minimum_size(CELL_SIZE_HIDDEN);
 }
 
 void LinkControler::on_size_changed() {
@@ -424,17 +425,22 @@ void LinkControler::start_edit_mode() {
 
 void LinkControler::update_edit_mode() {
 	set_component_visibility();
+	component_rect->set_custom_minimum_size(CELL_SIZE_SMAL);
+	component_set_rect->set_custom_minimum_size(CELL_SIZE_SMAL);
+	component_output_rect->set_custom_minimum_size(CELL_SIZE_SMAL);
 	Point2 mouse_pos = get_local_mouse_position();
 	if (rect_source().has_point(mouse_pos)) {
 		source_rect->set_custom_minimum_size(CELL_SIZE);
 	} else if (rect_arg().has_point(mouse_pos)) {
 		arg_rect->set_custom_minimum_size(CELL_SIZE);
-	} else if (rect_set().has_point(mouse_pos)) {
-		component_set_rect->set_custom_minimum_size(CELL_SIZE);
 	} else if (rect_output().has_point(mouse_pos)) {
 		output_rect->set_custom_minimum_size(CELL_SIZE);
 	} else if (rect_push().has_point(mouse_pos)) {
 		push_rect->set_custom_minimum_size(CELL_SIZE);
+	} else if (rect_set().has_point(mouse_pos)) {
+		component_set_rect->set_custom_minimum_size(CELL_SIZE);
+	} else if (rect_component().has_point(mouse_pos)) {
+		component_rect->set_custom_minimum_size(CELL_SIZE);
 	} else if (rect_next().has_point(mouse_pos)) {
 		component_output_rect->set_custom_minimum_size(CELL_SIZE);
 	}
@@ -445,6 +451,7 @@ void LinkControler::end_edit_mode() {
 	edit_index->hide();
 	label->show();
 	edit_mode = false;
+	set_component_visibility();
 	set_size(Vector2(0, 0));
 }
 
