@@ -67,8 +67,6 @@ protected:
 	static void _bind_methods();
 	void _notification(int p_what);
 
-	int link_components = LinkerLink::LINK_COMPONENT_PULL;
-
 	virtual void _instantiate();
 	void set_component_visibility();
 

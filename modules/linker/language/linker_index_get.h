@@ -26,8 +26,6 @@ public:
 
 	virtual LinkerLinkInstance *get_instance(LinkerScriptInstance *p_host, int p_stack_size) override;
 	virtual void remove_instance(LinkerScriptInstance *p_host, int p_stack_size) override;
-
-	LinkerIndexGet();
 };
 
 ////////////////////////////////////////////////////////////////////////

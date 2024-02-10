@@ -189,8 +189,6 @@ void LinkControler::_instantiate() {
 
 	edit_index->connect("text_submitted", callable_mp(link.ptr(), &LinkerLink::set_index), CONNECT_DEFERRED);
 
-	link_components = link->get_link_component_mask();
-
 	set_component_visibility();
 }
 
