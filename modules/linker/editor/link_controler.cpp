@@ -110,16 +110,18 @@ void LinkControler::_notification(int p_what) {
 			if (!dragging && !mouse_inside) {
 				set_process(false);
 			}
-			if (mouse_inside && !edit_mode) {
-				if (OS::get_singleton()->get_ticks_msec() - last_mouse_enter > 750) {
-					start_edit_mode();
+			if (!dragging && !lmb_down) { // do not change layout during dragging
+				if (mouse_inside && !edit_mode) {
+					if (OS::get_singleton()->get_ticks_msec() - last_mouse_enter > 750) {
+						start_edit_mode();
+					}
 				}
-			}
-			if (mouse_inside && edit_mode) {
-				update_edit_mode();
-			}
-			if (edit_mode && !mouse_inside) {
-				end_edit_mode();
+				if (edit_mode && !mouse_inside) {
+					end_edit_mode();
+				}
+				if (mouse_inside && edit_mode) {
+					update_edit_mode();
+				}
 			}
 			queue_redraw();
 			break;
@@ -131,6 +133,8 @@ void LinkControler::_notification(int p_what) {
 		}
 		case NOTIFICATION_DRAG_END: {
 			dragging = false;
+			lmb_down = false;
+			drag_value = Variant();
 			queue_redraw();
 			break;
 		}
@@ -175,17 +179,6 @@ void LinkControler::_instantiate() {
 	icon->set_stretch_mode(TextureRect::STRETCH_KEEP);
 	icon->set_v_size_flags(SIZE_SHRINK_CENTER);
 	icon->set_h_size_flags(SIZE_SHRINK_CENTER);
-
-	label->set_drag_forwarding(callable_mp(this, &LinkControler::get_drag_data), callable_mp(this, &LinkControler::can_drop_data), callable_mp(this, &LinkControler::drop_data));
-	// edit_index->set_drag_forwarding(callable_mp(this, &LinkControler::get_drag_data), callable_mp(this, &LinkControler::can_drop_data), callable_mp(this, &LinkControler::drop_data));
-	icon->set_drag_forwarding(callable_mp(this, &LinkControler::get_drag_data), callable_mp(this, &LinkControler::can_drop_data), callable_mp(this, &LinkControler::drop_data));
-	source_rect->set_drag_forwarding(callable_mp(this, &LinkControler::get_drag_data), callable_mp(this, &LinkControler::can_drop_data), callable_mp(this, &LinkControler::drop_data));
-	arg_rect->set_drag_forwarding(callable_mp(this, &LinkControler::get_drag_data), callable_mp(this, &LinkControler::can_drop_data), callable_mp(this, &LinkControler::drop_data));
-	component_set_rect->set_drag_forwarding(callable_mp(this, &LinkControler::get_drag_data), callable_mp(this, &LinkControler::can_drop_data), callable_mp(this, &LinkControler::drop_data));
-	component_rect->set_drag_forwarding(callable_mp(this, &LinkControler::get_drag_data), callable_mp(this, &LinkControler::can_drop_data), callable_mp(this, &LinkControler::drop_data));
-	output_rect->set_drag_forwarding(callable_mp(this, &LinkControler::get_drag_data), callable_mp(this, &LinkControler::can_drop_data), callable_mp(this, &LinkControler::drop_data));
-	push_rect->set_drag_forwarding(callable_mp(this, &LinkControler::get_drag_data), callable_mp(this, &LinkControler::can_drop_data), callable_mp(this, &LinkControler::drop_data));
-	component_output_rect->set_drag_forwarding(callable_mp(this, &LinkControler::get_drag_data), callable_mp(this, &LinkControler::can_drop_data), callable_mp(this, &LinkControler::drop_data));
 
 	edit_index->connect("text_submitted", callable_mp(link.ptr(), &LinkerLink::set_index), CONNECT_DEFERRED);
 
@@ -274,7 +267,7 @@ void LinkControler::_draw_debug() {
 		draw_string(font, get_size() / 2, debug_string, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size, Color(0, 0, 0, 1));
 	}
 
-	if (dragging_from) {
+	if (dragging_from || edit_mode) {
 		Point2 mouse_pos = get_local_mouse_position();
 		draw_rect(rect_this(), Color(0.1, 0.9, 0.9, 0.3), false); //rect_this().has_point(mouse_pos));
 		draw_rect(rect_source(), Color(0.9, 0.1, 0.1, 0.3), rect_source().has_point(mouse_pos));
@@ -307,6 +300,43 @@ void LinkControler::gui_input(const Ref<InputEvent> &p_event) {
 			//		button->grab_focus();
 			get_viewport()->set_input_as_handled();
 		}
+		if (!mb->get_button_mask().has_flag(MouseButtonMask::LEFT)) {
+			lmb_down = false;
+		} else {
+			if (!lmb_down) {
+				prep_drag_data();
+			}
+			lmb_down = true;
+		}
+	}
+}
+
+void LinkControler::prep_drag_data() {
+	// prep on mouse down as start drag data has no acurate mouseposition and the layout may be changed as well.
+	drag_value = Variant();
+	Point2 mouse_pos = get_local_mouse_position();
+	if (rect_source().has_point(mouse_pos)) {
+		print_line("rect_source   ");
+	} else if (rect_arg().has_point(mouse_pos)) {
+		print_line("rect_arg      ");
+	} else if (rect_set().has_point(mouse_pos)) {
+		print_line("rect_set      ");
+	} else if (rect_index().has_point(mouse_pos)) {
+		print_line("rect_index   ");
+	} else if (rect_icon().has_point(mouse_pos)) {
+		print_line("rect_icon   ");
+	} else if (rect_component().has_point(mouse_pos)) {
+		print_line("rect_component   ");
+	} else if (rect_output().has_point(mouse_pos)) {
+		print_line("rect_output   ");
+	} else if (rect_push().has_point(mouse_pos)) {
+		print_line("rect_push     ");
+	} else if (rect_next().has_point(mouse_pos)) {
+		print_line("rect_next     ");
+	} else if (rect_this().has_point(mouse_pos)) {
+		print_line("link_background ");
+	} else {
+		ERR_PRINT("link_background ");
 	}
 }
 
@@ -333,7 +363,7 @@ bool LinkControler::can_drop_data(const Point2 &p_point, const Variant &p_data) 
 	} else if (rect_set().has_point(mouse_pos)) {
 		return link->can_drop(drag_link);
 	} else if (rect_output().has_point(mouse_pos)) {
-		return link->can_drop(drag_link);
+		return link->can_drop_on_value(drag_link);
 	} else if (rect_push().has_point(mouse_pos)) {
 		return link->can_drop(drag_link);
 	} else if (rect_next().has_point(mouse_pos)) {
@@ -405,10 +435,9 @@ void LinkControler::start_edit_mode() {
 	edit_mode_line_edit = !dragging_from;
 
 	if (edit_mode_line_edit) {
-		edit_index->set_text(String(link->get_index()));
-		edit_index->show();
-		label->hide();
-		//		button->hide();
+		// edit_index->set_text(String(link->get_index()));
+		// edit_index->show();
+		// label->hide();
 	}
 	if (dragging_from) {
 		// expand i/o rects

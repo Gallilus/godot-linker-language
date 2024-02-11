@@ -61,6 +61,8 @@ class LinkControler : public MarginContainer {
 	Control *component_output_rect = nullptr;
 
 	bool dragging_from = false;
+	bool lmb_down = false;
+	Variant drag_value;
 	bool edit_mode_line_edit = false;
 
 protected:
@@ -86,6 +88,7 @@ public:
 
 	virtual void gui_input(const Ref<InputEvent> &p_event) override;
 
+	void prep_drag_data();
 	virtual Variant get_drag_data(const Point2 &p_point) override;
 	virtual bool can_drop_data(const Point2 &p_point, const Variant &p_data) const override;
 	virtual void drop_data(const Point2 &p_point, const Variant &p_data) override;
