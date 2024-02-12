@@ -1,0 +1,55 @@
+[gd_scene load_steps=2 format=3 uid="uid://bht8ibcj23dd0"]
+
+[ext_resource type="Texture2D" uid="uid://cr7vtpu2r6rhd" path="res://icon.svg" id="1_4ysm6"]
+
+[node name="HBoxContainer" type="HBoxContainer"]
+offset_right = 8.0
+
+[node name="Left" type="VBoxContainer" parent="."]
+layout_mode = 2
+alignment = 1
+
+[node name="Control" type="Control" parent="Left"]
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+
+[node name="Control2" type="Control" parent="Left"]
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+
+[node name="Control3" type="Control" parent="Left"]
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+
+[node name="Center" type="VBoxContainer" parent="."]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="Center"]
+layout_mode = 2
+text = "aa"
+horizontal_alignment = 1
+
+[node name="TextureRect" type="TextureRect" parent="Center"]
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+texture = ExtResource("1_4ysm6")
+expand_mode = 1
+
+[node name="Right" type="VBoxContainer" parent="."]
+layout_mode = 2
+alignment = 1
+
+[node name="Control" type="Control" parent="Right"]
+visible = false
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+
+[node name="Control2" type="Control" parent="Right"]
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+
+[node name="Control3" type="Control" parent="Right"]
+visible = false
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2

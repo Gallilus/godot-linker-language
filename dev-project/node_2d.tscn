@@ -1,6 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://bgl0vdmir3svw"]
+[gd_scene load_steps=4 format=3 uid="uid://bgl0vdmir3svw"]
 
-[ext_resource type="Script" path="res://ColorRect.ls" id="1_7tlnk"]
+[ext_resource type="Script" path="res://ColorRect.ls" id="1_35crr"]
+[ext_resource type="Script" uid="uid://bis3f3num8dpf" path="res://TextureRect.gd" id="2_pmias"]
+[ext_resource type="PackedScene" uid="uid://bht8ibcj23dd0" path="res://controlreTest.tscn" id="3_lomfo"]
 
 [node name="Node2D" type="Node2D"]
 position = Vector2(0, 1)
@@ -16,24 +18,13 @@ size_flags_vertical = 3
 
 [node name="ColorRect" type="ColorRect" parent="Control"]
 layout_mode = 0
-anchor_left = null
-anchor_top = null
-anchor_right = null
-anchor_bottom = null
-offset_left = null
-offset_top = null
-offset_right = null
-offset_bottom = null
-focus_neighbor_left = null
-focus_neighbor_top = null
-focus_neighbor_right = null
-focus_neighbor_bottom = null
-script = ExtResource("1_7tlnk")
+script = ExtResource("1_35crr")
 
 [node name="TextureRect" type="TextureRect" parent="Control/ColorRect"]
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
+script = ExtResource("2_pmias")
 
 [node name="GridMap" type="GridMap" parent="."]
 
@@ -66,9 +57,54 @@ layout_mode = 2
 [node name="Button3" type="Button" parent="Control2/VBoxContainer"]
 layout_mode = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="Control2/VBoxContainer"]
+[node name="Label" type="Label" parent="Control2/VBoxContainer"]
+layout_mode = 2
+text = "ASDADSASzcxz"
+horizontal_alignment = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="Control2"]
+layout_mode = 2
+offset_left = 234.0
+offset_top = 305.0
+offset_right = 348.0
+offset_bottom = 335.0
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="Control2/MarginContainer"]
 layout_mode = 2
 
-[node name="Button" type="Button" parent="Control2/VBoxContainer/MarginContainer"]
+[node name="Button" type="Button" parent="Control2/MarginContainer/VBoxContainer2"]
 custom_minimum_size = Vector2(30, 30)
 layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control2/MarginContainer/VBoxContainer2"]
+modulate = Color(0.709804, 1, 1, 1)
+self_modulate = Color(1, 1, 0.356863, 1)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="MenuButton" type="MenuButton" parent="Control2/MarginContainer/VBoxContainer2/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+flat = false
+switch_on_hover = true
+item_count = 1
+popup/item_0/text = "ssds"
+popup/item_0/id = 0
+
+[node name="MenuButton2" type="MenuButton" parent="Control2/MarginContainer/VBoxContainer2/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+flat = false
+item_count = 2
+popup/item_0/text = "vvv"
+popup/item_0/id = 0
+popup/item_1/text = "bbbbbbbbbb"
+popup/item_1/id = 1
+
+[node name="MenuButton3" type="MenuButton" parent="Control2/MarginContainer/VBoxContainer2/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+flat = false
+
+[node name="HBoxContainer" parent="Control2" instance=ExtResource("3_lomfo")]
+layout_mode = 0
