@@ -436,6 +436,28 @@ void ResultTree::update_results() {
 		ti->set_meta("MethodInfo", Dictionary(E->get()));
 		ti->set_meta("type", "MethodInfo");
 	}
+	List<String> ls_registered_links;
+	LinkerLanguage::get_singleton()->get_registered_link_names(&ls_registered_links);
+	while (!ls_registered_links.is_empty()) {
+		String link_name = ls_registered_links[0];
+		ls_registered_links.pop_front();
+
+		if (search_term != "" && link_name.find(search_term) == -1) {
+			continue;
+		}
+
+		Vector<String> path = link_name.split("/");
+		if (path[0] == "functions") {
+			if (path[1] == "built_in") {
+				TreeItem *ti = get_root()->create_child();
+				ti->set_text(1, path[2]);
+				ti->set_tooltip_text(1, link_name);
+				ti->set_custom_color(1, EDITOR_GET("text_editor/theme/highlighting/function_color"));
+				ti->set_meta("type", "registered_link");
+				ti->set_meta("link_name", link_name);
+			}
+		}
+	}
 }
 
 ResultTree::ResultTree() {
@@ -729,8 +751,6 @@ void ConnectNext::close() {
 }
 
 ConnectNext::ConnectNext() {
-	LinkerLanguage::get_singleton()->get_registered_link_names(&ls_registered_links);
-
 	set_z_index(10);
 	menu_bar = memnew(HBoxContainer);
 	add_child(menu_bar);

@@ -12,6 +12,7 @@
 #include "core/variant/variant_utility.h"
 #include "editor/editor_interface.h"
 #include "editor/editor_node.h"
+#include "editor/editor_settings.h"
 #include "editor/themes/editor_scale.h"
 #include "scene/animation/tween.h"
 #include "scene/gui/box_container.h"
@@ -200,8 +201,6 @@ class ConnectNext : public VBoxContainer {
 
 	LineEdit *search_text = nullptr;
 	ResultTree *results_tree = nullptr;
-
-	List<String> ls_registered_links; // built in links
 
 protected:
 	static void _bind_methods() {}
