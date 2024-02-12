@@ -51,7 +51,7 @@ Dictionary LinkerFunction::get_placeholder_info() const {
 	return Dictionary(host->get_method_info(index).return_val);
 }
 
-bool LinkerFunction::can_drop(Ref<LinkerLink> drag_link) const {
+bool LinkerFunction::can_drop_on_link(Ref<LinkerLink> drag_link) const {
 	if (drag_link.is_null() ||
 			drag_link == this) {
 		return false;
@@ -59,7 +59,7 @@ bool LinkerFunction::can_drop(Ref<LinkerLink> drag_link) const {
 	return false;
 }
 
-void LinkerFunction::drop_data(Ref<LinkerLink> dropped_link) {
+void LinkerFunction::drop_data_on_link(Ref<LinkerLink> dropped_link) {
 	if (dropped_link->get_class_name() == SNAME("LinkerIndexGet")) {
 		Ref<LinkerIndexGet> index_get = dropped_link;
 		PropertyInfo info = host->get_method_info(index).return_val;

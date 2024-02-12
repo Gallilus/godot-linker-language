@@ -44,8 +44,8 @@ public:
 	void set_node_scene_relative_path(const StringName &p_node_scene_relative_path);
 	StringName get_node_scene_relative_path() const { return node_scene_relative_path; }
 
-	virtual bool can_drop(Ref<LinkerLink> drag_link) const override;
-	virtual void drop_data(Ref<LinkerLink> dropped_link) override;
+	virtual bool can_drop_on_value(Ref<LinkerLink> drag_link) const override;
+	virtual void drop_data_on_link(Ref<LinkerLink> dropped_link) override;
 	virtual bool use_source() const override { return false; }
 	virtual bool use_argument() const override { return false; }
 

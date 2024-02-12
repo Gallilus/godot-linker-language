@@ -134,7 +134,7 @@ void LinkControler::_notification(int p_what) {
 		case NOTIFICATION_DRAG_END: {
 			dragging = false;
 			lmb_down = false;
-			drag_value = Variant();
+			drag_data = Variant();
 			queue_redraw();
 			break;
 		}
@@ -313,35 +313,41 @@ void LinkControler::gui_input(const Ref<InputEvent> &p_event) {
 
 void LinkControler::prep_drag_data() {
 	// prep on mouse down as start drag data has no acurate mouseposition and the layout may be changed as well.
-	drag_value = Variant();
 	Point2 mouse_pos = get_local_mouse_position();
 	if (rect_source().has_point(mouse_pos)) {
-		print_line("rect_source   ");
+		drag_data = link->get_source()->get_drag_data();
 	} else if (rect_arg().has_point(mouse_pos)) {
-		print_line("rect_arg      ");
+		drag_data = link->get_drag_data();
+		drag_data["link_request"] = "get_arg";
+		drag_data["arg_index"] = 0;
 	} else if (rect_set().has_point(mouse_pos)) {
-		print_line("rect_set      ");
+		drag_data = link->get_drag_data();
+		drag_data["link_request"] = "set_part_of_value";
 	} else if (rect_index().has_point(mouse_pos)) {
-		print_line("rect_index   ");
+		drag_data = link->get_drag_data();
 	} else if (rect_icon().has_point(mouse_pos)) {
-		print_line("rect_icon   ");
+		drag_data = link->get_drag_data();
 	} else if (rect_component().has_point(mouse_pos)) {
-		print_line("rect_component   ");
+		drag_data = link->get_drag_data();
+		drag_data["link_request"] = "get_part_of_value";
 	} else if (rect_output().has_point(mouse_pos)) {
-		print_line("rect_output   ");
+		drag_data = link->get_drag_data();
+		drag_data["link_request"] = "use_output";
 	} else if (rect_push().has_point(mouse_pos)) {
-		print_line("rect_push     ");
+		drag_data = link->get_drag_data();
+		drag_data["link_request"] = "push next command";
 	} else if (rect_next().has_point(mouse_pos)) {
-		print_line("rect_next     ");
+		drag_data = link->get_drag_data();
+		drag_data["link_request"] = "push next command";
 	} else if (rect_this().has_point(mouse_pos)) {
-		print_line("link_background ");
+		drag_data = link->get_drag_data();
 	} else {
-		ERR_PRINT("link_background ");
+		ERR_PRINT("no drag data");
 	}
 }
 
 Variant LinkControler::get_drag_data(const Point2 &p_point) {
-	return link->get_drag_data();
+	return drag_data;
 }
 
 bool LinkControler::can_drop_data(const Point2 &p_point, const Variant &p_data) const {
@@ -357,19 +363,27 @@ bool LinkControler::can_drop_data(const Point2 &p_point, const Variant &p_data) 
 	}
 	Point2 mouse_pos = get_local_mouse_position();
 	if (rect_source().has_point(mouse_pos)) {
-		return link->can_drop_source(drag_link);
+		if (d_data.has("link_request") && d_data["link_request"] == "get_arg") {
+			return link->get_source()->can_drop_on_link(drag_link->get_drag_arg_data(drag_data["arg_index"])); // get argument info
+		}
 	} else if (rect_arg().has_point(mouse_pos)) {
-		return link->can_drop_argument(drag_link);
+		if (d_data.has("link_request") && d_data["link_request"] == "get_arg") {
+			return false;
+		}
+		return link->can_drop_on_arg(drag_link);
 	} else if (rect_set().has_point(mouse_pos)) {
-		return link->can_drop(drag_link);
+		if (d_data.has("link_request") && d_data["link_request"] == "get_arg") {
+			return false;
+		}
+		return link->can_drop_on_link(drag_link);
 	} else if (rect_output().has_point(mouse_pos)) {
 		return link->can_drop_on_value(drag_link);
 	} else if (rect_push().has_point(mouse_pos)) {
-		return link->can_drop(drag_link);
+		return link->can_drop_on_link(drag_link);
 	} else if (rect_next().has_point(mouse_pos)) {
-		return link->can_drop(drag_link);
+		return link->can_drop_on_link(drag_link);
 	} else if (rect_this().has_point(mouse_pos)) {
-		return link->can_drop(drag_link);
+		return link->can_drop_on_link(drag_link);
 	}
 	return false;
 }
@@ -381,7 +395,31 @@ void LinkControler::drop_data(const Point2 &p_point, const Variant &p_data) {
 		return;
 	}
 	Ref<LinkerLink> drag_link = link->get_host()->get_link(d_data["link_idx"]);
-	link->drop_data(drag_link);
+
+	Point2 mouse_pos = get_local_mouse_position();
+	if (rect_source().has_point(mouse_pos)) {
+		if (d_data.has("link_request") &&
+				d_data["link_request"] == "get_arg") {
+			// disconnect argument
+			// connect source to argument
+			link->get_source()->drop_data_on_link(drag_link); // drop argument
+		}
+		// return link->can_drop_on_source(drag_link);
+	} else if (rect_arg().has_point(mouse_pos)) {
+		// return link->can_drop_on_arg(drag_link);
+	} else if (rect_set().has_point(mouse_pos)) {
+		// return link->can_drop_on_link(drag_link);
+	} else if (rect_output().has_point(mouse_pos)) {
+		// return link->can_drop_on_value(drag_link);
+	} else if (rect_push().has_point(mouse_pos)) {
+		// return link->can_drop_on_link(drag_link);
+	} else if (rect_next().has_point(mouse_pos)) {
+		// return link->can_drop_on_link(drag_link);
+	} else if (rect_this().has_point(mouse_pos)) {
+		// return link->can_drop_on_link(drag_link);
+	}
+
+	link->drop_data_on_link(drag_link);
 }
 
 void LinkControler::set_link(Ref<LinkerLink> p_link) {

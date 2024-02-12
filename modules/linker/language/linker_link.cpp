@@ -187,15 +187,27 @@ Variant LinkerLink::get_drag_data() const {
 	return drag_data;
 }
 
-bool LinkerLink::can_drop(Ref<LinkerLink> drag_link) const {
+Variant LinkerLink::get_drag_arg_data(int p_index) const {
+	return Variant();
+}
+
+bool LinkerLink::can_drop_on_link(Ref<LinkerLink> drag_link) const {
+	ERR_PRINT_ONCE("can_drop_on_link: not implemented for " + String(get_class_name()));
 	return false;
 }
 
-bool LinkerLink::can_drop_argument(Ref<LinkerLink> drag_link) const {
+bool LinkerLink::can_drop_on_arg(Ref<LinkerLink> drag_link) const {
+	ERR_PRINT_ONCE("can_drop_on_arg: not implemented for " + String(get_class_name()));
 	return false;
 }
 
-bool LinkerLink::can_drop_source(Ref<LinkerLink> drag_link) const {
+bool LinkerLink::can_drop_on_source(Ref<LinkerLink> drag_link) const {
+	ERR_PRINT_ONCE("can_drop_on_source: not implemented for " + String(get_class_name()));
+	return false;
+}
+
+bool LinkerLink::can_drop_on_value(Ref<LinkerLink> drag_link) const {
+	ERR_PRINT_ONCE("can_drop_on_value: not implemented for " + String(get_class_name()));
 	return false;
 }
 

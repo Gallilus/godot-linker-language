@@ -48,7 +48,7 @@ Dictionary LinkerIndexGet::get_placeholder_info() const {
 	return d;
 }
 
-bool LinkerIndexGet::can_drop(Ref<LinkerLink> drag_link) const {
+bool LinkerIndexGet::can_drop_on_link(Ref<LinkerLink> drag_link) const {
 	if (drag_link.is_null()) {
 		return false;
 	}
@@ -62,7 +62,7 @@ bool LinkerIndexGet::can_drop(Ref<LinkerLink> drag_link) const {
 	return false;
 }
 
-void LinkerIndexGet::drop_data(Ref<LinkerLink> dropped_link) {
+void LinkerIndexGet::drop_data_on_link(Ref<LinkerLink> dropped_link) {
 	set_source(dropped_link);
 }
 

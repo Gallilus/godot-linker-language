@@ -21,8 +21,8 @@ public:
 	virtual String get_graph_category() const override { return "graph_output"; }
 	virtual bool controler_at_source() const override { return false; }
 
-	virtual bool can_drop(Ref<LinkerLink> drag_link) const override;
-	virtual void drop_data(Ref<LinkerLink> dropped_link) override;
+	virtual bool can_drop_on_link(Ref<LinkerLink> drag_link) const override;
+	virtual void drop_data_on_link(Ref<LinkerLink> dropped_link) override;
 
 	virtual LinkerLinkInstance *get_instance(LinkerScriptInstance *p_host, int p_stack_size) override;
 	virtual void remove_instance(LinkerScriptInstance *p_host, int p_stack_size) override;

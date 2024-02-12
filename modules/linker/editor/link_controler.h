@@ -62,7 +62,7 @@ class LinkControler : public MarginContainer {
 
 	bool dragging_from = false;
 	bool lmb_down = false;
-	Variant drag_value;
+	Dictionary drag_data;
 	bool edit_mode_line_edit = false;
 
 protected:

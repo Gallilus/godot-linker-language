@@ -79,17 +79,12 @@ void LinkerSceneRefrence::set_node_scene_relative_path(const StringName &p_node_
 	set_index(p_node_scene_relative_path);
 }
 
-bool LinkerSceneRefrence::can_drop(Ref<LinkerLink> drag_link) const {
-	if (drag_link.is_null()) {
-		return false;
-	}
-	if (drag_link->get_graph_category() == "graph_input") {
-		return false;
-	}
+bool LinkerSceneRefrence::can_drop_on_value(Ref<LinkerLink> drag_link) const {
+	print_error(String(drag_link->get_class_name()) + " can take value of " + String(get_class_name()));
 	return true;
 }
 
-void LinkerSceneRefrence::drop_data(Ref<LinkerLink> dropped_link) {
+void LinkerSceneRefrence::drop_data_on_link(Ref<LinkerLink> dropped_link) {
 	if (dropped_link.is_null()) {
 		return;
 	}

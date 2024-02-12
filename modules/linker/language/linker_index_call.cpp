@@ -28,23 +28,35 @@ void LinkerIndexCall::_initialize_instance(LinkerLinkInstance *link, LinkerScrip
 	}
 }
 
-Dictionary LinkerIndexCall::get_placeholder_info() const {
+MethodInfo LinkerIndexCall::get_method_info() const {
+	MethodInfo mi;
 	PropertyInfo pi;
 	if (!get_source().is_valid()) {
-		return Dictionary();
+		return mi;
 	}
 	pi = get_source()->get_output_info();
 
-	MethodInfo mi;
 	ClassDB::get_method_info(pi.class_name, index, &mi);
-	pi = mi.return_val;
+	return mi;
+}
+
+Dictionary LinkerIndexCall::get_placeholder_info() const {
+	MethodInfo mi = get_method_info();
 	Dictionary d;
 	d["type"] = "PropertyInfo";
-	d["value"] = Dictionary(pi);
+	d["value"] = Dictionary(mi.return_val);
 	return d;
 }
 
-bool LinkerIndexCall::can_drop(Ref<LinkerLink> drag_link) const {
+Variant LinkerIndexCall::get_drag_arg_data(int p_index) const {
+	MethodInfo mi = get_method_info();
+	Dictionary d;
+	d["type"] = "PropertyInfo";
+	d["value"] = Dictionary(mi.arguments[p_index]);
+	return d;
+}
+
+bool LinkerIndexCall::can_drop_on_link(Ref<LinkerLink> drag_link) const {
 	if (drag_link.is_null() ||
 			drag_link == this) {
 		return false;
@@ -55,7 +67,17 @@ bool LinkerIndexCall::can_drop(Ref<LinkerLink> drag_link) const {
 	return true; // for now allow any link
 }
 
-void LinkerIndexCall::drop_data(Ref<LinkerLink> dropped_link) {
+bool LinkerIndexCall::can_drop_on_arg(Ref<LinkerLink> drag_link) const {
+	MethodInfo mi = get_method_info();
+	PropertyInfo pi = mi.arguments[0];
+	PropertyInfo pi2 = drag_link->get_output_info();
+	if (pi2.type == Variant::NIL){
+		return true;
+	}
+	return pi.type == pi2.type;
+}
+
+void LinkerIndexCall::drop_data_on_link(Ref<LinkerLink> dropped_link) {
 	// momentarly only compatible with one argument
 	set_source(dropped_link);
 }

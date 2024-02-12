@@ -15,13 +15,16 @@ protected:
 	virtual void _initialize_instance(LinkerLinkInstance *link, LinkerScriptInstance *p_host, int p_stack_size) override;
 
 public:
+	MethodInfo get_method_info() const;
+
 	virtual Variant get_placeholder_value() const override { return Variant(); }
 	virtual Dictionary get_placeholder_info() const override;
 
-	virtual bool can_drop(Ref<LinkerLink> drag_link) const override;
-	virtual bool can_drop_argument(Ref<LinkerLink> drag_link) const override { return true; }
-	virtual bool can_drop_source(Ref<LinkerLink> drag_link) const override { return true; }
-	virtual void drop_data(Ref<LinkerLink> dropped_link) override;
+	virtual Variant get_drag_arg_data(int p_index) const override;
+	virtual bool can_drop_on_link(Ref<LinkerLink> drag_link) const override;
+	virtual bool can_drop_on_arg(Ref<LinkerLink> drag_link) const override;
+	virtual bool can_drop_on_source(Ref<LinkerLink> drag_link) const override { return true; }
+	virtual void drop_data_on_link(Ref<LinkerLink> dropped_link) override;
 	virtual bool controler_at_source() const override { return false; }
 
 	virtual LinkerLinkInstance *get_instance(LinkerScriptInstance *p_host, int p_stack_size) override;

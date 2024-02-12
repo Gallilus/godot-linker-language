@@ -18,9 +18,9 @@ public:
 	virtual Variant get_placeholder_value() const override;
 	virtual Dictionary get_placeholder_info() const override;
 
-	virtual bool can_drop(Ref<LinkerLink> drag_link) const override;
-	virtual bool can_drop_source(Ref<LinkerLink> drag_link) const override { return true; }
-	virtual void drop_data(Ref<LinkerLink> dropped_link) override;
+	virtual bool can_drop_on_link(Ref<LinkerLink> drag_link) const override;
+	virtual bool can_drop_on_source(Ref<LinkerLink> drag_link) const override { return true; }
+	virtual void drop_data_on_link(Ref<LinkerLink> dropped_link) override;
 	virtual bool controler_at_source() const override { return true; }
 	virtual bool use_source() const override { return false; }
 
