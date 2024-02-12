@@ -103,12 +103,12 @@ HashMap<float, int> PointRemapper::get_largest(PackedInt32Array p_order, int p_a
 	return result;
 }
 
-HashMap<float, int> PointRemapper::strech_out_points(HashMap<float, int> cel_sizes) {
+HashMap<float, int> PointRemapper::strech_out_points(HashMap<float, int> cel_sizes, int p_space) {
 	HashMap<float, int> result;
 	int last_value = 0;
 	for (const KeyValue<float, int> &E : cel_sizes) {
 		result[E.key] = last_value;
-		last_value += E.value;
+		last_value += E.value + p_space;
 	}
 	return result;
 }
@@ -116,9 +116,9 @@ HashMap<float, int> PointRemapper::strech_out_points(HashMap<float, int> cel_siz
 HashMap<Vector2, Vector2> PointRemapper::get_point_map() {
 	point_map.clear();
 	HashMap<float, int> cel_sizes_x = get_largest(get_order_of_by(points, X), X);
-	HashMap<float, int> cel_points_x = strech_out_points(cel_sizes_x);
+	HashMap<float, int> cel_points_x = strech_out_points(cel_sizes_x, spacing.x);
 	HashMap<float, int> cel_sizes_y = get_largest(get_order_of_by(points, Y), Y);
-	HashMap<float, int> cel_points_y = strech_out_points(cel_sizes_y);
+	HashMap<float, int> cel_points_y = strech_out_points(cel_sizes_y, spacing.y);
 	for (const KeyValue<float, int> &E : cel_points_x) {
 		for (const KeyValue<float, int> &F : cel_points_y) {
 			point_map[Vector2(E.key, F.key)] = Vector2(E.value, F.value);

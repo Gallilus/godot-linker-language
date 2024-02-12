@@ -23,7 +23,7 @@ public:
 	const int X = 0;
 	const int Y = 1;
 
-	Vector2 spacing = Vector2(5, 5);
+	Vector2 spacing = Vector2(30, 10);
 
 	void add_point(Vector2 p_point);
 	void add_point(Vector2 p_point, Vector2 p_size);
@@ -38,7 +38,7 @@ public:
 
 	PackedInt32Array get_order_of_by(PackedVector2Array p_sizes, int p_axis);
 	HashMap<float, int> get_largest(PackedInt32Array p_order, int p_axis);
-	HashMap<float, int> strech_out_points(HashMap<float, int> cel_sizes);
+	HashMap<float, int> strech_out_points(HashMap<float, int> cel_sizes, int p_space);
 	HashMap<Vector2, Vector2> get_point_map();
 
 	void print_size_order_by_x();
