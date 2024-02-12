@@ -661,6 +661,10 @@ void ConnectNext::_tree_confirmed() {
 		return;
 	}
 
+	if (ti->get_meta("type") == "registered_link") {
+		ERR_PRINT(String(ti->get_meta("link_name")));
+	} // else if registered_link
+
 	if (ti->get_meta("type") == "MethodInfo") {
 		_method_info_confirmed(ti->get_meta("MethodInfo"));
 	} // else if MethodInfo
