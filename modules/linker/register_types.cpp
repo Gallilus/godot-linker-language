@@ -17,6 +17,7 @@
 #include "language/linker_saver.h"
 #include "language/linker_scene_refrence.h"
 #include "language/linker_script.h"
+#include "language/linker_builtin_function.h"
 
 using namespace godot;
 
@@ -29,23 +30,27 @@ void initialize_linker_module(ModuleInitializationLevel p_level) {
 		// not accesable by extensions
 	}
 	if (p_level == GDEXTENSION_INITIALIZATION_SERVERS) {
+		// When Saving and loading no longer works on a rebase https://github.com/godotengine/godot/pull/84611
+		// GDREGISTER_ calls _bind_methods() which is not needed for this class or getting things lige signals to work on base classes
+
+		linker_language = memnew(LinkerLanguage);
+		ScriptServer::register_language(linker_language);
+		
 		GDREGISTER_CLASS(LinkerScript);
 		GDREGISTER_ABSTRACT_CLASS(LinkerLink);
 		GDREGISTER_CLASS(LinkerSceneRefrence);
 		GDREGISTER_CLASS(LinkerIndexCall);
 		GDREGISTER_CLASS(LinkerIndexGet);
 		GDREGISTER_CLASS(LinkerFunction);
-		// When Saving and loading no longer works on a rebase https://github.com/godotengine/godot/pull/84611
-		// GDREGISTER_ calls _bind_methods() which is not needed for this class or getting things lige signals to work on base classes
-
-		linker_language = memnew(LinkerLanguage);
-		ScriptServer::register_language(linker_language);
+		GDREGISTER_CLASS(LinkerBuiltinFunction);
 
 		linker_loader.instantiate();
 		ResourceLoader::add_resource_format_loader(linker_loader);
 
 		linker_saver.instantiate();
 		ResourceSaver::add_resource_format_saver(linker_saver);
+
+		register_visual_script_builtin_func_node();
 	}
 	if (p_level == GDEXTENSION_INITIALIZATION_SCENE) {
 	}

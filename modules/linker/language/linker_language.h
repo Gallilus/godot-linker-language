@@ -10,7 +10,11 @@
 
 using namespace godot;
 
+typedef Ref<LinkerLink> (*LinkerLinkRegisterFunc)(const String &p_type);
+
 class LinkerLanguage : public ScriptLanguage {
+	HashMap<String, LinkerLinkRegisterFunc> register_funcs;
+
 	friend class LinkerScriptInstance;
 	static LinkerLanguage *singleton;
 
@@ -97,6 +101,9 @@ public:
 
 	virtual bool handles_global_class_type(const String &p_type) const { return false; }
 	virtual String get_global_class_name(const String &p_path, String *r_base_type = nullptr, String *r_icon_path = nullptr) const { return String(); }
+
+	void add_register_func(const String &p_name, LinkerLinkRegisterFunc p_func);
+	void remove_register_func(const String &p_name);
 
 	LinkerLanguage();
 	~LinkerLanguage();

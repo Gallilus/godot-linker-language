@@ -2,6 +2,7 @@
 #define LINKER_BUILTIN_FUNCTION_H
 
 #include "editor/editor_node.h"
+#include "linker_language.h"
 #include "linker_link.h"
 #include "linker_script.h"
 
@@ -89,6 +90,7 @@ public:
 
 private:
 	static const char *func_name[FUNC_MAX];
+	BuiltinFunc func;
 
 protected:
 	static void _bind_methods() {}
@@ -97,7 +99,6 @@ protected:
 	virtual void _initialize_instance(LinkerLinkInstance *link, LinkerScriptInstance *p_host, int p_stack_size) override;
 
 public:
-	static const MethodInfo _execute;
 	// String name;
 	// PropertyInfo return_val;
 	// uint32_t flags = METHOD_FLAGS_DEFAULT;
@@ -106,6 +107,7 @@ public:
 	// Vector<Variant> default_arguments;
 	// int return_val_metadata = 0;
 	// Vector<int> arguments_metadata;
+	virtual void set_index(StringName p_index) override;
 
 	virtual Variant get_placeholder_value() const override;
 	virtual Dictionary get_placeholder_info() const override;
@@ -116,7 +118,12 @@ public:
 
 	virtual LinkerLinkInstance *get_instance(LinkerScriptInstance *p_host, int p_stack_size) override;
 	virtual void remove_instance(LinkerScriptInstance *p_host, int p_stack_size) override;
+
+	LinkerBuiltinFunction(LinkerBuiltinFunction::BuiltinFunc p_func);
+	LinkerBuiltinFunction();
 };
+
+void register_visual_script_builtin_func_node();
 
 ////////////////////////////////////////////////////////////////////////
 //////////////////////////////  INSTANCE  //////////////////////////////

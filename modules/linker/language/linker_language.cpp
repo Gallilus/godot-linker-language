@@ -190,6 +190,16 @@ void LinkerLanguage::get_recognized_extensions(List<String> *p_extensions) const
 	p_extensions->push_back(get_extension());
 }
 
+void LinkerLanguage::add_register_func(const String &p_name, LinkerLinkRegisterFunc p_func) {
+	ERR_FAIL_COND(register_funcs.has(p_name));
+	register_funcs[p_name] = p_func;
+}
+
+void LinkerLanguage::remove_register_func(const String &p_name) {
+	ERR_FAIL_COND(!register_funcs.has(p_name));
+	register_funcs.erase(p_name);
+}
+
 LinkerLanguage::LinkerLanguage() {
 	singleton = this;
 }

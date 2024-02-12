@@ -43,7 +43,7 @@ public:
 	virtual void set_source(Ref<LinkerLink> p_source);
 	Ref<LinkerLink> get_source() const;
 	bool has_source() const { return !pull_links.is_empty(); }
-	void set_index(StringName p_index) { index = p_index; }
+	virtual void set_index(StringName p_index) { index = p_index; }
 	StringName get_index() const { return index; }
 	void set_owner(LinkerLink *p_link);
 	bool is_pushed() const;

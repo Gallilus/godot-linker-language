@@ -37,7 +37,7 @@ void LinkerBuiltinFunction::_initialize_instance(LinkerLinkInstance *link, Linke
 		}
 	}
 
-	instance->func = find_function(instance->index);
+	instance->func = func;
 }
 
 const char *LinkerBuiltinFunction::func_name[LinkerBuiltinFunction::FUNC_MAX] = {
@@ -723,6 +723,15 @@ LinkerBuiltinFunction::BuiltinFunc LinkerBuiltinFunction::find_function(const St
 	return FUNC_MAX;
 }
 
+void LinkerBuiltinFunction::set_index(StringName p_index) {
+	if (find_function(p_index)) {
+		ERR_PRINT("Built in function " + p_index + " not found");
+		return;
+	}
+	index = p_index;
+	func = find_function(p_index);
+}
+
 Variant LinkerBuiltinFunction::get_placeholder_value() const {
 	return Variant();
 }
@@ -750,6 +759,99 @@ void LinkerBuiltinFunction::remove_instance(LinkerScriptInstance *p_host, int p_
 		p_host->remove_link_instance(link_instances[p_stack_size]);
 		link_instances.erase(p_stack_size);
 	}
+}
+
+LinkerBuiltinFunction::LinkerBuiltinFunction(LinkerBuiltinFunction::BuiltinFunc p_func) {
+	func = p_func;
+	index = func_name[func];
+}
+
+LinkerBuiltinFunction::LinkerBuiltinFunction() {
+	func = MATH_SIN;
+	index = func_name[func];
+}
+
+template <LinkerBuiltinFunction::BuiltinFunc func>
+static Ref<LinkerLink> create_builtin_func_node(const String &p_name) {
+	Ref<LinkerBuiltinFunction> link = memnew(LinkerBuiltinFunction(func));
+	return link;
+}
+
+void register_visual_script_builtin_func_node() {
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/sin", create_builtin_func_node<LinkerBuiltinFunction::MATH_SIN>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/cos", create_builtin_func_node<LinkerBuiltinFunction::MATH_COS>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/tan", create_builtin_func_node<LinkerBuiltinFunction::MATH_TAN>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/sinh", create_builtin_func_node<LinkerBuiltinFunction::MATH_SINH>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/cosh", create_builtin_func_node<LinkerBuiltinFunction::MATH_COSH>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/tanh", create_builtin_func_node<LinkerBuiltinFunction::MATH_TANH>);
+
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/asin", create_builtin_func_node<LinkerBuiltinFunction::MATH_ASIN>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/acos", create_builtin_func_node<LinkerBuiltinFunction::MATH_ACOS>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/atan", create_builtin_func_node<LinkerBuiltinFunction::MATH_ATAN>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/atan2", create_builtin_func_node<LinkerBuiltinFunction::MATH_ATAN2>);
+
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/sqrt", create_builtin_func_node<LinkerBuiltinFunction::MATH_SQRT>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/fmod", create_builtin_func_node<LinkerBuiltinFunction::MATH_FMOD>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/fposmod", create_builtin_func_node<LinkerBuiltinFunction::MATH_FPOSMOD>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/posmod", create_builtin_func_node<LinkerBuiltinFunction::MATH_POSMOD>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/floor", create_builtin_func_node<LinkerBuiltinFunction::MATH_FLOOR>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/ceil", create_builtin_func_node<LinkerBuiltinFunction::MATH_CEIL>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/round", create_builtin_func_node<LinkerBuiltinFunction::MATH_ROUND>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/abs", create_builtin_func_node<LinkerBuiltinFunction::MATH_ABS>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/sign", create_builtin_func_node<LinkerBuiltinFunction::MATH_SIGN>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/pow", create_builtin_func_node<LinkerBuiltinFunction::MATH_POW>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/log", create_builtin_func_node<LinkerBuiltinFunction::MATH_LOG>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/exp", create_builtin_func_node<LinkerBuiltinFunction::MATH_EXP>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/isnan", create_builtin_func_node<LinkerBuiltinFunction::MATH_ISNAN>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/isinf", create_builtin_func_node<LinkerBuiltinFunction::MATH_ISINF>);
+
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/ease", create_builtin_func_node<LinkerBuiltinFunction::MATH_EASE>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/step_decimals", create_builtin_func_node<LinkerBuiltinFunction::MATH_STEP_DECIMALS>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/snapped", create_builtin_func_node<LinkerBuiltinFunction::MATH_SNAPPED>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/lerp", create_builtin_func_node<LinkerBuiltinFunction::MATH_LERP>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/cubic_interpolate", create_builtin_func_node<LinkerBuiltinFunction::MATH_CUBIC_INTERPOLATE>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/lerp_angle", create_builtin_func_node<LinkerBuiltinFunction::MATH_LERP_ANGLE>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/inverse_lerp", create_builtin_func_node<LinkerBuiltinFunction::MATH_INVERSE_LERP>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/range_lerp", create_builtin_func_node<LinkerBuiltinFunction::MATH_REMAP>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/smoothstep", create_builtin_func_node<LinkerBuiltinFunction::MATH_SMOOTHSTEP>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/move_toward", create_builtin_func_node<LinkerBuiltinFunction::MATH_MOVE_TOWARD>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/randomize", create_builtin_func_node<LinkerBuiltinFunction::MATH_RANDOMIZE>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/randi", create_builtin_func_node<LinkerBuiltinFunction::MATH_RANDI>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/randf", create_builtin_func_node<LinkerBuiltinFunction::MATH_RANDF>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/randi_range", create_builtin_func_node<LinkerBuiltinFunction::MATH_RANDI_RANGE>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/randf_range", create_builtin_func_node<LinkerBuiltinFunction::MATH_RANDF_RANGE>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/randfn", create_builtin_func_node<LinkerBuiltinFunction::MATH_RANDFN>);
+
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/seed", create_builtin_func_node<LinkerBuiltinFunction::MATH_SEED>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/randseed", create_builtin_func_node<LinkerBuiltinFunction::MATH_RANDSEED>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/deg2rad", create_builtin_func_node<LinkerBuiltinFunction::MATH_DEG_TO_RAD>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/rad2deg", create_builtin_func_node<LinkerBuiltinFunction::MATH_RAD_TO_DEG>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/linear2db", create_builtin_func_node<LinkerBuiltinFunction::MATH_LINEAR_TO_DB>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/db2linear", create_builtin_func_node<LinkerBuiltinFunction::MATH_DB_TO_LINEAR>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/wrapi", create_builtin_func_node<LinkerBuiltinFunction::MATH_WRAP>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/wrapf", create_builtin_func_node<LinkerBuiltinFunction::MATH_WRAPF>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/pingpong", create_builtin_func_node<LinkerBuiltinFunction::MATH_PINGPONG>);
+
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/max", create_builtin_func_node<LinkerBuiltinFunction::LOGIC_MAX>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/min", create_builtin_func_node<LinkerBuiltinFunction::LOGIC_MIN>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/clamp", create_builtin_func_node<LinkerBuiltinFunction::LOGIC_CLAMP>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/nearest_po2", create_builtin_func_node<LinkerBuiltinFunction::LOGIC_NEAREST_PO2>);
+
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/weakref", create_builtin_func_node<LinkerBuiltinFunction::OBJ_WEAKREF>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/convert", create_builtin_func_node<LinkerBuiltinFunction::TYPE_CONVERT>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/typeof", create_builtin_func_node<LinkerBuiltinFunction::TYPE_OF>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/type_exists", create_builtin_func_node<LinkerBuiltinFunction::TYPE_EXISTS>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/char", create_builtin_func_node<LinkerBuiltinFunction::TEXT_CHAR>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/ord", create_builtin_func_node<LinkerBuiltinFunction::TEXT_ORD>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/str", create_builtin_func_node<LinkerBuiltinFunction::TEXT_STR>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/print", create_builtin_func_node<LinkerBuiltinFunction::TEXT_PRINT>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/printerr", create_builtin_func_node<LinkerBuiltinFunction::TEXT_PRINTERR>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/printraw", create_builtin_func_node<LinkerBuiltinFunction::TEXT_PRINTRAW>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/print_verbose", create_builtin_func_node<LinkerBuiltinFunction::TEXT_PRINT_VERBOSE>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/var2str", create_builtin_func_node<LinkerBuiltinFunction::VAR_TO_STR>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/str2var", create_builtin_func_node<LinkerBuiltinFunction::STR_TO_VAR>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/var2bytes", create_builtin_func_node<LinkerBuiltinFunction::VAR_TO_BYTES>);
+	LinkerLanguage::get_singleton()->add_register_func("functions/built_in/bytes2var", create_builtin_func_node<LinkerBuiltinFunction::BYTES_TO_VAR>);
 }
 
 int LinkerBuiltInFunctionInstance::_step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) {
