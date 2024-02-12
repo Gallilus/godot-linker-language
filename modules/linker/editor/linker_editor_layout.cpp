@@ -413,19 +413,19 @@ void ResultTree::update_results(const String &p_search_term) {
 void ResultTree::update_results() {
 	get_root()->clear_children();
 	Ref<Texture2D> icon = Control::get_theme_icon(SNAME("MemberMethod"), EditorStringName(EditorIcons));
-	List<MethodInfo> m;
+	List<MethodInfo> mi;
 
 	if (ClassDB::class_exists(class_name)) {
-		ClassDB::get_method_list(class_name, &m, scope_flags & SCOPE_BASE, search_flags & SEARCH_EXLUDE_FROM_PROPERTIES);
+		ClassDB::get_method_list(class_name, &mi, scope_flags & SCOPE_BASE, search_flags & SEARCH_EXLUDE_FROM_PROPERTIES);
 	}
 	if (hint_string.is_absolute_path()) {
 		Ref<Script> _script = ResourceLoader::load(hint_string);
 		if (_script.is_valid()) {
-			_script->get_script_method_list(&m);
+			_script->get_script_method_list(&mi);
 		}
 	}
 
-	for (List<MethodInfo>::Element *E = m.front(); E; E = E->next()) {
+	for (List<MethodInfo>::Element *E = mi.front(); E; E = E->next()) {
 		if (search_term != "" && E->get().name.find(search_term) == -1) {
 			continue;
 		}
