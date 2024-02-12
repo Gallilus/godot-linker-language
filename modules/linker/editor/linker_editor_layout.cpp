@@ -729,6 +729,8 @@ void ConnectNext::close() {
 }
 
 ConnectNext::ConnectNext() {
+	LinkerLanguage::get_singleton()->get_registered_link_names(&ls_registered_links);
+
 	set_z_index(10);
 	menu_bar = memnew(HBoxContainer);
 	add_child(menu_bar);

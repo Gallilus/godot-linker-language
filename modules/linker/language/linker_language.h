@@ -13,7 +13,7 @@ using namespace godot;
 typedef Ref<LinkerLink> (*LinkerLinkRegisterFunc)(const String &p_type);
 
 class LinkerLanguage : public ScriptLanguage {
-	HashMap<String, LinkerLinkRegisterFunc> register_funcs;
+	HashMap<String, LinkerLinkRegisterFunc> registered_links;
 
 	friend class LinkerScriptInstance;
 	static LinkerLanguage *singleton;
@@ -104,6 +104,7 @@ public:
 
 	void add_register_func(const String &p_name, LinkerLinkRegisterFunc p_func);
 	void remove_register_func(const String &p_name);
+	void get_registered_link_names(List<String> *p_funcs) const;
 
 	LinkerLanguage();
 	~LinkerLanguage();

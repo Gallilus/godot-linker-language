@@ -191,13 +191,19 @@ void LinkerLanguage::get_recognized_extensions(List<String> *p_extensions) const
 }
 
 void LinkerLanguage::add_register_func(const String &p_name, LinkerLinkRegisterFunc p_func) {
-	ERR_FAIL_COND(register_funcs.has(p_name));
-	register_funcs[p_name] = p_func;
+	ERR_FAIL_COND(registered_links.has(p_name));
+	registered_links[p_name] = p_func;
 }
 
 void LinkerLanguage::remove_register_func(const String &p_name) {
-	ERR_FAIL_COND(!register_funcs.has(p_name));
-	register_funcs.erase(p_name);
+	ERR_FAIL_COND(!registered_links.has(p_name));
+	registered_links.erase(p_name);
+}
+
+void LinkerLanguage::get_registered_link_names(List<String> *r_names) const {
+	for (const KeyValue<String, LinkerLinkRegisterFunc> &E : registered_links) {
+		r_names->push_back(E.key);
+	}
 }
 
 LinkerLanguage::LinkerLanguage() {

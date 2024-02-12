@@ -201,6 +201,8 @@ class ConnectNext : public VBoxContainer {
 	LineEdit *search_text = nullptr;
 	ResultTree *results_tree = nullptr;
 
+	List<String> ls_registered_links; // built in links
+
 protected:
 	static void _bind_methods() {}
 	void _notification(int p_what);
