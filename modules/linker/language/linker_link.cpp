@@ -55,7 +55,7 @@ void LinkerLink::set_source(Ref<LinkerLink> p_source) {
 
 Ref<LinkerLink> LinkerLink::get_source() const {
 	if (pull_links.is_empty()) {
-		return Ref<LinkerLink>();
+		return this;
 	}
 	return pull_links[0];
 }
