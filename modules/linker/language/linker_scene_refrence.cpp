@@ -84,14 +84,6 @@ bool LinkerSceneRefrence::can_drop_on_value(Ref<LinkerLink> drag_link) const {
 	return true;
 }
 
-void LinkerSceneRefrence::drop_data_on_link(Ref<LinkerLink> dropped_link) {
-	if (dropped_link.is_null()) {
-		return;
-	}
-	// if no inxed found create ne popup
-	dropped_link->set_source(this);
-}
-
 LinkerLinkInstance *LinkerSceneRefrence::get_instance(LinkerScriptInstance *p_host, int p_stack_size) {
 	if (!link_instances.has(p_stack_size)) {
 		LinkerSceneRefrenceInstance *instance = new LinkerSceneRefrenceInstance();

@@ -187,10 +187,6 @@ Variant LinkerLink::get_drag_data() const {
 	return drag_data;
 }
 
-Variant LinkerLink::get_drag_arg_data(int p_index) const {
-	return Variant();
-}
-
 bool LinkerLink::can_drop_on_link(Ref<LinkerLink> drag_link) const {
 	ERR_PRINT_ONCE("can_drop_on_link: not implemented for " + String(get_class_name()));
 	return false;

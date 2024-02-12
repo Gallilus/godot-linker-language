@@ -20,11 +20,10 @@ public:
 	virtual Variant get_placeholder_value() const override { return Variant(); }
 	virtual Dictionary get_placeholder_info() const override;
 
-	virtual Variant get_drag_arg_data(int p_index) const override;
+	virtual Variant get_drag_data() const override;
 	virtual bool can_drop_on_link(Ref<LinkerLink> drag_link) const override;
 	virtual bool can_drop_on_arg(Ref<LinkerLink> drag_link) const override;
 	virtual bool can_drop_on_source(Ref<LinkerLink> drag_link) const override { return true; }
-	virtual void drop_data_on_link(Ref<LinkerLink> dropped_link) override;
 	virtual bool controler_at_source() const override { return false; }
 
 	virtual LinkerLinkInstance *get_instance(LinkerScriptInstance *p_host, int p_stack_size) override;

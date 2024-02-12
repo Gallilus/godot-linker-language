@@ -62,10 +62,6 @@ bool LinkerIndexGet::can_drop_on_link(Ref<LinkerLink> drag_link) const {
 	return false;
 }
 
-void LinkerIndexGet::drop_data_on_link(Ref<LinkerLink> dropped_link) {
-	set_source(dropped_link);
-}
-
 LinkerLinkInstance *LinkerIndexGet::get_instance(LinkerScriptInstance *p_host, int p_stack_size) {
 	if (!link_instances.has(p_stack_size)) {
 		LinkerIndexGetInstance *instance = new LinkerIndexGetInstance();

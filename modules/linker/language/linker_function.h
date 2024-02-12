@@ -22,7 +22,6 @@ public:
 	virtual bool controler_at_source() const override { return false; }
 
 	virtual bool can_drop_on_link(Ref<LinkerLink> drag_link) const override;
-	virtual void drop_data_on_link(Ref<LinkerLink> dropped_link) override;
 
 	virtual LinkerLinkInstance *get_instance(LinkerScriptInstance *p_host, int p_stack_size) override;
 	virtual void remove_instance(LinkerScriptInstance *p_host, int p_stack_size) override;

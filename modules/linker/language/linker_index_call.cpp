@@ -48,12 +48,14 @@ Dictionary LinkerIndexCall::get_placeholder_info() const {
 	return d;
 }
 
-Variant LinkerIndexCall::get_drag_arg_data(int p_index) const {
+Variant LinkerIndexCall::get_drag_data() const {
 	MethodInfo mi = get_method_info();
-	Dictionary d;
-	d["type"] = "PropertyInfo";
-	d["value"] = Dictionary(mi.arguments[p_index]);
-	return d;
+	Dictionary drag_data;
+	drag_data["type"] = "linker_link";
+	drag_data["link_idx"] = get_link_idx();
+	drag_data["value_type"] = "MethodInfo";
+	drag_data["value"] = Dictionary(mi);
+	return drag_data;
 }
 
 bool LinkerIndexCall::can_drop_on_link(Ref<LinkerLink> drag_link) const {
@@ -71,15 +73,10 @@ bool LinkerIndexCall::can_drop_on_arg(Ref<LinkerLink> drag_link) const {
 	MethodInfo mi = get_method_info();
 	PropertyInfo pi = mi.arguments[0];
 	PropertyInfo pi2 = drag_link->get_output_info();
-	if (pi2.type == Variant::NIL){
+	if (pi2.type == Variant::NIL) {
 		return true;
 	}
 	return pi.type == pi2.type;
-}
-
-void LinkerIndexCall::drop_data_on_link(Ref<LinkerLink> dropped_link) {
-	// momentarly only compatible with one argument
-	set_source(dropped_link);
 }
 
 LinkerLinkInstance *LinkerIndexCall::get_instance(LinkerScriptInstance *p_host, int p_stack_size) {

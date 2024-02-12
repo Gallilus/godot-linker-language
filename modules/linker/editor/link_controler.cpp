@@ -319,9 +319,10 @@ void LinkControler::prep_drag_data() {
 	} else if (rect_arg().has_point(mouse_pos)) {
 		drag_data = link->get_drag_data();
 		drag_data["link_request"] = "get_arg";
-		drag_data["arg_index"] = 0;
+		drag_data["link_arg_index"] = 0;
 	} else if (rect_set().has_point(mouse_pos)) {
-		drag_data = link->get_drag_data();
+		drag_data = Variant();
+		// create popup for what property to set
 		drag_data["link_request"] = "set_part_of_value";
 	} else if (rect_index().has_point(mouse_pos)) {
 		drag_data = link->get_drag_data();
@@ -335,10 +336,10 @@ void LinkControler::prep_drag_data() {
 		drag_data["link_request"] = "use_output";
 	} else if (rect_push().has_point(mouse_pos)) {
 		drag_data = link->get_drag_data();
-		drag_data["link_request"] = "push next command";
+		drag_data["link_request"] = "push_next_command";
 	} else if (rect_next().has_point(mouse_pos)) {
 		drag_data = link->get_drag_data();
-		drag_data["link_request"] = "push next command";
+		drag_data["link_request"] = "push_next_command";
 	} else if (rect_this().has_point(mouse_pos)) {
 		drag_data = link->get_drag_data();
 	} else {
@@ -356,34 +357,47 @@ bool LinkControler::can_drop_data(const Point2 &p_point, const Variant &p_data) 
 			d_data["type"] != "linker_link") {
 		return false;
 	}
-	Ref<LinkerLink> drag_link = link->get_host()->get_link(d_data["link_idx"]);
-	if (drag_link.is_null() ||
-			drag_link->get_host() != link->get_host()) {
+	Ref<LinkerLink> dropped_link = link->get_host()->get_link(d_data["link_idx"]);
+	if (dropped_link.is_null() || dropped_link->get_host() != link->get_host()) {
+		// drag link is not vallid or not part of the same script
 		return false;
 	}
 	Point2 mouse_pos = get_local_mouse_position();
 	if (rect_source().has_point(mouse_pos)) {
-		if (d_data.has("link_request") && d_data["link_request"] == "get_arg") {
-			return link->get_source()->can_drop_on_link(drag_link->get_drag_arg_data(drag_data["arg_index"])); // get argument info
+		// use the drop link as a new source
+		if (d_data.has("link_request")) {
+			return (
+					(d_data["link_request"] == "use_output") ||
+					(d_data["link_request"] == "push_next_command"));
 		}
 	} else if (rect_arg().has_point(mouse_pos)) {
-		if (d_data.has("link_request") && d_data["link_request"] == "get_arg") {
-			return false;
+		if (d_data.has("link_request")) {
+			return (
+					(d_data["link_request"] == "use_output") ||
+					(d_data["link_request"] == "push_next_command"));
 		}
-		return link->can_drop_on_arg(drag_link);
 	} else if (rect_set().has_point(mouse_pos)) {
-		if (d_data.has("link_request") && d_data["link_request"] == "get_arg") {
-			return false;
+		if (d_data.has("link_request")) {
+			return (
+					(d_data["link_request"] == "use_output") ||
+					(d_data["link_request"] == "push_next_command"));
 		}
-		return link->can_drop_on_link(drag_link);
 	} else if (rect_output().has_point(mouse_pos)) {
-		return link->can_drop_on_value(drag_link);
+		if (d_data.has("link_request")) {
+			return (
+					(d_data["link_request"] == "get_arg") ||
+					(d_data["link_request"] == "get_part_of_value"));
+		}
 	} else if (rect_push().has_point(mouse_pos)) {
-		return link->can_drop_on_link(drag_link);
+		return false;
 	} else if (rect_next().has_point(mouse_pos)) {
-		return link->can_drop_on_link(drag_link);
+		return false;
 	} else if (rect_this().has_point(mouse_pos)) {
-		return link->can_drop_on_link(drag_link);
+		if (d_data.has("link_request")) {
+			return (
+					(d_data["link_request"] == "get_arg") ||
+					(d_data["link_request"] == "get_part_of_value"));
+		}
 	}
 	return false;
 }
@@ -398,28 +412,78 @@ void LinkControler::drop_data(const Point2 &p_point, const Variant &p_data) {
 
 	Point2 mouse_pos = get_local_mouse_position();
 	if (rect_source().has_point(mouse_pos)) {
-		if (d_data.has("link_request") &&
-				d_data["link_request"] == "get_arg") {
-			// disconnect argument
-			// connect source to argument
-			link->get_source()->drop_data_on_link(drag_link); // drop argument
+		if (d_data.has("link_request")){
+			if (d_data["link_request"] == "use_output") {
+				link->set_source(drag_link);
+			} else if (d_data["link_request"] == "get_arg") {
+				ERR_PRINT("not able to set arguments");
+			} else if (d_data["link_request"] == "push_next_command") {
+				drag_link->add_push_link_ref(link);
+			} else if (d_data["link_request"] == "get_part_of_value") {
+				ERR_PRINT("get_part_of_value not implemented jet");
+			}
 		}
-		// return link->can_drop_on_source(drag_link);
 	} else if (rect_arg().has_point(mouse_pos)) {
-		// return link->can_drop_on_arg(drag_link);
+		if (d_data.has("link_request")){
+			if (d_data["link_request"] == "use_output") {
+				ERR_PRINT("not able to set arguments");
+			} else if (d_data["link_request"] == "get_arg") {
+				ERR_PRINT("not able to get argument from argument");
+			} else if (d_data["link_request"] == "push_next_command") {
+				ERR_PRINT("not able to push setting of an argument");
+			} else if (d_data["link_request"] == "get_part_of_value") {
+				ERR_PRINT("get_part_of_value not implemented jet");
+			}
+		}
 	} else if (rect_set().has_point(mouse_pos)) {
-		// return link->can_drop_on_link(drag_link);
+		if (d_data.has("link_request")){
+			if (d_data["link_request"] == "use_output") {
+				ERR_PRINT("not able to set memeber of a value");
+			} else if (d_data["link_request"] == "get_arg") {
+				ERR_PRINT("not able to set memeber of a value");
+			} else if (d_data["link_request"] == "push_next_command") {
+				ERR_PRINT("not able to set memeber of a value");
+			} else if (d_data["link_request"] == "get_part_of_value") {
+				ERR_PRINT("not able to set memeber of a value");
+			}
+		}
 	} else if (rect_output().has_point(mouse_pos)) {
-		// return link->can_drop_on_value(drag_link);
+		if (d_data.has("link_request")){
+			if (d_data["link_request"] == "use_output") {
+				link->set_source(drag_link);
+			} else if (d_data["link_request"] == "get_arg") {
+				ERR_PRINT("not able to set arguments");
+			} else if (d_data["link_request"] == "push_next_command") {
+				drag_link->add_push_link_ref(link);
+			} else if (d_data["link_request"] == "get_part_of_value") {
+				ERR_PRINT("not able to set memeber of a value");
+			}
+		}
 	} else if (rect_push().has_point(mouse_pos)) {
-		// return link->can_drop_on_link(drag_link);
+			if (d_data["link_request"] == "use_output") {
+				link->add_push_link_ref(drag_link);
+			} else if (d_data["link_request"] == "get_arg") {
+				ERR_PRINT("not able to set arguments");
+			} else if (d_data["link_request"] == "push_next_command") {
+				drag_link->add_push_link_ref(link);
+			} else if (d_data["link_request"] == "get_part_of_value") {
+				ERR_PRINT("not able to set memeber of a value");
+			}
 	} else if (rect_next().has_point(mouse_pos)) {
 		// return link->can_drop_on_link(drag_link);
 	} else if (rect_this().has_point(mouse_pos)) {
-		// return link->can_drop_on_link(drag_link);
+		if (d_data.has("link_request")){
+			if (d_data["link_request"] == "use_output") {
+				link->set_source(drag_link);
+			} else if (d_data["link_request"] == "get_arg") {
+				ERR_PRINT("not able to push setting of an argument");
+			} else if (d_data["link_request"] == "push_next_command") {
+				link->add_push_link_ref(drag_link);
+			} else if (d_data["link_request"] == "get_part_of_value") {
+				ERR_PRINT("not able to set memeber of a value");
+			}
+		}
 	}
-
-	link->drop_data_on_link(drag_link);
 }
 
 void LinkControler::set_link(Ref<LinkerLink> p_link) {

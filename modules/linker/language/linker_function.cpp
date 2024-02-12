@@ -59,27 +59,6 @@ bool LinkerFunction::can_drop_on_link(Ref<LinkerLink> drag_link) const {
 	return false;
 }
 
-void LinkerFunction::drop_data_on_link(Ref<LinkerLink> dropped_link) {
-	if (dropped_link->get_class_name() == SNAME("LinkerIndexGet")) {
-		Ref<LinkerIndexGet> index_get = dropped_link;
-		PropertyInfo info = host->get_method_info(index).return_val;
-		if (info.type == Variant::NIL ||
-				info.type == int(index_get->get_placeholder_info()["type"])) {
-			set_source(dropped_link);
-		}
-	}
-	if (dropped_link->get_class_name() == SNAME("LinkerIndexCall")) {
-		Ref<LinkerIndexCall> index_call = dropped_link;
-		PropertyInfo info = host->get_method_info(index).return_val;
-		if (info.type == Variant::NIL ||
-				info.type == int(index_call->get_placeholder_info()["type"])) {
-			set_source(dropped_link);
-		} else {
-			add_push_link_ref(dropped_link);
-		}
-	}
-}
-
 LinkerLinkInstance *LinkerFunction::get_instance(LinkerScriptInstance *p_host, int p_stack_size) {
 	if (!link_instances.has(p_stack_size)) {
 		LinkerFunctionInstance *instance = new LinkerFunctionInstance();

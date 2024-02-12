@@ -70,12 +70,10 @@ public:
 	virtual String get_graph_category() const { return "graph_data"; }
 	virtual bool controler_at_source() const = 0;
 	virtual Variant get_drag_data() const;
-	virtual Variant get_drag_arg_data(int p_index) const;
 	virtual bool can_drop_on_link(Ref<LinkerLink> drag_link) const;
 	virtual bool can_drop_on_arg(Ref<LinkerLink> drag_link) const;
 	virtual bool can_drop_on_source(Ref<LinkerLink> drag_link) const;
 	virtual bool can_drop_on_value(Ref<LinkerLink> drag_link) const;
-	virtual void drop_data_on_link(Ref<LinkerLink> dropped_link) {}
 	virtual bool use_argument() const;
 	virtual bool use_source() const;
 
