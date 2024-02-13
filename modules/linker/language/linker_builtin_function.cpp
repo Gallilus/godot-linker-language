@@ -719,12 +719,11 @@ LinkerBuiltinFunction::BuiltinFunc LinkerBuiltinFunction::find_function(const St
 			return BuiltinFunc(i);
 		}
 	}
-
 	return FUNC_MAX;
 }
 
 void LinkerBuiltinFunction::set_index(StringName p_index) {
-	if (find_function(p_index)) {
+	if (find_function(p_index) == FUNC_MAX) {
 		ERR_PRINT("Built in function " + p_index + " not found");
 		return;
 	}
@@ -855,13 +854,33 @@ void register_visual_script_builtin_func_node() {
 }
 
 int LinkerBuiltInFunctionInstance::_step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) {
-	if (pull_count > 0) {
-		value = pull_links[0]->get_value();
+	if (LinkerBuiltinFunction::get_func_argument_count(func) != pull_count) {
+		r_error.expected = LinkerBuiltinFunction::get_func_argument_count(func);
+		if (r_error.expected < pull_count) {
+			r_error.error = Callable::CallError::CALL_ERROR_TOO_MANY_ARGUMENTS;
+		} else {
+			r_error.error = Callable::CallError::CALL_ERROR_TOO_FEW_ARGUMENTS;
+		}
+		r_error_str = "func " + String(index);
+		return STEP_ERROR;
 	}
 
-	const Variant **p_inputs;
-	Variant **p_outputs;
+	input_args.clear();
+	Vector<const Variant *> argp;
+	input_args.resize(pull_count);
+	argp.resize(pull_count);
 
-	LinkerBuiltinFunction::exec_func(func, p_inputs, p_outputs[0], r_error, r_error_str);
+	for (int i = 0; i < pull_count; i++) {
+		input_args.write[i] = pull_links[i]->get_value();
+		argp.write[i] = &input_args[i];
+	}
+
+	// if (!Engine::get_singleton()->is_editor_hint()) {
+	LinkerBuiltinFunction::exec_func(func, (const Variant **)argp.ptr(), &value, r_error, r_error_str);
+	// }
+
+	if (r_error.error != Callable::CallError::CALL_OK) {
+		return STEP_ERROR;
+	}
 	return STEP_COMPLETE;
 }

@@ -200,6 +200,12 @@ void LinkerLanguage::remove_register_func(const String &p_name) {
 	registered_links.erase(p_name);
 }
 
+Ref<LinkerLink> LinkerLanguage::create_node_from_name(const String &p_name) {
+	ERR_FAIL_COND_V(!registered_links.has(p_name), Ref<LinkerLink>());
+
+	return registered_links[p_name](p_name);
+}
+
 void LinkerLanguage::get_registered_link_names(List<String> *r_names) const {
 	for (const KeyValue<String, LinkerLinkRegisterFunc> &E : registered_links) {
 		r_names->push_back(E.key);

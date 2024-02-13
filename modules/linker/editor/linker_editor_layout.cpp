@@ -662,7 +662,7 @@ void ConnectNext::_tree_confirmed() {
 	}
 
 	if (ti->get_meta("type") == "registered_link") {
-		ERR_PRINT(String(ti->get_meta("link_name")));
+		_registered_link_confirmed(ti->get_meta("link_name"));
 	} // else if registered_link
 
 	if (ti->get_meta("type") == "MethodInfo") {
@@ -698,6 +698,12 @@ void ConnectNext::_method_info_confirmed(Dictionary p_info) {
 		// 	dropped_script->add_link(link);
 		// 	return;
 		// }
+	}
+}
+
+void ConnectNext::_registered_link_confirmed(String p_name) {
+	if (dropped_script.is_valid()) {
+		dropped_script->add_link(LinkerLanguage::get_singleton()->create_node_from_name(p_name));
 	}
 }
 

@@ -212,6 +212,7 @@ protected:
 	void _class_from_search_therm();
 	void _tree_confirmed();
 	void _method_info_confirmed(Dictionary p_info);
+	void _registered_link_confirmed(String p_name);
 	void _move_source_to_argument();
 	void _update_link_infos();
 

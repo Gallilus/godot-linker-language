@@ -104,6 +104,7 @@ public:
 
 	void add_register_func(const String &p_name, LinkerLinkRegisterFunc p_func);
 	void remove_register_func(const String &p_name);
+	Ref<LinkerLink> create_node_from_name(const String &p_name);
 	void get_registered_link_names(List<String> *p_funcs) const;
 
 	LinkerLanguage();

@@ -133,6 +133,7 @@ class LinkerBuiltInFunctionInstance : public LinkerLinkInstance {
 	friend class LinkerBuiltinFunction;
 
 	LinkerBuiltinFunction::BuiltinFunc func;
+	Vector<Variant> input_args;
 
 protected:
 	virtual int _step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) override;
