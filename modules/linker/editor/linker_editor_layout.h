@@ -64,7 +64,6 @@ class LinkerEditorLayout : public Container {
 protected:
 	static void _bind_methods();
 	void _notification(int p_what);
-	void _sort_children();
 
 	LinkControler *make_link_controler(Ref<LinkerLink> p_link);
 
@@ -92,6 +91,7 @@ public:
 
 	void clear_layout();
 	void update_graph();
+	void position_controlers();
 	void add_link(Ref<LinkerLink> p_link);
 	void add_pull_connection(Ref<LinkerLink> pulled_link, Ref<LinkerLink> owner_link);
 	void add_sequence_connection(Ref<LinkerLink> source_link, Ref<LinkerLink> destination_link);

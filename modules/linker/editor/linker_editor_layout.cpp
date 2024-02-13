@@ -31,35 +31,8 @@ void LinkerEditorLayout::_bind_methods() {
 void LinkerEditorLayout::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_SORT_CHILDREN: {
-			_sort_children();
+			position_controlers();
 		} break;
-	}
-}
-
-void LinkerEditorLayout::_sort_children() {
-	PointRemapper point_map;
-	HashMap<LinkControler *, Vector2> controler_normalised_map;
-	// fill size with base values
-	for (const KeyValue<Ref<LinkerLink>, Vector2> &E : graph.get_linker_link_positions()) {
-		Ref<LinkerLink> link = E.key;
-		if (link.is_valid()) {
-			LinkControler *controler = get_link_controler(link);
-			controler_normalised_map[controler] = E.value;
-			point_map.add_point(E.value, controler->get_size(), controler->to_string(), link->get_link_idx());
-		} else {
-			point_map.add_point(E.value);
-		}
-	}
-
-	HashMap<Vector2, Vector2> size_map = point_map.get_point_map();
-
-	// apply real position size
-	for (const KeyValue<LinkControler *, Vector2> &E : controler_normalised_map) {
-		LinkControler *controler = E.key;
-		Vector2 norm_pos = E.value;
-		controler->set_visible(true);
-		Ref<Tween> tween = create_tween();
-		tween->tween_property(controler, NodePath("position"), size_map[norm_pos], 0.5);
 	}
 }
 
@@ -318,7 +291,34 @@ void LinkerEditorLayout::update_graph() {
 	script->for_every_pulled(callable_mp(this, &LinkerEditorLayout::add_pull_connection));
 	script->for_every_sequenced(callable_mp(this, &LinkerEditorLayout::add_sequence_connection));
 
-	_sort_children();
+	position_controlers();
+}
+
+void LinkerEditorLayout::position_controlers() {
+	PointRemapper point_map;
+	HashMap<LinkControler *, Vector2> controler_normalised_map;
+	// fill size with base values
+	for (const KeyValue<Ref<LinkerLink>, Vector2> &E : graph.get_linker_link_positions()) {
+		Ref<LinkerLink> link = E.key;
+		if (link.is_valid()) {
+			LinkControler *controler = get_link_controler(link);
+			controler_normalised_map[controler] = E.value;
+			point_map.add_point(E.value, controler->get_size(), controler->to_string(), link->get_link_idx());
+		} else {
+			point_map.add_point(E.value);
+		}
+	}
+
+	HashMap<Vector2, Vector2> size_map = point_map.get_point_map();
+
+	// apply real position size
+	for (const KeyValue<LinkControler *, Vector2> &E : controler_normalised_map) {
+		LinkControler *controler = E.key;
+		Vector2 norm_pos = E.value;
+		controler->set_visible(true);
+		Ref<Tween> tween = create_tween();
+		tween->tween_property(controler, NodePath("position"), size_map[norm_pos], 0.5);
+	}
 }
 
 void LinkerEditorLayout::add_link(Ref<LinkerLink> p_link) {
