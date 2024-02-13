@@ -452,7 +452,9 @@ void ResultTree::update_results() {
 				TreeItem *ti = get_root()->create_child();
 				ti->set_text(1, path[2]);
 				ti->set_tooltip_text(1, link_name);
-				ti->set_custom_color(1, EDITOR_GET("text_editor/theme/highlighting/function_color"));
+				ti->set_custom_color(1, EDITOR_GET("text_editor/theme/highlighting/keyword_color"));
+				ti->set_icon(1, icon);
+				ti->set_icon_modulate(1, EDITOR_GET("text_editor/theme/highlighting/keyword_color"));
 				ti->set_meta("type", "registered_link");
 				ti->set_meta("link_name", link_name);
 			}
