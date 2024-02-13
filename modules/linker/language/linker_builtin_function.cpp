@@ -861,7 +861,7 @@ int LinkerBuiltInFunctionInstance::_step(StartMode p_start_mode, Callable::CallE
 		} else {
 			r_error.error = Callable::CallError::CALL_ERROR_TOO_FEW_ARGUMENTS;
 		}
-		r_error_str = "func " + String(index);
+		r_error_str = "LinkerBuiltinFunction " + String(index);
 		return STEP_ERROR;
 	}
 
