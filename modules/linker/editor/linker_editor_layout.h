@@ -116,6 +116,12 @@ class ResultTree : public Tree {
 	String class_name = "";
 	String hint_string = "";
 
+	List<StringName> selectable_enums;
+	List<MethodInfo> selectable_methods;
+	List<MethodInfo> selectable_signals;
+	List<PropertyInfo> selectable_properties;
+	List<String> selectable_integer_constants;
+
 protected:
 	static void _bind_methods() {}
 	void _notification(int p_what) {}
@@ -154,6 +160,7 @@ public:
 	void set_show_hierarchy(bool p_show_hierarchy);
 	void set_show_setters_getters(bool p_show_setters_getters);
 
+	void update_result_lists();
 	void update_results(const String &p_search_term);
 	void update_results();
 

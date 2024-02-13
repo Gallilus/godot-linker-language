@@ -405,6 +405,24 @@ void ResultTree::set_show_setters_getters(bool p_show_setters_getters) {
 	}
 }
 
+void ResultTree::update_result_lists() {
+	if (ClassDB::class_exists(class_name)) {
+		ClassDB::get_enum_list(class_name, &selectable_enums, true);
+		ClassDB::get_method_list(class_name, &selectable_methods, true, true);
+		ClassDB::get_signal_list(class_name, &selectable_signals, true);
+		ClassDB::get_property_list(class_name, &selectable_properties, true);
+		ClassDB::get_integer_constant_list(class_name, &selectable_integer_constants, true);
+	}
+	if (hint_string.is_absolute_path()) {
+		Ref<Script> _script = ResourceLoader::load(hint_string);
+		if (_script.is_valid()) {
+			_script->get_script_method_list(&selectable_methods);
+			_script->get_script_signal_list(&selectable_signals);
+			_script->get_script_property_list(&selectable_properties);
+		}
+	}
+}
+
 void ResultTree::update_results(const String &p_search_term) {
 	search_term = p_search_term;
 	update_results();
@@ -412,20 +430,22 @@ void ResultTree::update_results(const String &p_search_term) {
 
 void ResultTree::update_results() {
 	get_root()->clear_children();
-	Ref<Texture2D> icon = Control::get_theme_icon(SNAME("MemberMethod"), EditorStringName(EditorIcons));
-	List<MethodInfo> mi;
 
-	if (ClassDB::class_exists(class_name)) {
-		ClassDB::get_method_list(class_name, &mi, scope_flags & SCOPE_BASE, search_flags & SEARCH_EXLUDE_FROM_PROPERTIES);
-	}
-	if (hint_string.is_absolute_path()) {
-		Ref<Script> _script = ResourceLoader::load(hint_string);
-		if (_script.is_valid()) {
-			_script->get_script_method_list(&mi);
+	Ref<Texture2D> icon = Control::get_theme_icon(SNAME("Enum"), EditorStringName(EditorIcons));
+	for (List<StringName>::Element *E = selectable_enums.front(); E; E = E->next()) {
+		if (search_term != "" && String(E->get()).find(String(search_term)) == -1) {
+			continue;
 		}
+		TreeItem *ti = get_root()->create_child();
+		ti->set_text(1, E->get());
+		ti->set_tooltip_text(1, E->get());
+		ti->set_icon(1, icon);
+		ti->set_meta("type", "enum");
+		ti->set_meta("enum", E->get());
 	}
 
-	for (List<MethodInfo>::Element *E = mi.front(); E; E = E->next()) {
+	icon = Control::get_theme_icon(SNAME("MemberMethod"), EditorStringName(EditorIcons));
+	for (List<MethodInfo>::Element *E = selectable_methods.front(); E; E = E->next()) {
 		if (search_term != "" && E->get().name.find(search_term) == -1) {
 			continue;
 		}
@@ -436,6 +456,46 @@ void ResultTree::update_results() {
 		ti->set_meta("MethodInfo", Dictionary(E->get()));
 		ti->set_meta("type", "MethodInfo");
 	}
+
+	icon = Control::get_theme_icon(SNAME("MemberSignal"), EditorStringName(EditorIcons));
+	for (List<MethodInfo>::Element *E = selectable_signals.front(); E; E = E->next()) {
+		if (search_term != "" && E->get().name.find(search_term) == -1) {
+			continue;
+		}
+		TreeItem *ti = get_root()->create_child();
+		ti->set_text(1, E->get().name);
+		ti->set_tooltip_text(1, E->get().name);
+		ti->set_icon(1, icon);
+		ti->set_meta("MethodInfo", Dictionary(E->get()));
+		ti->set_meta("type", "MethodInfo");
+	}
+
+	icon = Control::get_theme_icon(SNAME("MemberProperty"), EditorStringName(EditorIcons));
+	for (List<PropertyInfo>::Element *E = selectable_properties.front(); E; E = E->next()) {
+		if (search_term != "" && E->get().name.find(search_term) == -1) {
+			continue;
+		}
+		TreeItem *ti = get_root()->create_child();
+		ti->set_text(1, E->get().name);
+		ti->set_tooltip_text(1, E->get().name);
+		ti->set_icon(1, icon);
+		ti->set_meta("PropertyInfo", Dictionary(E->get()));
+		ti->set_meta("type", "PropertyInfo");
+	}
+
+	icon = Control::get_theme_icon(SNAME("MemberConstant"), EditorStringName(EditorIcons));
+	for (List<String>::Element *E = selectable_integer_constants.front(); E; E = E->next()) {
+		if (search_term != "" && E->get().find(search_term) == -1) {
+			continue;
+		}
+		TreeItem *ti = get_root()->create_child();
+		ti->set_text(1, E->get());
+		ti->set_tooltip_text(1, E->get());
+		ti->set_icon(1, icon);
+		ti->set_meta("type", "integer_constant");
+		ti->set_meta("integer_constant", E->get());
+	}
+
 	List<String> ls_registered_links;
 	LinkerLanguage::get_singleton()->get_registered_link_names(&ls_registered_links);
 	while (!ls_registered_links.is_empty()) {
@@ -625,6 +685,7 @@ void ConnectNext::_update_results(const String &p_search_term) {
 	if (search_text->get_text().find("::") != -1) {
 		_class_from_search_therm();
 		_update_icons();
+		results_tree->update_result_lists();
 		results_tree->update_results(search_text->get_text());
 	} else {
 		results_tree->update_results(p_search_term);
@@ -665,12 +726,15 @@ void ConnectNext::_tree_confirmed() {
 
 	if (ti->get_meta("type") == "registered_link") {
 		_registered_link_confirmed(ti->get_meta("link_name"));
-	} // else if registered_link
-
-	if (ti->get_meta("type") == "MethodInfo") {
+	} else if (ti->get_meta("type") == "MethodInfo") {
 		_method_info_confirmed(ti->get_meta("MethodInfo"));
-	} // else if MethodInfo
-
+	} else {
+		List<StringName> keys;
+		ti->get_meta_list(&keys);
+		for (const String &E : keys) {
+			ERR_PRINT(String(E) + " " + String(ti->get_meta(E)));
+		}
+	}
 	close();
 }
 
@@ -736,6 +800,7 @@ void ConnectNext::dropped(Ref<LinkerScript> p_script, const Point2 &p_point) {
 	results_tree->hint_string = dropped_script->get_path();
 	search_text->set_text("");
 	popup(p_point);
+	results_tree->update_result_lists();
 	results_tree->update_results("");
 }
 
@@ -748,6 +813,7 @@ void ConnectNext::dropped(Ref<LinkerLink> p_link, const Point2 &p_point) {
 	results_tree->hint_string = source_info.hint_string;
 	search_text->set_text("");
 	popup(p_point);
+	results_tree->update_result_lists();
 	results_tree->update_results("");
 }
 
