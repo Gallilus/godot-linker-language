@@ -8,7 +8,7 @@ int EditorGraph::get_vertex_id(Ref<LinkerLink> p_linker_link) const {
 		return -1;
 	}
 	for (const KeyValue<int, Ref<LinkerLink>> &E : links) {
-		if (E.value->get_link_idx() == p_linker_link->get_link_idx()) {
+		if (E.value.is_valid() && E.value->get_link_idx() == p_linker_link->get_link_idx()) {
 			return E.key;
 		}
 	}
