@@ -11,6 +11,10 @@ void LinkerIndexGet::_initialize_instance(LinkerLinkInstance *link, LinkerScript
 	instance->pull_count = pull_links.size();
 	instance->push_count = push_links.size();
 
+	if (source_link.is_valid()) {
+		instance->source_link = source_link->get_instance(p_host, p_stack_size);
+	}
+
 	for (int i = 0; i < instance->pull_count; i++) {
 		LinkerLinkInstance *_link = pull_links[i]->get_instance(p_host, p_stack_size);
 		if (_link) {
@@ -83,8 +87,12 @@ void LinkerIndexGet::remove_instance(LinkerScriptInstance *p_host, int p_stack_s
 ////////////////////////////////////////////////////////////////////////
 
 int LinkerIndexGetInstance::_step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) {
-	if (pull_count > 0) {
-		value = pull_links[0]->get_value().get(index);
+	if (source_link != nullptr) {
+		value = source_link->get_value().get(index);
+	} else {
+		r_error.error = Callable::CallError::CALL_ERROR_INSTANCE_IS_NULL;
+		r_error_str = "LinkerIndexGet expects a source link";
+		return STEP_ERROR;
 	}
 	return STEP_COMPLETE;
 }

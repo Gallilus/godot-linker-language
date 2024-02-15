@@ -10,6 +10,10 @@ void LinkerLink::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_index", "idx"), &LinkerLink::set_index);
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "index_name"), "set_index", "get_index");
 
+	ClassDB::bind_method(D_METHOD("get_source_link"), &LinkerLink::get_source_idx);
+	ClassDB::bind_method(D_METHOD("set_source_link", "idx"), &LinkerLink::set_source_idx);
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "source_link_idx "), "set_source_link", "get_source_link");
+
 	ClassDB::bind_method(D_METHOD("get_pull_links"), &LinkerLink::get_pull_links);
 	ClassDB::bind_method(D_METHOD("set_pull_links", "idx"), &LinkerLink::set_pull_links);
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "pull_links_idx "), "set_pull_links", "get_pull_links");
@@ -43,21 +47,20 @@ void LinkerLink::set_host(LinkerScript *p_host) {
 }
 
 void LinkerLink::set_source(Ref<LinkerLink> p_source) {
-	if (pull_links.is_empty()) {
-		pull_links.append(p_source);
-	} else {
-		pull_links.set(0, p_source);
+	if (!p_source.is_valid()) {
+		return;
 	}
+	if (source_link.ptr() == p_source.ptr()) {
+		return;
+	}
+	source_link = p_source;
 	if (host) {
 		host->emit_signal("changed");
 	}
 }
 
 Ref<LinkerLink> LinkerLink::get_source() const {
-	if (pull_links.is_empty()) {
-		return this;
-	}
-	return pull_links[0];
+	return source_link;
 }
 
 void LinkerLink::set_owner(LinkerLink *p_link) {
@@ -116,6 +119,18 @@ Array LinkerLink::get_pull_links() const {
 	return r_idx;
 }
 
+void LinkerLink::add_pull_link_ref(Ref<LinkerLink> p_link) {
+	if (p_link.is_valid()) {
+		pull_links.append(p_link);
+		add_link_ref_to_script(p_link);
+		emit_signal("changed");
+	}
+}
+
+int LinkerLink::get_source_idx() const {
+	return source_link.is_valid() ? source_link->get_link_idx() : -1;
+}
+
 Array LinkerLink::get_push_links() const {
 	if (host == nullptr) {
 		return Array();
@@ -160,6 +175,12 @@ void LinkerLink::set_link_refrences() {
 		Ref<LinkerLink> link = get_host()->get_link(owner_links_idx);
 		if (link.is_valid()) {
 			set_owner(link.ptr());
+		}
+	}
+	if (source_link_idx != -1) {
+		Ref<LinkerLink> link = get_host()->get_link(source_link_idx);
+		if (link.is_valid()) {
+			source_link = link;
 		}
 	}
 }
@@ -229,6 +250,7 @@ void LinkerLink::remove_from_script(bool p_force) {
 
 int LinkerLinkInstance::step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) {
 	int step_state;
+	int sourced = 0;
 
 	if (stepped && StartMode::START_MODE_BEGIN == p_start_mode) {
 		return STEP_COMPLETE;
@@ -242,27 +264,30 @@ int LinkerLinkInstance::step(StartMode p_start_mode, Callable::CallError &r_erro
 	running = true;
 
 	while (true) {
-		if (step_count < pull_count) {
+		if (source_link != nullptr && step_count == 0) {
+			step_state = source_link->step(p_start_mode, r_error, r_error_str);
+			sourced = 1;
+		} else if (step_count < pull_count + sourced) {
 			step_state = pull_links[step_count]->step(p_start_mode, r_error, r_error_str);
-		} else if (step_count == pull_count && !stepped) {
+		} else if (step_count == pull_count + sourced && !stepped) {
 			step_state = _step(p_start_mode, r_error, r_error_str);
 			if (step_state & STEP_COMPLETE) {
 				stepped = true;
 				step_state = STEP_OK;
 			}
-		} else if (step_count < pull_count + push_count) {
-			step_state = push_links[step_count - pull_count]->step(p_start_mode, r_error, r_error_str);
+		} else if (step_count < pull_count + push_count + sourced) {
+			step_state = push_links[step_count - pull_count - sourced]->step(p_start_mode, r_error, r_error_str);
 		} else {
 			break;
 		}
 		if (step_state & STEP_COMPLETE) {
 			step_count++;
 		} else if (step_state & STEP_ERROR) {
-			return STEP_ERROR;
+			return step_state;
 		} else if (step_state & STEP_BREAKPOINT) {
-			return STEP_BREAKPOINT;
+			return step_state;
 		} else if (step_state & STEP_RESULT_YIELD) {
-			return STEP_RESULT_YIELD;
+			return step_state;
 		}
 		// BREAK HERE EVERY SUBSTEP FOR DEBUGGING
 		// waiting on all steps to complete

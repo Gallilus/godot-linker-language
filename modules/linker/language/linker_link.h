@@ -16,6 +16,7 @@ class LinkerLink : public Resource {
 private:
 	int saved_links_idx = -1; // used temporarily for loading from file
 
+	int source_link_idx = -1;
 	Array pull_links_idx;
 	Array push_links_idx;
 	int owner_links_idx = -1;
@@ -28,6 +29,7 @@ protected:
 
 	HashMap<int, LinkerLinkInstance *> link_instances;
 
+	Ref<LinkerLink> source_link;
 	Vector<Ref<LinkerLink>> pull_links;
 	Vector<Ref<LinkerLink>> push_links;
 
@@ -54,7 +56,10 @@ public:
 	void set_to_idx(int p_idx) { saved_links_idx = p_idx; }
 	Array get_pull_links() const;
 	Vector<Ref<LinkerLink>> get_pull_link_refs() const { return pull_links; }
+	void add_pull_link_ref(Ref<LinkerLink> p_link);
 	void set_pull_links(Array p_links) { pull_links_idx = p_links; }
+	int get_source_idx() const;
+	void set_source_idx(int p_idx) { source_link_idx = p_idx; }
 	Array get_push_links() const;
 	Vector<Ref<LinkerLink>> get_push_link_refs() const { return push_links; }
 	void add_push_link_ref(Ref<LinkerLink> p_link);
@@ -107,6 +112,7 @@ protected:
 	LinkerScriptInstance *host = nullptr;
 	StringName index;
 
+	LinkerLinkInstance *source_link = nullptr;
 	Vector<LinkerLinkInstance *> pull_links;
 	Vector<LinkerLinkInstance *> push_links;
 

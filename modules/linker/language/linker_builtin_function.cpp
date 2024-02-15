@@ -19,6 +19,10 @@ void LinkerBuiltinFunction::_initialize_instance(LinkerLinkInstance *link, Linke
 	instance->pull_count = pull_links.size();
 	instance->push_count = push_links.size();
 
+	if (source_link.is_valid()) {
+		instance->source_link = source_link->get_instance(p_host, p_stack_size);
+	}
+
 	for (int i = 0; i < instance->pull_count; i++) {
 		LinkerLinkInstance *_link = pull_links[i]->get_instance(p_host, p_stack_size);
 		if (_link) {
@@ -741,6 +745,10 @@ Dictionary LinkerBuiltinFunction::get_placeholder_info() const {
 
 bool LinkerBuiltinFunction::can_drop_on_link(Ref<LinkerLink> drag_link) const {
 	return false;
+}
+
+bool LinkerBuiltinFunction::can_drop_on_source(Ref<LinkerLink> drag_link) const {
+	return drag_link.is_valid();
 }
 
 LinkerLinkInstance *LinkerBuiltinFunction::get_instance(LinkerScriptInstance *p_host, int p_stack_size) {
