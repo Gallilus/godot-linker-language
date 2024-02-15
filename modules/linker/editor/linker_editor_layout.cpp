@@ -288,6 +288,7 @@ void LinkerEditorLayout::update_graph() {
 	}
 
 	script->for_every_link(callable_mp(this, &LinkerEditorLayout::add_link));
+	script->for_every_source(callable_mp(this, &LinkerEditorLayout::add_pull_connection));
 	script->for_every_pulled(callable_mp(this, &LinkerEditorLayout::add_pull_connection));
 	script->for_every_sequenced(callable_mp(this, &LinkerEditorLayout::add_sequence_connection));
 

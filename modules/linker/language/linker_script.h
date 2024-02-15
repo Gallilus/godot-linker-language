@@ -264,6 +264,7 @@ public:
 	int get_link_idx(const LinkerLink *p_link) const;
 
 	void for_every_link(const Callable &p_callable) const;
+	void for_every_source(const Callable &p_callable) const;
 	void for_every_pulled(const Callable &p_callable) const;
 	void for_every_sequenced(const Callable &p_callable) const;
 

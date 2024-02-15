@@ -611,6 +611,16 @@ void LinkerScript::for_every_link(const Callable &p_callable) const {
 	}
 }
 
+void LinkerScript::for_every_source(const Callable &p_callable) const {
+	for (int i = 0; i < links.size(); i++) {
+		if (links[i].is_valid()) {
+			if (links[i]->get_source().is_valid()) {
+				p_callable.call(links[i]->get_source(), links[i]);
+			}
+		}
+	}
+}
+
 void LinkerScript::for_every_pulled(const Callable &p_callable) const {
 	for (int i = 0; i < links.size(); i++) {
 		if (links[i].is_valid()) {
