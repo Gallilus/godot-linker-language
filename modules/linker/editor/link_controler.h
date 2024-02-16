@@ -5,20 +5,25 @@
 #include "../language/linker_script.h"
 
 #include "editor/editor_node.h"
+#include "scene/gui/box_container.h"
 #include "scene/gui/button.h"
 #include "scene/gui/control.h"
 #include "scene/gui/line_edit.h"
-#include "scene/gui/margin_container.h"
 #include "scene/main/viewport.h"
+#include "scene/resources/label_settings.h"
 
 class LinkerEditorLayout;
 class LinkConnection;
 
-class LinkControler : public MarginContainer {
-	GDCLASS(LinkControler, MarginContainer);
+class LinkControler : public VBoxContainer {
+	GDCLASS(LinkControler, VBoxContainer);
 
 	const Vector2 CELL_SIZE = Vector2(16, 16);
-	const Vector2 CELL_SIZE_SMAL = Vector2(12, 12);
+	const Vector2 CELL_SIZE_Y = Vector2(0, CELL_SIZE.y);
+	const Vector2 CELL_SIZE_X = Vector2(CELL_SIZE.x, 0);
+	const Vector2 CELL_SIZE_SMALL = Vector2(12, 12);
+	const Vector2 CELL_SIZE_SMALL_Y = Vector2(0, CELL_SIZE_SMALL.y);
+	const Vector2 CELL_SIZE_SMALL_X = Vector2(CELL_SIZE_SMALL.x, 0);
 	const Vector2 CELL_SIZE_COLAPSED = CELL_SIZE / 4; // for components visible but not active like connected arguments
 	const Vector2 CELL_SIZE_HIDDEN = Vector2(0, 0);
 
@@ -33,37 +38,31 @@ class LinkControler : public MarginContainer {
 	Rect2 rect_this() const;
 	Rect2 rect_source() const;
 	Rect2 rect_arg() const;
-	Rect2 rect_set() const;
+	Rect2 rect_value_1() const;
 	Rect2 rect_index() const;
 	Rect2 rect_icon() const;
-	Rect2 rect_component() const;
-	Rect2 rect_output() const;
 	Rect2 rect_push() const;
-	Rect2 rect_next() const;
+	Rect2 rect_value_2() const;
 
 	Ref<LinkerLink> link;
 
-	VBoxContainer *controler = nullptr;
-	HBoxContainer *link_rects = nullptr;
-	HBoxContainer *value_rects = nullptr;
-	VBoxContainer *controler_inputs = nullptr;
-	VBoxContainer *controler_core = nullptr;
-	VBoxContainer *controler_outputs = nullptr;
+	HBoxContainer *banner = nullptr;
+	HBoxContainer *components = nullptr;
+	VBoxContainer *arguments = nullptr;
 	Label *label = nullptr;
 	LineEdit *edit_index = nullptr;
 	TextureRect *icon = nullptr;
 	Control *source_rect = nullptr;
-	Control *arg_rect = nullptr;
-	Control *component_set_rect = nullptr;
-	Control *component_rect = nullptr;
-	Control *output_rect = nullptr;
+	Control *value_rect_1 = nullptr;
 	Control *push_rect = nullptr;
-	Control *component_output_rect = nullptr;
+	Control *value_rect_2 = nullptr; // if value rect is to small
 
 	bool dragging_from = false;
 	bool lmb_down = false;
 	Dictionary drag_data;
 	bool edit_mode_line_edit = false;
+
+	void resize_font_of(Label *p_label, int p_font_size);
 
 protected:
 	static void _bind_methods();
