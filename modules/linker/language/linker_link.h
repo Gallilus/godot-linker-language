@@ -79,7 +79,8 @@ public:
 	virtual bool can_drop_on_arg(Ref<LinkerLink> drag_link) const;
 	virtual bool can_drop_on_source(Ref<LinkerLink> drag_link) const;
 	virtual bool can_drop_on_value(Ref<LinkerLink> drag_link) const;
-	virtual bool use_argument() const;
+	virtual int get_argument_count() const;
+	virtual PropertyInfo get_input_value_port_info(int p_idx) const;
 	virtual bool use_source() const;
 
 	virtual LinkerLinkInstance *get_instance(LinkerScriptInstance *p_host, int p_stack_size) = 0;

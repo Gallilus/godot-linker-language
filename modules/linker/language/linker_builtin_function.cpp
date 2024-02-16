@@ -743,6 +743,253 @@ Dictionary LinkerBuiltinFunction::get_placeholder_info() const {
 	return Dictionary();
 }
 
+int LinkerBuiltinFunction::get_argument_count() const {
+	return get_func_argument_count(func);
+}
+
+PropertyInfo LinkerBuiltinFunction::get_input_value_port_info(int p_idx) const {
+	switch (func) {
+		case MATH_SIN:
+		case MATH_COS:
+		case MATH_TAN:
+		case MATH_SINH:
+		case MATH_COSH:
+		case MATH_TANH:
+		case MATH_ASIN:
+		case MATH_ACOS:
+		case MATH_ATAN:
+		case MATH_SQRT:
+		case MATH_FLOOR:
+		case MATH_CEIL:
+		case MATH_ROUND:
+		case MATH_ABS:
+		case MATH_SIGN:
+		case MATH_LOG:
+		case MATH_EXP:
+		case MATH_ISNAN:
+		case MATH_ISINF: {
+			return PropertyInfo(Variant::FLOAT, "s");
+		} break;
+		case MATH_ATAN2: {
+			if (p_idx == 0) {
+				return PropertyInfo(Variant::FLOAT, "y");
+			} else {
+				return PropertyInfo(Variant::FLOAT, "x");
+			}
+		} break;
+		case MATH_FMOD:
+		case MATH_FPOSMOD:
+		case LOGIC_MAX:
+		case LOGIC_MIN: {
+			if (p_idx == 0) {
+				return PropertyInfo(Variant::FLOAT, "a");
+			} else {
+				return PropertyInfo(Variant::FLOAT, "b");
+			}
+		} break;
+		case MATH_POSMOD: {
+			if (p_idx == 0) {
+				return PropertyInfo(Variant::INT, "a");
+			} else {
+				return PropertyInfo(Variant::INT, "b");
+			}
+		} break;
+		case MATH_POW: {
+			if (p_idx == 0) {
+				return PropertyInfo(Variant::FLOAT, "base");
+			} else {
+				return PropertyInfo(Variant::FLOAT, "exp");
+			}
+		} break;
+		case MATH_EASE: {
+			if (p_idx == 0) {
+				return PropertyInfo(Variant::FLOAT, "s");
+			} else {
+				return PropertyInfo(Variant::FLOAT, "curve");
+			}
+		} break;
+		case MATH_STEP_DECIMALS: {
+			return PropertyInfo(Variant::FLOAT, "step");
+		} break;
+		case MATH_SNAPPED: {
+			if (p_idx == 0) {
+				return PropertyInfo(Variant::FLOAT, "s");
+			} else {
+				return PropertyInfo(Variant::FLOAT, "steps");
+			}
+		} break;
+		case MATH_LERP:
+		case MATH_LERP_ANGLE:
+		case MATH_INVERSE_LERP:
+		case MATH_SMOOTHSTEP: {
+			if (p_idx == 0) {
+				return PropertyInfo(Variant::FLOAT, "from");
+			} else if (p_idx == 1) {
+				return PropertyInfo(Variant::FLOAT, "to");
+			} else {
+				return PropertyInfo(Variant::FLOAT, "weight");
+			}
+		} break;
+		case MATH_CUBIC_INTERPOLATE: {
+			if (p_idx == 0) {
+				return PropertyInfo(Variant::FLOAT, "from");
+			} else if (p_idx == 1) {
+				return PropertyInfo(Variant::FLOAT, "to");
+			} else if (p_idx == 2) {
+				return PropertyInfo(Variant::FLOAT, "pre");
+			} else if (p_idx == 3) {
+				return PropertyInfo(Variant::FLOAT, "post");
+			} else {
+				return PropertyInfo(Variant::FLOAT, "weight");
+			}
+		} break;
+		case MATH_REMAP: {
+			if (p_idx == 0) {
+				return PropertyInfo(Variant::FLOAT, "value");
+			} else if (p_idx == 1) {
+				return PropertyInfo(Variant::FLOAT, "istart");
+			} else if (p_idx == 2) {
+				return PropertyInfo(Variant::FLOAT, "istop");
+			} else if (p_idx == 3) {
+				return PropertyInfo(Variant::FLOAT, "ostart");
+			} else {
+				return PropertyInfo(Variant::FLOAT, "ostop");
+			}
+		} break;
+		case MATH_MOVE_TOWARD: {
+			if (p_idx == 0) {
+				return PropertyInfo(Variant::FLOAT, "from");
+			} else if (p_idx == 1) {
+				return PropertyInfo(Variant::FLOAT, "to");
+			} else {
+				return PropertyInfo(Variant::FLOAT, "delta");
+			}
+		} break;
+		case MATH_RANDOMIZE:
+		case MATH_RANDI:
+		case MATH_RANDF: {
+		} break;
+		case MATH_RANDI_RANGE: {
+			if (p_idx == 0) {
+				return PropertyInfo(Variant::INT, "from");
+			} else {
+				return PropertyInfo(Variant::INT, "to");
+			}
+		} break;
+		case MATH_RANDF_RANGE: {
+			if (p_idx == 0) {
+				return PropertyInfo(Variant::FLOAT, "from");
+			} else {
+				return PropertyInfo(Variant::FLOAT, "to");
+			}
+		} break;
+		case MATH_RANDFN: {
+			if (p_idx == 0) {
+				return PropertyInfo(Variant::FLOAT, "mean");
+			} else {
+				return PropertyInfo(Variant::FLOAT, "deviation");
+			}
+		} break;
+		case MATH_SEED:
+		case MATH_RANDSEED: {
+			return PropertyInfo(Variant::INT, "seed");
+		} break;
+		case MATH_DEG_TO_RAD: {
+			return PropertyInfo(Variant::FLOAT, "deg");
+		} break;
+		case MATH_RAD_TO_DEG: {
+			return PropertyInfo(Variant::FLOAT, "rad");
+		} break;
+		case MATH_LINEAR_TO_DB: {
+			return PropertyInfo(Variant::FLOAT, "nrg");
+		} break;
+		case MATH_DB_TO_LINEAR: {
+			return PropertyInfo(Variant::FLOAT, "db");
+		} break;
+		case MATH_PINGPONG: {
+			if (p_idx == 0) {
+				return PropertyInfo(Variant::FLOAT, "value");
+			} else {
+				return PropertyInfo(Variant::FLOAT, "length");
+			}
+		} break;
+		case MATH_WRAP: {
+			if (p_idx == 0) {
+				return PropertyInfo(Variant::INT, "value");
+			} else if (p_idx == 1) {
+				return PropertyInfo(Variant::INT, "min");
+			} else {
+				return PropertyInfo(Variant::INT, "max");
+			}
+		} break;
+		case MATH_WRAPF:
+		case LOGIC_CLAMP: {
+			if (p_idx == 0) {
+				return PropertyInfo(Variant::FLOAT, "value");
+			} else if (p_idx == 1) {
+				return PropertyInfo(Variant::FLOAT, "min");
+			} else {
+				return PropertyInfo(Variant::FLOAT, "max");
+			}
+		} break;
+		case LOGIC_NEAREST_PO2: {
+			return PropertyInfo(Variant::INT, "value");
+		} break;
+		case OBJ_WEAKREF: {
+			return PropertyInfo(Variant::OBJECT, "source");
+		} break;
+		case TYPE_CONVERT: {
+			if (p_idx == 0) {
+				return PropertyInfo(Variant::NIL, "what");
+			} else {
+				return PropertyInfo(Variant::STRING, "type");
+			}
+		} break;
+		case TYPE_OF: {
+			return PropertyInfo(Variant::NIL, "what");
+		} break;
+		case TYPE_EXISTS: {
+			return PropertyInfo(Variant::STRING, "type");
+		} break;
+		case TEXT_ORD: {
+			return PropertyInfo(Variant::STRING, "character");
+		} break;
+		case TEXT_CHAR: {
+			return PropertyInfo(Variant::INT, "ascii");
+		} break;
+		case TEXT_STR:
+		case TEXT_PRINT:
+		case TEXT_PRINTERR:
+		case TEXT_PRINTRAW:
+		case TEXT_PRINT_VERBOSE: {
+			return PropertyInfo(Variant::NIL, "value");
+		} break;
+		case STR_TO_VAR: {
+			return PropertyInfo(Variant::STRING, "string");
+		} break;
+		case VAR_TO_STR:
+		case VAR_TO_BYTES: {
+			if (p_idx == 0) {
+				return PropertyInfo(Variant::NIL, "var");
+			} else {
+				return PropertyInfo(Variant::BOOL, "full_objects");
+			}
+
+		} break;
+		case BYTES_TO_VAR: {
+			if (p_idx == 0) {
+				return PropertyInfo(Variant::PACKED_BYTE_ARRAY, "bytes");
+			} else {
+				return PropertyInfo(Variant::BOOL, "allow_objects");
+			}
+		} break;
+		case FUNC_MAX: {
+		}
+	}
+
+	return PropertyInfo();
+}
+
 bool LinkerBuiltinFunction::can_drop_on_link(Ref<LinkerLink> drag_link) const {
 	return false;
 }

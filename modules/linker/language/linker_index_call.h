@@ -25,6 +25,7 @@ public:
 	virtual bool can_drop_on_arg(Ref<LinkerLink> drag_link) const override;
 	virtual bool can_drop_on_source(Ref<LinkerLink> drag_link) const override { return true; }
 	virtual bool controler_at_source() const override { return false; }
+	virtual int get_argument_count() const override;
 
 	virtual LinkerLinkInstance *get_instance(LinkerScriptInstance *p_host, int p_stack_size) override;
 	virtual void remove_instance(LinkerScriptInstance *p_host, int p_stack_size) override;

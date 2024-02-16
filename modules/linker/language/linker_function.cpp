@@ -55,6 +55,12 @@ Dictionary LinkerFunction::get_placeholder_info() const {
 	return Dictionary(host->get_method_info(index).return_val);
 }
 
+PropertyInfo LinkerFunction::get_input_value_port_info(int p_idx) const {
+	PropertyInfo info;
+	info.name = "return";
+	return info;
+}
+
 bool LinkerFunction::can_drop_on_link(Ref<LinkerLink> drag_link) const {
 	if (drag_link.is_null() ||
 			drag_link == this) {

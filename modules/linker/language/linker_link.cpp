@@ -121,6 +121,9 @@ Array LinkerLink::get_pull_links() const {
 
 void LinkerLink::add_pull_link_ref(Ref<LinkerLink> p_link) {
 	if (p_link.is_valid()) {
+		if (source_link == p_link) {
+			source_link = Ref<LinkerLink>();
+		}
 		pull_links.append(p_link);
 		add_link_ref_to_script(p_link);
 		emit_signal("changed");
@@ -228,8 +231,12 @@ bool LinkerLink::can_drop_on_value(Ref<LinkerLink> drag_link) const {
 	return false;
 }
 
-bool LinkerLink::use_argument() const {
-	return true;
+int LinkerLink::get_argument_count() const {
+	return 0;
+}
+
+PropertyInfo LinkerLink::get_input_value_port_info(int p_idx) const {
+	return PropertyInfo();
 }
 
 bool LinkerLink::use_source() const {

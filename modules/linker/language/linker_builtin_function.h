@@ -115,6 +115,9 @@ public:
 	virtual bool controler_at_source() const override { return false; }
 	virtual bool use_source() const override { return false; }
 
+	virtual int get_argument_count() const override;
+	virtual PropertyInfo get_input_value_port_info(int p_idx) const override;
+
 	virtual bool can_drop_on_link(Ref<LinkerLink> drag_link) const override;
 	virtual bool can_drop_on_source(Ref<LinkerLink> drag_link) const override;
 

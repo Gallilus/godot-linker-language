@@ -46,7 +46,6 @@ public:
 
 	virtual bool can_drop_on_value(Ref<LinkerLink> drag_link) const override;
 	virtual bool use_source() const override { return false; }
-	virtual bool use_argument() const override { return false; }
 
 	virtual LinkerLinkInstance *get_instance(LinkerScriptInstance *p_host, int p_stack_size) override;
 	virtual void remove_instance(LinkerScriptInstance *p_host, int p_stack_size) override {}

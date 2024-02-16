@@ -180,6 +180,13 @@ void LinkControler::_instantiate() {
 	icon->set_v_size_flags(SIZE_SHRINK_CENTER);
 	icon->set_h_size_flags(SIZE_SHRINK_CENTER);
 
+	for (int i = 0; i < link->get_argument_count(); i++) {
+		PropertyInfo pi = link->get_input_value_port_info(i);
+		Label *label = memnew(Label);
+		label->set_text(pi.name);
+		arg_rect->add_child(label);
+	}
+
 	edit_index->connect("text_submitted", callable_mp(link.ptr(), &LinkerLink::set_index), CONNECT_DEFERRED);
 
 	set_component_visibility();
@@ -194,8 +201,8 @@ void LinkControler::set_component_visibility() {
 	} else {
 		source_rect->set_custom_minimum_size(CELL_SIZE_HIDDEN);
 	}
-	if (link->use_argument()) {
-		arg_rect->set_custom_minimum_size(CELL_SIZE_SMAL);
+	if (link->get_argument_count() > 0) {
+		arg_rect->set_size(Vector2(CELL_SIZE_SMAL.x, CELL_SIZE_SMAL.y * link->get_argument_count()));
 	} else {
 		arg_rect->set_custom_minimum_size(CELL_SIZE_HIDDEN);
 	}
@@ -426,7 +433,7 @@ void LinkControler::drop_data(const Point2 &p_point, const Variant &p_data) {
 	} else if (rect_arg().has_point(mouse_pos)) {
 		if (d_data.has("link_request")) {
 			if (d_data["link_request"] == "use_output") {
-				ERR_PRINT("not able to set arguments");
+				link->add_pull_link_ref(drag_link);
 			} else if (d_data["link_request"] == "get_arg") {
 				ERR_PRINT("not able to get argument from argument");
 			} else if (d_data["link_request"] == "push_next_command") {
@@ -563,7 +570,7 @@ void LinkControler::update_edit_mode() {
 	if (rect_source().has_point(mouse_pos)) {
 		source_rect->set_custom_minimum_size(CELL_SIZE);
 	} else if (rect_arg().has_point(mouse_pos)) {
-		arg_rect->set_custom_minimum_size(CELL_SIZE);
+		arg_rect->set_size(Vector2(CELL_SIZE.x, CELL_SIZE.y * link->get_argument_count()));
 	} else if (rect_output().has_point(mouse_pos)) {
 		output_rect->set_custom_minimum_size(CELL_SIZE);
 	} else if (rect_push().has_point(mouse_pos)) {
@@ -605,7 +612,7 @@ LinkControler::LinkControler() {
 
 	source_rect = memnew(Control);
 	controler_inputs->add_child(source_rect);
-	arg_rect = memnew(Control);
+	arg_rect = memnew(VBoxContainer);
 	controler_inputs->add_child(arg_rect);
 	label = memnew(Label);
 	controler_core->add_child(label);
