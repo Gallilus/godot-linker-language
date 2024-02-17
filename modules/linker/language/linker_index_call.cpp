@@ -9,6 +9,10 @@ void LinkerIndexCall::_initialize_instance(LinkerLinkInstance *link, LinkerScrip
 	instance->pull_count = pull_links.size();
 	instance->push_count = push_links.size();
 
+	if (source_link.is_valid()) {
+		instance->source_link = source_link->get_instance(p_host, p_stack_size);
+	}
+
 	for (int i = 0; i < instance->pull_count; i++) {
 		LinkerLinkInstance *_link = pull_links[i]->get_instance(p_host, p_stack_size);
 		if (_link) {
@@ -79,6 +83,10 @@ bool LinkerIndexCall::can_drop_on_arg(Ref<LinkerLink> drag_link) const {
 	return pi.type == pi2.type;
 }
 
+int LinkerIndexCall::get_argument_count() const {
+	return get_method_info().arguments.size();
+}
+
 LinkerLinkInstance *LinkerIndexCall::get_instance(LinkerScriptInstance *p_host, int p_stack_size) {
 	if (!link_instances.has(p_stack_size)) {
 		LinkerIndexCallInstance *instance = new LinkerIndexCallInstance();
@@ -100,22 +108,54 @@ void LinkerIndexCall::remove_instance(LinkerScriptInstance *p_host, int p_stack_
 ////////////////////////////////////////////////////////////////////////
 
 int LinkerIndexCallInstance::_step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) {
+	List<MethodInfo> info_list;
+	MethodInfo mi;
+	Object *object = nullptr;
+	
+	// Check the argument and source conditions
+	if (source_link != nullptr) {
+		object = Object::cast_to<Object>(source_link->get_value());
+		if (!source_link->get_value().has_method(index)) {
+			r_error.error = Callable::CallError::CALL_ERROR_INVALID_METHOD;
+			r_error_str = "LinkerIndexCall source " + index + "not found in class " + String(object->get_class_name());
+			return STEP_ERROR;
+		}
+		ERR_PRINT(String(object->get_class_name()));
+		ClassDB::get_method_info(object->get_class_name(), index, &mi);
+	} else if (host->has_method(index)) {
+		object = host->get_owner();
+		mi = host->get_script()->get_method_info(index);
+		ERR_PRINT(String(object->get_class_name()));
+	} else {
+		ERR_PRINT("String(object->get_class_name())");
+		r_error.error = Callable::CallError::CALL_ERROR_INVALID_METHOD;
+		r_error_str = "LinkerIndexCall " + index + "no source found";
+		return STEP_ERROR;
+	}
+
+	if (mi.arguments.size() != pull_count) {
+		r_error.expected = mi.arguments.size();
+		if (r_error.expected < pull_count) {
+			r_error.error = Callable::CallError::CALL_ERROR_TOO_MANY_ARGUMENTS;
+		} else {
+			r_error.error = Callable::CallError::CALL_ERROR_TOO_FEW_ARGUMENTS;
+		}
+		r_error_str = "LinkerBuiltinFunction " + String(index);
+		return STEP_ERROR;
+	}
+
 	input_args.clear();
 	Vector<const Variant *> argp;
 	input_args.resize(pull_count);
 	argp.resize(pull_count);
 
+	// get the arguments
 	for (int i = 0; i < pull_count; i++) {
 		input_args.write[i] = pull_links[i]->get_value();
 		argp.write[i] = &input_args[i];
 	}
-
-	//value = host->get_owner()->callp(index, (const Variant **)argp.ptr(), argp.size(), r_error);
-	if (pull_links.is_empty()) {
-		print_error("there is a call without arguments"); // temp code
-	} else {
-		print_line(pull_links[0]->get_value()); // built in functions
-	}
+	// call the function
+	object->callp(index, (const Variant **)argp.ptr(), argp.size(), r_error);
 
 	if (r_error.error != Callable::CallError::CALL_OK) {
 		return STEP_ERROR;
