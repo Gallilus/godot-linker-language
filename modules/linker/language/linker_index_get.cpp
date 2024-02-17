@@ -87,12 +87,22 @@ void LinkerIndexGet::remove_instance(LinkerScriptInstance *p_host, int p_stack_s
 ////////////////////////////////////////////////////////////////////////
 
 int LinkerIndexGetInstance::_step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) {
+	// check and use source link
 	if (source_link != nullptr) {
 		value = source_link->get_value().get(index);
+		return STEP_COMPLETE;
+	}
+
+	// check and use script property
+	bool valid = false;
+	Object *object = host->get_owner();
+	Variant p_value = object->get(index, &valid);
+	if (valid) {
+		value = p_value;
+		return STEP_COMPLETE;
 	} else {
 		r_error.error = Callable::CallError::CALL_ERROR_INSTANCE_IS_NULL;
-		r_error_str = "LinkerIndexGet expects a source link";
+		r_error_str = "LinkerIndexGet " + String(index) + "expects a source link or valid script property";
 		return STEP_ERROR;
 	}
-	return STEP_COMPLETE;
 }

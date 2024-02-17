@@ -235,6 +235,7 @@ public:
 	List<StringName> get_property_name_list() const;
 	void set_property_list(const Dictionary &p_properties);
 	void set_property(const VariableInfo &p_info);
+	bool has_property(const StringName &p_name);
 	void remove_property(const StringName &p_name);
 
 	void set_member_variable(const PropertyInfo &p_value, const Variant &p_default_value); // needs to be replaced with set_property using Varible info when the VariantEditor is ready
@@ -286,6 +287,7 @@ class LinkerScriptInstance : public ScriptInstance {
 	bool initialized = false;
 
 	Vector<Variant> members;
+	HashMap<StringName, Variant> variables;
 	bool base_ref_counted;
 	Vector<LinkerLinkInstance *> link_instances;
 

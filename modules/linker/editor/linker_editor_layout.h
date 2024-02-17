@@ -98,7 +98,7 @@ public:
 	void add_sequence_connection(Ref<LinkerLink> source_link, Ref<LinkerLink> destination_link);
 
 	static Ref<LinkerLink> create_scenerefrence(Node *to_node, Node *p_scripted_node = nullptr);
-	static Ref<LinkerLink> create_index_get(const String &index, const Ref<LinkerLink> &p_source_link);
+	static Ref<LinkerLink> create_index_get(const String &index);
 	static Ref<LinkerLink> create_index_call(const String &index, const Ref<LinkerLink> &p_source_link, const Vector<Ref<LinkerLink>> &p_arguments);
 
 	LinkerEditorLayout();
@@ -220,6 +220,7 @@ protected:
 	void _class_from_search_therm();
 	void _tree_confirmed();
 	void _method_info_confirmed(Dictionary p_info);
+	void _property_info_confirmed(Dictionary p_info);
 	void _registered_link_confirmed(String p_name);
 	void _move_source_to_argument();
 	void _update_link_infos();

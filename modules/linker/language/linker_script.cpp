@@ -55,7 +55,6 @@ ScriptInstance *LinkerScript::_create_instance(const Variant **p_args, int p_arg
 	/* STEP 1, CREATE */
 	LinkerScriptInstance *instance = memnew(LinkerScriptInstance);
 	instance->base_ref_counted = p_is_ref_counted;
-	instance->members.resize(members.size());
 	instance->script = Ref<Script>(this);
 	instance->owner = p_owner;
 	instance->owner_id = p_owner->get_instance_id();
@@ -416,6 +415,13 @@ void LinkerScript::set_property(const VariableInfo &p_info) {
 	}
 }
 
+bool LinkerScript::has_property(const StringName &p_name) {
+	if (members.has(p_name) && member_properties.has(p_name)) {
+		return true;
+	}
+	return false;
+}
+
 void LinkerScript::remove_property(const StringName &p_name) {
 	if (members.has(p_name) && member_properties.has(p_name)) {
 		members.erase(p_name);
@@ -665,10 +671,15 @@ bool LinkerScriptInstance::set(const StringName &p_name, const Variant &p_value)
 }
 
 bool LinkerScriptInstance::get(const StringName &p_name, Variant &r_ret) const {
+	if (variables.has(p_name)) {
+		r_ret = variables[p_name];
+		return true;
+	}
 	return false;
 }
 
 void LinkerScriptInstance::get_property_list(List<PropertyInfo> *p_properties) const {
+	script->get_script_property_list(p_properties);
 }
 
 Variant::Type LinkerScriptInstance::get_property_type(const StringName &p_name, bool *r_is_valid) const {
@@ -834,6 +845,10 @@ void LinkerScriptInstance::initialize() {
 	if (initialized) {
 		return;
 	}
+	for (const KeyValue<StringName, LinkerScript::VariableInfo> &E : script->member_properties) {
+		variables[E.key] = E.value.default_value;
+	}
+
 	initialized = true;
 }
 
