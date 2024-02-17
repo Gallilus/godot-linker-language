@@ -367,7 +367,11 @@ bool LinkControler::can_drop_data(const Point2 &p_point, const Variant &p_data) 
 					(d_data["link_request"] == "push_next_command"));
 		}
 	} else if (rect_push().has_point(mouse_pos)) {
-		return false;
+		if (d_data.has("link_request")) {
+			return (
+					(d_data["link_request"] == "use_output") ||
+					(d_data["link_request"] == "push_next_command"));
+		}
 	} else if (rect_value_2().has_point(mouse_pos)) {
 		return false;
 	} else if (rect_this().has_point(mouse_pos)) {
@@ -423,21 +427,22 @@ void LinkControler::drop_data(const Point2 &p_point, const Variant &p_data) {
 			} else if (d_data["link_request"] == "get_arg") {
 				ERR_PRINT("not able to set memeber of a value");
 			} else if (d_data["link_request"] == "push_next_command") {
-				ERR_PRINT("not able to set memeber of a value");
+				ERR_PRINT("not able to push memeber of a value");
 			} else if (d_data["link_request"] == "get_part_of_value") {
 				ERR_PRINT("not able to set memeber of a value");
 			}
 		}
 	} else if (rect_push().has_point(mouse_pos)) {
-		if (d_data["link_request"] == "use_output") {
-			link->add_push_link_ref(drag_link);
-		} else if (d_data["link_request"] == "get_arg") {
-			ERR_PRINT("not able to set arguments");
-		} else if (d_data["link_request"] == "push_next_command") {
-			drag_link->add_push_link_ref(link);
-		} else if (d_data["link_request"] == "get_part_of_value") {
-			ERR_PRINT("not able to set memeber of a value");
-		}
+		link->add_push_link_ref(drag_link);
+		// if (d_data["link_request"] == "use_output") {
+		// 	link->add_push_link_ref(drag_link);
+		// } else if (d_data["link_request"] == "get_arg") {
+		// 	ERR_PRINT("not able to push arguments");
+		// } else if (d_data["link_request"] == "push_next_command") {
+		// 	drag_link->add_push_link_ref(link);
+		// } else if (d_data["link_request"] == "get_part_of_value") {
+		// 	ERR_PRINT("not able to set memeber of a value");
+		// }
 	} else if (rect_value_2().has_point(mouse_pos)) {
 		// return link->can_drop_on_link(drag_link);
 	} else if (rect_this().has_point(mouse_pos)) {
@@ -447,7 +452,7 @@ void LinkControler::drop_data(const Point2 &p_point, const Variant &p_data) {
 			} else if (d_data["link_request"] == "get_arg") {
 				drag_link->add_arg_link_ref(link, d_data["link_arg_index"]);
 			} else if (d_data["link_request"] == "push_next_command") {
-				link->add_push_link_ref(drag_link);
+				drag_link->add_push_link_ref(link);
 			} else if (d_data["link_request"] == "get_part_of_value") {
 				ERR_PRINT("not able to set memeber of a value");
 			}

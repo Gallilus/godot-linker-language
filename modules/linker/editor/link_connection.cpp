@@ -42,6 +42,18 @@ void LinkConnection::_update_connection() {
 			break;
 		}
 		case CONNECTION_TYPE_REFRENCE: {
+			curve.clear_points();
+			Vector2 start_pos = start->get_connection_point_right();
+			Vector2 end_pos = end->get_connection_point_left();
+			int distance_x = end_pos.x - start_pos.x;
+			if (distance_x < 0) {
+				distance_x = distance_x * -1;
+			}
+			distance_x = distance_x / 3;
+			curve.add_point(start_pos, Vector2(-distance_x, 0), Vector2(distance_x, 0));
+			curve.add_point(end_pos, Vector2(-distance_x, 0), Vector2(distance_x, 0));
+			connection_color = Color::named("CADET_BLUE");
+			set_width(2);
 			break;
 		}
 	}
@@ -102,12 +114,10 @@ void LinkConnection::check_validity() {
 
 	switch (connection_type) {
 		case CONNECTION_TYPE_SOURCE: {
-			Vector<Ref<LinkerLink>> pull_links = end->get_link()->get_pull_link_refs();
-			for (int i = 0; i < pull_links.size(); i++) {
-				if (pull_links[i].ptr() == start->get_link()) {
-					valid = true;
-					return;
-				}
+			Ref<LinkerLink> source_link = end->get_link()->get_source();
+			if (source_link.ptr() == start->get_link()) {
+				valid = true;
+				return;
 			}
 			break;
 		}
@@ -115,6 +125,16 @@ void LinkConnection::check_validity() {
 			Vector<Ref<LinkerLink>> push_links = start->get_link()->get_push_link_refs();
 			for (int i = 0; i < push_links.size(); i++) {
 				if (push_links[i].ptr() == end->get_link()) {
+					valid = true;
+					return;
+				}
+			}
+			break;
+		}
+		case CONNECTION_TYPE_REFRENCE: {
+			Vector<Ref<LinkerLink>> pull_links = end->get_link()->get_pull_link_refs();
+			for (int i = 0; i < pull_links.size(); i++) {
+				if (pull_links[i].ptr() == start->get_link()) {
 					valid = true;
 					return;
 				}
