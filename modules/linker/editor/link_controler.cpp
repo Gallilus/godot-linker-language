@@ -303,16 +303,20 @@ void LinkControler::prep_drag_data() {
 	if (rect_source().has_point(mouse_pos)) {
 		drag_data = link->get_source()->get_drag_data();
 	} else if (rect_arg().has_point(mouse_pos)) {
+		Vector2 arg_pos = mouse_pos - rect_arg().position;
+		int arg_count = link->get_argument_count();
 		drag_data = link->get_drag_data();
 		drag_data["link_request"] = "get_arg";
-		drag_data["link_arg_index"] = 0;
+		drag_data["link_arg_index"] = arg_pos.y / (rect_arg().size.y / arg_count);
 	} else if (rect_value_1().has_point(mouse_pos)) {
 		drag_data = link->get_drag_data();
 		drag_data["link_request"] = "use_part_of_value";
 	} else if (rect_index().has_point(mouse_pos)) {
 		drag_data = link->get_drag_data();
+		drag_data["link_request"] = "use_output";
 	} else if (rect_icon().has_point(mouse_pos)) {
 		drag_data = link->get_drag_data();
+		drag_data["link_request"] = "use_output";
 	} else if (rect_push().has_point(mouse_pos)) {
 		drag_data = link->get_drag_data();
 		drag_data["link_request"] = "push_next_command";
@@ -399,8 +403,11 @@ void LinkControler::drop_data(const Point2 &p_point, const Variant &p_data) {
 		}
 	} else if (rect_arg().has_point(mouse_pos)) {
 		if (d_data.has("link_request")) {
+			Vector2 arg_pos = mouse_pos - rect_arg().position;
+			int arg_count = link->get_argument_count();
+			int arg_idx = arg_pos.y / (rect_arg().size.y / arg_count);
 			if (d_data["link_request"] == "use_output") {
-				link->add_pull_link_ref(drag_link);
+				link->add_arg_link_ref(drag_link, arg_idx);
 			} else if (d_data["link_request"] == "get_arg") {
 				ERR_PRINT("not able to get argument from argument");
 			} else if (d_data["link_request"] == "push_next_command") {
@@ -438,7 +445,7 @@ void LinkControler::drop_data(const Point2 &p_point, const Variant &p_data) {
 			if (d_data["link_request"] == "use_output") {
 				link->set_source(drag_link);
 			} else if (d_data["link_request"] == "get_arg") {
-				ERR_PRINT("not able to push setting of an argument");
+				drag_link->add_arg_link_ref(link, d_data["link_arg_index"]);
 			} else if (d_data["link_request"] == "push_next_command") {
 				link->add_push_link_ref(drag_link);
 			} else if (d_data["link_request"] == "get_part_of_value") {

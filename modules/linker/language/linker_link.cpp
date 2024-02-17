@@ -98,7 +98,7 @@ Ref<LinkerLink> LinkerLink::get_push_link() const {
 void LinkerLink::disconnect_pushed_link(Ref<LinkerLink> p_link) {
 	push_links.erase(p_link);
 	p_link->set_owner(nullptr);
-	emit_signal("changed");
+		host->emit_signal("changed");
 }
 
 int LinkerLink::get_link_idx() const {
@@ -126,8 +126,17 @@ void LinkerLink::add_pull_link_ref(Ref<LinkerLink> p_link) {
 		}
 		pull_links.append(p_link);
 		add_link_ref_to_script(p_link);
-		emit_signal("changed");
+		host->emit_signal("changed");
 	}
+}
+
+void LinkerLink::add_arg_link_ref(Ref<LinkerLink> p_link, int p_arg_idx) {
+	if (pull_links.size() <= p_arg_idx) {
+		pull_links.resize(p_arg_idx + 1);
+		ERR_PRINT("resize push_links to " + itos(p_arg_idx + 1));
+	}
+	pull_links.set(p_arg_idx, p_link);
+	host->emit_signal("changed");
 }
 
 int LinkerLink::get_source_idx() const {
@@ -150,7 +159,7 @@ void LinkerLink::add_push_link_ref(Ref<LinkerLink> p_link) {
 		push_links.append(p_link);
 		p_link->set_owner(this);
 		add_link_ref_to_script(p_link);
-		emit_signal("changed");
+		host->emit_signal("changed");
 	}
 }
 
