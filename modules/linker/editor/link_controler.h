@@ -1,8 +1,11 @@
 #ifndef LINK_CONTROLER_H
 #define LINK_CONTROLER_H
 
+#include "../language/linker_index_set.h"
 #include "../language/linker_link.h"
 #include "../language/linker_script.h"
+#include "linker_inspector.h"
+#include "linker_inspector_2.h"
 
 #include "editor/editor_node.h"
 #include "scene/gui/box_container.h"
@@ -81,6 +84,8 @@ protected:
 
 	void _draw_debug();
 
+	static Ref<LinkerLink> create_index_set(const String &index);
+
 public:
 	bool edit_mode = false;
 	// void set_layout(LinkerEditorLayout *p_layout) { layout = p_layout; }
@@ -91,6 +96,7 @@ public:
 	virtual Variant get_drag_data(const Point2 &p_point) override;
 	virtual bool can_drop_data(const Point2 &p_point, const Variant &p_data) const override;
 	virtual void drop_data(const Point2 &p_point, const Variant &p_data) override;
+	void edit_property(const String &p_property);
 	void set_link(Ref<LinkerLink> p_link);
 	LinkerLink *get_link() const { return link.ptr(); }
 	int get_link_idx() const { return link->get_link_idx(); }

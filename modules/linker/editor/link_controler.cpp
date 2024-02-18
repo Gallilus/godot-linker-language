@@ -268,6 +268,13 @@ void LinkControler::_draw_debug() {
 	}
 }
 
+Ref<LinkerLink> LinkControler::create_index_set(const String &index) {
+	Ref<LinkerIndexSet> index_set;
+	index_set.instantiate();
+	index_set->set_index(index);
+	return index_set;
+}
+
 void LinkControler::gui_input(const Ref<InputEvent> &p_event) {
 	if (p_event->is_action("ui_graph_delete")) {
 		link->remove_from_script();
@@ -467,6 +474,16 @@ void LinkControler::drop_data(const Point2 &p_point, const Variant &p_data) {
 			}
 		}
 	}
+}
+
+void LinkControler::edit_property(const String &p_property) {
+	Ref<LinkerIndexSet> index_set = create_index_set(p_property);
+	index_set->set_source(link->get_source());
+	link->get_host()->add_link(index_set);
+	// if (link->get_placeholder_value().has_member(p_property)) {
+	// } else {
+	// 	ERR_PRINT("property not found");
+	// }
 }
 
 void LinkControler::set_link(Ref<LinkerLink> p_link) {
