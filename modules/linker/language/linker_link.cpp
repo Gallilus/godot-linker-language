@@ -284,7 +284,7 @@ int LinkerLinkInstance::step(StartMode p_start_mode, Callable::CallError &r_erro
 			step_state = source_link->step(p_start_mode, r_error, r_error_str);
 			sourced = 1;
 		} else if (step_count < pull_count + sourced) {
-			step_state = pull_links[step_count]->step(p_start_mode, r_error, r_error_str);
+			step_state = pull_links[step_count - sourced]->step(p_start_mode, r_error, r_error_str);
 		} else if (step_count == pull_count + sourced && !stepped) {
 			step_state = _step(p_start_mode, r_error, r_error_str);
 			if (step_state & STEP_COMPLETE) {
