@@ -61,8 +61,8 @@ void EditorGraph::add_edge(Ref<LinkerLink> p_link_from, Ref<LinkerLink> p_link_t
 	SETEAS(&graph, "category", edge_id, category);
 }
 
-void EditorGraph::add_pull_edge(Ref<LinkerLink> pulled_link, Ref<LinkerLink> owner_link) {
-	add_edge(pulled_link, owner_link, "edge_data");
+void EditorGraph::add_arg_edge(Ref<LinkerLink> arg_link, Ref<LinkerLink> owner_link) {
+	add_edge(arg_link, owner_link, "edge_data");
 }
 
 void EditorGraph::add_sequence_edge(Ref<LinkerLink> source_link, Ref<LinkerLink> destination_link) {

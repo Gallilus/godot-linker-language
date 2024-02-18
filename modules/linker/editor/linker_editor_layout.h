@@ -93,8 +93,8 @@ public:
 	void update_graph();
 	void position_controlers();
 	void add_link(Ref<LinkerLink> p_link);
-	void add_source_connection(Ref<LinkerLink> pulled_link, Ref<LinkerLink> owner_link);
-	void add_pull_connection(Ref<LinkerLink> pulled_link, Ref<LinkerLink> owner_link);
+	void add_source_connection(Ref<LinkerLink> source_link, Ref<LinkerLink> owner_link);
+	void add_arg_connection(Ref<LinkerLink> arg_link, Ref<LinkerLink> owner_link);
 	void add_sequence_connection(Ref<LinkerLink> source_link, Ref<LinkerLink> destination_link);
 
 	static Ref<LinkerLink> create_scenerefrence(Node *to_node, Node *p_scripted_node = nullptr);

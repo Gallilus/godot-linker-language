@@ -17,7 +17,7 @@ private:
 	int saved_links_idx = -1; // used temporarily for loading from file
 
 	int source_link_idx = -1;
-	Array pull_links_idx;
+	Array arg_links_idx;
 	Array push_links_idx;
 	int owner_links_idx = -1;
 
@@ -30,7 +30,7 @@ protected:
 	HashMap<int, LinkerLinkInstance *> link_instances;
 
 	Ref<LinkerLink> source_link;
-	Vector<Ref<LinkerLink>> pull_links;
+	Vector<Ref<LinkerLink>> arg_links;
 	Vector<Ref<LinkerLink>> push_links;
 
 	LinkerLink *owner = nullptr;
@@ -44,7 +44,7 @@ public:
 	LinkerScript *get_host() const { return host; }
 	virtual void set_source(Ref<LinkerLink> p_source);
 	Ref<LinkerLink> get_source() const;
-	bool has_source() const { return !pull_links.is_empty(); }
+	bool has_source() const { return !arg_links.is_empty(); }
 	virtual void set_index(StringName p_index) { index = p_index; }
 	StringName get_index() const { return index; }
 	void set_owner(LinkerLink *p_link);
@@ -54,11 +54,11 @@ public:
 
 	int get_link_idx() const;
 	void set_to_idx(int p_idx) { saved_links_idx = p_idx; }
-	Array get_pull_links() const;
-	Vector<Ref<LinkerLink>> get_pull_link_refs() const { return pull_links; }
-	void add_pull_link_ref(Ref<LinkerLink> p_link);
-	void add_arg_link_ref(Ref<LinkerLink> p_link, int p_arg_idx);
-	void set_pull_links(Array p_links) { pull_links_idx = p_links; }
+	Array get_arg_links() const;
+	Vector<Ref<LinkerLink>> get_arg_link_refs() const { return arg_links; }
+	void add_arg_link_ref(Ref<LinkerLink> p_link);
+	void set_arg_link_ref(Ref<LinkerLink> p_link, int p_arg_idx);
+	void set_arg_links(Array p_links) { arg_links_idx = p_links; }
 	int get_source_idx() const;
 	void set_source_idx(int p_idx) { source_link_idx = p_idx; }
 	Array get_push_links() const;
@@ -115,11 +115,11 @@ protected:
 	StringName index;
 
 	LinkerLinkInstance *source_link = nullptr;
-	Vector<LinkerLinkInstance *> pull_links;
+	Vector<LinkerLinkInstance *> arg_links;
 	Vector<LinkerLinkInstance *> push_links;
 
 	Variant value;
-	int pull_count = 0;
+	int arg_count = 0;
 	int push_count = 0;
 	int step_count = 0;
 

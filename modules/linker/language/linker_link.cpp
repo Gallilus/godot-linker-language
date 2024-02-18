@@ -14,9 +14,9 @@ void LinkerLink::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_source_link", "idx"), &LinkerLink::set_source_idx);
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "source_link_idx "), "set_source_link", "get_source_link");
 
-	ClassDB::bind_method(D_METHOD("get_pull_links"), &LinkerLink::get_pull_links);
-	ClassDB::bind_method(D_METHOD("set_pull_links", "idx"), &LinkerLink::set_pull_links);
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "pull_links_idx "), "set_pull_links", "get_pull_links");
+	ClassDB::bind_method(D_METHOD("get_arg_links"), &LinkerLink::get_arg_links);
+	ClassDB::bind_method(D_METHOD("set_arg_links", "idx"), &LinkerLink::set_arg_links);
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "arg_links_idx "), "set_arg_links", "get_arg_links");
 
 	ClassDB::bind_method(D_METHOD("get_push_links"), &LinkerLink::get_push_links);
 	ClassDB::bind_method(D_METHOD("set_push_links", "idx"), &LinkerLink::set_push_links);
@@ -36,7 +36,7 @@ void LinkerLink::_add_owned_link(Ref<LinkerLink> p_link, bool p_is_push) {
 	if (p_is_push) {
 		push_links.append(p_link);
 	} else {
-		pull_links.append(p_link);
+		arg_links.append(p_link);
 	}
 	p_link->set_owner(this);
 }
@@ -98,7 +98,7 @@ Ref<LinkerLink> LinkerLink::get_push_link() const {
 void LinkerLink::disconnect_pushed_link(Ref<LinkerLink> p_link) {
 	push_links.erase(p_link);
 	p_link->set_owner(nullptr);
-		host->emit_signal("changed");
+	host->emit_signal("changed");
 }
 
 int LinkerLink::get_link_idx() const {
@@ -108,34 +108,34 @@ int LinkerLink::get_link_idx() const {
 	return host->get_link_idx(this);
 }
 
-Array LinkerLink::get_pull_links() const {
+Array LinkerLink::get_arg_links() const {
 	if (host == nullptr) {
 		return Array();
 	}
 	Array r_idx;
-	for (int i = 0; i < pull_links.size(); i++) {
-		r_idx.append(pull_links[i]->get_link_idx());
+	for (int i = 0; i < arg_links.size(); i++) {
+		r_idx.append(arg_links[i]->get_link_idx());
 	}
 	return r_idx;
 }
 
-void LinkerLink::add_pull_link_ref(Ref<LinkerLink> p_link) {
+void LinkerLink::add_arg_link_ref(Ref<LinkerLink> p_link) {
 	if (p_link.is_valid()) {
 		if (source_link == p_link) {
 			source_link = Ref<LinkerLink>();
 		}
-		pull_links.append(p_link);
+		arg_links.append(p_link);
 		add_link_ref_to_script(p_link);
 		host->emit_signal("changed");
 	}
 }
 
-void LinkerLink::add_arg_link_ref(Ref<LinkerLink> p_link, int p_arg_idx) {
-	if (pull_links.size() <= p_arg_idx) {
-		pull_links.resize(p_arg_idx + 1);
+void LinkerLink::set_arg_link_ref(Ref<LinkerLink> p_link, int p_arg_idx) {
+	if (arg_links.size() <= p_arg_idx) {
+		arg_links.resize(p_arg_idx + 1);
 		ERR_PRINT("resize push_links to " + itos(p_arg_idx + 1));
 	}
-	pull_links.set(p_arg_idx, p_link);
+	arg_links.set(p_arg_idx, p_link);
 	host->emit_signal("changed");
 }
 
@@ -171,10 +171,10 @@ int LinkerLink::get_owner_idx() const {
 }
 
 void LinkerLink::set_link_refrences() {
-	for (int i = 0; i < pull_links_idx.size(); i++) {
-		Ref<LinkerLink> link = get_host()->get_link(pull_links_idx[i]);
+	for (int i = 0; i < arg_links_idx.size(); i++) {
+		Ref<LinkerLink> link = get_host()->get_link(arg_links_idx[i]);
 		if (link.is_valid()) {
-			pull_links.append(link);
+			arg_links.append(link);
 		}
 	}
 	for (int i = 0; i < push_links_idx.size(); i++) {
@@ -283,16 +283,16 @@ int LinkerLinkInstance::step(StartMode p_start_mode, Callable::CallError &r_erro
 		if (source_link != nullptr && step_count == 0) {
 			step_state = source_link->step(p_start_mode, r_error, r_error_str);
 			sourced = 1;
-		} else if (step_count < pull_count + sourced) {
-			step_state = pull_links[step_count - sourced]->step(p_start_mode, r_error, r_error_str);
-		} else if (step_count == pull_count + sourced && !stepped) {
+		} else if (step_count < arg_count + sourced) {
+			step_state = arg_links[step_count - sourced]->step(p_start_mode, r_error, r_error_str);
+		} else if (step_count == arg_count + sourced && !stepped) {
 			step_state = _step(p_start_mode, r_error, r_error_str);
 			if (step_state & STEP_COMPLETE) {
 				stepped = true;
 				step_state = STEP_OK;
 			}
-		} else if (step_count < pull_count + push_count + sourced) {
-			step_state = push_links[step_count - pull_count - sourced]->step(p_start_mode, r_error, r_error_str);
+		} else if (step_count < arg_count + push_count + sourced) {
+			step_state = push_links[step_count - arg_count - sourced]->step(p_start_mode, r_error, r_error_str);
 		} else {
 			break;
 		}

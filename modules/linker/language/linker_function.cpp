@@ -4,7 +4,7 @@
 #include "linker_script.h"
 
 void LinkerFunction::_set_owned_links() {
-	if (pull_links.size() == 0) {
+	if (arg_links.size() == 0) {
 		// only when using editor. so this needs to be triggerd on created by layout
 		// Ref<LinkerIndexGet> return_link = memnew(LinkerIndexGet);
 		// host->add_link(return_link);
@@ -18,19 +18,19 @@ void LinkerFunction::_initialize_instance(LinkerLinkInstance *link, LinkerScript
 	instance->host = p_host;
 	instance->index = index;
 
-	instance->pull_count = pull_links.size();
+	instance->arg_count = arg_links.size();
 	instance->push_count = push_links.size();
 
 	if (source_link.is_valid()) {
 		instance->source_link = source_link->get_instance(p_host, p_stack_size);
 	}
 
-	for (int i = 0; i < instance->pull_count; i++) {
-		LinkerLinkInstance *_link = pull_links[i]->get_instance(p_host, p_stack_size);
+	for (int i = 0; i < instance->arg_count; i++) {
+		LinkerLinkInstance *_link = arg_links[i]->get_instance(p_host, p_stack_size);
 		if (_link) {
-			instance->pull_links.push_back(_link);
+			instance->arg_links.push_back(_link);
 		} else {
-			ERR_PRINT(String(pull_links[i]->get_class_name()) + ": instance is null");
+			ERR_PRINT(String(arg_links[i]->get_class_name()) + ": instance is null");
 		}
 	}
 
@@ -91,8 +91,8 @@ void LinkerFunction::remove_instance(LinkerScriptInstance *p_host, int p_stack_s
 ////////////////////////////////////////////////////////////////////////
 
 int LinkerFunctionInstance::_step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) {
-	if (pull_count > 0) {
-		value = pull_links[0]->get_value();
+	if (arg_count > 0) {
+		value = arg_links[0]->get_value();
 	}
 	return STEP_COMPLETE;
 }

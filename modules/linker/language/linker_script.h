@@ -266,7 +266,7 @@ public:
 
 	void for_every_link(const Callable &p_callable) const;
 	void for_every_source(const Callable &p_callable) const;
-	void for_every_pulled(const Callable &p_callable) const;
+	void for_every_argument(const Callable &p_callable) const;
 	void for_every_sequenced(const Callable &p_callable) const;
 
 	LinkerScript();

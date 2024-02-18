@@ -303,7 +303,7 @@ void LinkerEditorLayout::update_graph() {
 
 	script->for_every_link(callable_mp(this, &LinkerEditorLayout::add_link));
 	script->for_every_source(callable_mp(this, &LinkerEditorLayout::add_source_connection));
-	script->for_every_pulled(callable_mp(this, &LinkerEditorLayout::add_pull_connection));
+	script->for_every_argument(callable_mp(this, &LinkerEditorLayout::add_arg_connection));
 	script->for_every_sequenced(callable_mp(this, &LinkerEditorLayout::add_sequence_connection));
 
 	position_controlers();
@@ -341,14 +341,14 @@ void LinkerEditorLayout::add_link(Ref<LinkerLink> p_link) {
 	get_link_controler(p_link); // create the controler
 }
 
-void LinkerEditorLayout::add_source_connection(Ref<LinkerLink> pulled_link, Ref<LinkerLink> owner_link) {
-	graph.add_pull_edge(pulled_link, owner_link);
-	get_link_connection(pulled_link, owner_link, LinkConnection::CONNECTION_TYPE_SOURCE); // create the connection
+void LinkerEditorLayout::add_source_connection(Ref<LinkerLink> source_link, Ref<LinkerLink> owner_link) {
+	graph.add_arg_edge(source_link, owner_link);
+	get_link_connection(source_link, owner_link, LinkConnection::CONNECTION_TYPE_SOURCE); // create the connection
 }
 
-void LinkerEditorLayout::add_pull_connection(Ref<LinkerLink> pulled_link, Ref<LinkerLink> owner_link) {
-	graph.add_pull_edge(pulled_link, owner_link);
-	get_link_connection(pulled_link, owner_link, LinkConnection::CONNECTION_TYPE_REFRENCE); // create the connection
+void LinkerEditorLayout::add_arg_connection(Ref<LinkerLink> source_link, Ref<LinkerLink> owner_link) {
+	graph.add_arg_edge(source_link, owner_link);
+	get_link_connection(source_link, owner_link, LinkConnection::CONNECTION_TYPE_REFRENCE); // create the connection
 }
 
 void LinkerEditorLayout::add_sequence_connection(Ref<LinkerLink> source_link, Ref<LinkerLink> destination_link) {

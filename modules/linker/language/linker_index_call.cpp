@@ -6,19 +6,19 @@ void LinkerIndexCall::_initialize_instance(LinkerLinkInstance *link, LinkerScrip
 	instance->host = p_host;
 	instance->index = index;
 
-	instance->pull_count = pull_links.size();
+	instance->arg_count = arg_links.size();
 	instance->push_count = push_links.size();
 
 	if (source_link.is_valid()) {
 		instance->source_link = source_link->get_instance(p_host, p_stack_size);
 	}
 
-	for (int i = 0; i < instance->pull_count; i++) {
-		LinkerLinkInstance *_link = pull_links[i]->get_instance(p_host, p_stack_size);
+	for (int i = 0; i < instance->arg_count; i++) {
+		LinkerLinkInstance *_link = arg_links[i]->get_instance(p_host, p_stack_size);
 		if (_link) {
-			instance->pull_links.push_back(_link);
+			instance->arg_links.push_back(_link);
 		} else {
-			ERR_PRINT(String(pull_links[i]->get_class_name()) + ": instance is null");
+			ERR_PRINT(String(arg_links[i]->get_class_name()) + ": instance is null");
 		}
 	}
 
@@ -111,7 +111,7 @@ int LinkerIndexCallInstance::_step(StartMode p_start_mode, Callable::CallError &
 	List<MethodInfo> info_list;
 	MethodInfo mi;
 	Object *object = nullptr;
-	
+
 	// Check the argument and source conditions
 	if (source_link != nullptr) {
 		object = Object::cast_to<Object>(source_link->get_value());
@@ -133,9 +133,9 @@ int LinkerIndexCallInstance::_step(StartMode p_start_mode, Callable::CallError &
 		return STEP_ERROR;
 	}
 
-	if (mi.arguments.size() != pull_count) {
+	if (mi.arguments.size() != arg_count) {
 		r_error.expected = mi.arguments.size();
-		if (r_error.expected < pull_count) {
+		if (r_error.expected < arg_count) {
 			r_error.error = Callable::CallError::CALL_ERROR_TOO_MANY_ARGUMENTS;
 		} else {
 			r_error.error = Callable::CallError::CALL_ERROR_TOO_FEW_ARGUMENTS;
@@ -146,12 +146,12 @@ int LinkerIndexCallInstance::_step(StartMode p_start_mode, Callable::CallError &
 
 	input_args.clear();
 	Vector<const Variant *> argp;
-	input_args.resize(pull_count);
-	argp.resize(pull_count);
+	input_args.resize(arg_count);
+	argp.resize(arg_count);
 
 	// get the arguments
-	for (int i = 0; i < pull_count; i++) {
-		input_args.write[i] = pull_links[i]->get_value();
+	for (int i = 0; i < arg_count; i++) {
+		input_args.write[i] = arg_links[i]->get_value();
 		argp.write[i] = &input_args[i];
 	}
 	// call the function

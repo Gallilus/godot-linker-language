@@ -132,9 +132,9 @@ void LinkConnection::check_validity() {
 			break;
 		}
 		case CONNECTION_TYPE_REFRENCE: {
-			Vector<Ref<LinkerLink>> pull_links = end->get_link()->get_pull_link_refs();
-			for (int i = 0; i < pull_links.size(); i++) {
-				if (pull_links[i].ptr() == start->get_link()) {
+			Vector<Ref<LinkerLink>> arg_links = end->get_link()->get_arg_link_refs();
+			for (int i = 0; i < arg_links.size(); i++) {
+				if (arg_links[i].ptr() == start->get_link()) {
 					valid = true;
 					return;
 				}

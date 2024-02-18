@@ -427,7 +427,7 @@ void LinkControler::drop_data(const Point2 &p_point, const Variant &p_data) {
 			int arg_count = link->get_argument_count();
 			int arg_idx = arg_pos.y / (rect_arg().size.y / arg_count);
 			if (d_data["link_request"] == "use_output") {
-				link->add_arg_link_ref(drag_link, arg_idx);
+				link->set_arg_link_ref(drag_link, arg_idx);
 			} else if (d_data["link_request"] == "get_arg") {
 				ERR_PRINT("not able to get argument from argument");
 			} else if (d_data["link_request"] == "push_next_command") {
@@ -466,7 +466,7 @@ void LinkControler::drop_data(const Point2 &p_point, const Variant &p_data) {
 			if (d_data["link_request"] == "use_output") {
 				link->set_source(drag_link);
 			} else if (d_data["link_request"] == "get_arg") {
-				drag_link->add_arg_link_ref(link, d_data["link_arg_index"]);
+				drag_link->set_arg_link_ref(link, d_data["link_arg_index"]);
 			} else if (d_data["link_request"] == "push_next_command") {
 				drag_link->add_push_link_ref(link);
 			} else if (d_data["link_request"] == "get_part_of_value") {

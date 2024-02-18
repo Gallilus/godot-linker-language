@@ -9,19 +9,19 @@ void LinkerIndexSet::_initialize_instance(LinkerLinkInstance *link, LinkerScript
 	instance->host = p_host;
 	instance->index = index;
 
-	instance->pull_count = pull_links.size();
+	instance->arg_count = arg_links.size();
 	instance->push_count = push_links.size();
 
 	if (source_link.is_valid()) {
 		instance->source_link = source_link->get_instance(p_host, p_stack_size);
 	}
 
-	for (int i = 0; i < instance->pull_count; i++) {
-		LinkerLinkInstance *_link = pull_links[i]->get_instance(p_host, p_stack_size);
+	for (int i = 0; i < instance->arg_count; i++) {
+		LinkerLinkInstance *_link = arg_links[i]->get_instance(p_host, p_stack_size);
 		if (_link) {
-			instance->pull_links.push_back(_link);
+			instance->arg_links.push_back(_link);
 		} else {
-			ERR_PRINT(String(pull_links[i]->get_class_name()) + ": instance is null");
+			ERR_PRINT(String(arg_links[i]->get_class_name()) + ": instance is null");
 		}
 	}
 
@@ -81,8 +81,8 @@ int LinkerIndexSetInstance::_step(StartMode p_start_mode, Callable::CallError &r
 	value = Variant();
 	Variant set_value;
 
-	if (pull_count > 0) {
-		set_value = pull_links[0]->get_value();
+	if (arg_count > 0) {
+		set_value = arg_links[0]->get_value();
 	} else {
 		r_error.error = Callable::CallError::CALL_ERROR_INSTANCE_IS_NULL;
 		r_error_str = "LinkerIndexSet " + String(index) + "expects a arg link";

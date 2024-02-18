@@ -627,12 +627,12 @@ void LinkerScript::for_every_source(const Callable &p_callable) const {
 	}
 }
 
-void LinkerScript::for_every_pulled(const Callable &p_callable) const {
+void LinkerScript::for_every_argument(const Callable &p_callable) const {
 	for (int i = 0; i < links.size(); i++) {
 		if (links[i].is_valid()) {
-			for (int j = 0; j < links[i]->get_pull_link_refs().size(); j++) {
-				if (links[i]->get_pull_link_refs()[j].is_valid()) {
-					p_callable.call(links[i]->get_pull_link_refs()[j], links[i]);
+			for (int j = 0; j < links[i]->get_arg_link_refs().size(); j++) {
+				if (links[i]->get_arg_link_refs()[j].is_valid()) {
+					p_callable.call(links[i]->get_arg_link_refs()[j], links[i]);
 				}
 			}
 		}
