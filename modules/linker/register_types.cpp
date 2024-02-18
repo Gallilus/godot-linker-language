@@ -8,16 +8,18 @@
 #include "editor/linker_editor.h"
 #include "editor/linker_editor_layout.h"
 #include "editor/linker_editor_selector.h"
+#include "language/linker_builtin_function.h"
 #include "language/linker_function.h"
 #include "language/linker_index_call.h"
 #include "language/linker_index_get.h"
+#include "language/linker_index_set.h"
 #include "language/linker_language.h"
 #include "language/linker_link.h"
 #include "language/linker_loader.h"
 #include "language/linker_saver.h"
 #include "language/linker_scene_refrence.h"
 #include "language/linker_script.h"
-#include "language/linker_builtin_function.h"
+
 
 using namespace godot;
 
@@ -35,12 +37,13 @@ void initialize_linker_module(ModuleInitializationLevel p_level) {
 
 		linker_language = memnew(LinkerLanguage);
 		ScriptServer::register_language(linker_language);
-		
+
 		GDREGISTER_CLASS(LinkerScript);
 		GDREGISTER_ABSTRACT_CLASS(LinkerLink);
 		GDREGISTER_CLASS(LinkerSceneRefrence);
 		GDREGISTER_CLASS(LinkerIndexCall);
 		GDREGISTER_CLASS(LinkerIndexGet);
+		GDREGISTER_CLASS(LinkerIndexSet);
 		GDREGISTER_CLASS(LinkerFunction);
 		GDREGISTER_CLASS(LinkerBuiltinFunction);
 

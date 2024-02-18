@@ -281,9 +281,18 @@ void LinkControler::gui_input(const Ref<InputEvent> &p_event) {
 	Ref<InputEventMouseButton> mb = p_event;
 	if (mb.is_valid()) {
 		if (mb->is_double_click()) {
-			// popup menu
-			ERR_PRINT("create popup");
-			//		button->grab_focus();
+			Point2 mouse_pos = get_local_mouse_position();
+			if (rect_index().has_point(mouse_pos)) {
+				LinkerInspector2 *linker_inspecor = memnew(LinkerInspector2);
+				linker_inspecor->set_object(link);
+				add_child(linker_inspecor);
+				linker_inspecor->popup(mouse_pos);
+				// members_section->connect("edit_member", callable_mp(linker_inspecor, &LinkControler::edit_property));
+			} else if (rect_value_1().has_point(mouse_pos) || rect_value_2().has_point(mouse_pos)) {
+				ERR_PRINT("push set_value");
+			} else {
+				ERR_PRINT("create popup");
+			}
 			get_viewport()->set_input_as_handled();
 		}
 		if (!mb->get_button_mask().has_flag(MouseButtonMask::LEFT)) {

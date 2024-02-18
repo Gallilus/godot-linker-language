@@ -99,6 +99,7 @@ public:
 
 	static Ref<LinkerLink> create_scenerefrence(Node *to_node, Node *p_scripted_node = nullptr);
 	static Ref<LinkerLink> create_index_get(const String &index);
+	static Ref<LinkerLink> create_index_set(const String &index);
 	static Ref<LinkerLink> create_index_call(const String &index, const Ref<LinkerLink> &p_source_link, const Vector<Ref<LinkerLink>> &p_arguments);
 
 	LinkerEditorLayout();

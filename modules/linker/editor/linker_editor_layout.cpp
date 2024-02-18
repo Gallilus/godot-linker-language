@@ -151,9 +151,14 @@ void LinkerEditorLayout::drop_data(const Point2 &p_point, const Variant &p_data)
 			Ref<LinkerSceneRefrence> scene_ref = drop_data.nodes[0];
 			script->add_link(scene_ref);
 			scene_ref = script->get_scene_refrence(rel_path);
-			Ref<LinkerIndexGet> index_get = LinkerEditorLayout::create_index_get(drop_data.property_name);
-			index_get->set_source(scene_ref);
-			script->add_link(index_get);
+			Ref<LinkerLink> link;
+			if (drop_data.ctrl_drop) {
+				link = LinkerEditorLayout::create_index_set(String(drop_data.property_name));
+			} else {
+				link = LinkerEditorLayout::create_index_get(String(drop_data.property_name));
+			}
+			link->set_source(scene_ref);
+			script->add_link(link);
 		}
 	}
 
@@ -179,8 +184,13 @@ void LinkerEditorLayout::drop_data(const Point2 &p_point, const Variant &p_data)
 
 	if (String(d["type"]) == "variable") {
 		PropertyInfo property_info = PropertyInfo::from_dict(drop_data.value);
-		Ref<LinkerIndexGet> index_get = LinkerEditorLayout::create_index_get(String(property_info.name));
-		script->add_link(index_get);
+		Ref<LinkerLink> link;
+		if (drop_data.ctrl_drop) {
+			link = LinkerEditorLayout::create_index_set(String(property_info.name));
+		} else {
+			link = LinkerEditorLayout::create_index_get(String(property_info.name));
+		}
+		script->add_link(link);
 		ERR_PRINT("droped variable");
 	}
 }
@@ -367,6 +377,13 @@ Ref<LinkerLink> LinkerEditorLayout::create_index_get(const String &index) {
 	index_get.instantiate();
 	index_get->set_index(index);
 	return index_get;
+}
+
+Ref<LinkerLink> LinkerEditorLayout::create_index_set(const String &index) {
+	Ref<LinkerIndexSet> index_set;
+	index_set.instantiate();
+	index_set->set_index(index);
+	return index_set;
 }
 
 Ref<LinkerLink> LinkerEditorLayout::create_index_call(const String &index, const Ref<LinkerLink> &p_source_link, const Vector<Ref<LinkerLink>> &p_arguments) {
@@ -780,17 +797,30 @@ void ConnectNext::_method_info_confirmed(Dictionary p_info) {
 
 void ConnectNext::_property_info_confirmed(Dictionary p_info) {
 	PropertyInfo pi = PropertyInfo::from_dict(p_info);
+
+	bool ctrl = Input::get_singleton()->is_key_pressed(Key::CTRL);
+
 	if (source_link.is_valid()) { // scope link
 		StringName source_class = source_link->get_output_info().class_name;
 		if (ClassDB::has_property(source_class, pi.name)) {
-			Ref<LinkerLink> link = LinkerEditorLayout::create_index_get(pi.name);
+			Ref<LinkerLink> link;
+			if (ctrl) {
+				link = LinkerEditorLayout::create_index_set(pi.name);
+			} else {
+				link = LinkerEditorLayout::create_index_get(pi.name);
+			}
 			link->set_source(source_link);
 			dropped_link->get_host()->add_link(link);
 			return;
 		}
 	} else if (dropped_script.is_valid()) { // scope script
 		if (dropped_script->has_property(pi.name)) {
-			Ref<LinkerLink> link = LinkerEditorLayout::create_index_get(pi.name);
+			Ref<LinkerLink> link;
+			if (ctrl) {
+				link = LinkerEditorLayout::create_index_set(pi.name);
+			} else {
+				link = LinkerEditorLayout::create_index_get(pi.name);
+			}
 			dropped_script->add_link(link);
 			return;
 		}
