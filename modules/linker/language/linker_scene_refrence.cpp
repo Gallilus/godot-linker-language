@@ -54,8 +54,7 @@ void LinkerSceneRefrence::_initialize_instance(LinkerLinkInstance *link, LinkerS
 }
 
 Variant LinkerSceneRefrence::get_placeholder_value() const {
-	// get variant from property info
-	return Variant();
+	return EditorInterface::get_singleton()->get_edited_scene_root()->get_node(node_scene_path);
 }
 
 Dictionary LinkerSceneRefrence::get_placeholder_info() const {

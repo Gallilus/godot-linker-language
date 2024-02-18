@@ -35,7 +35,9 @@ void LinkerIndexGet::_initialize_instance(LinkerLinkInstance *link, LinkerScript
 }
 
 Variant LinkerIndexGet::get_placeholder_value() const {
-	// get the object index value
+	if (source_link != nullptr) {
+		return source_link->get_placeholder_value().get(index);
+	}
 	return Variant();
 }
 
