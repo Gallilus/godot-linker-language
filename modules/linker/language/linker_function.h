@@ -19,7 +19,7 @@ public:
 	virtual Variant get_placeholder_value() const override;
 	virtual Dictionary get_placeholder_info() const override;
 	virtual String get_graph_category() const override { return "graph_output"; }
-	virtual bool controler_at_source() const override { return false; }
+	virtual bool controler_at_object() const override { return false; }
 	virtual int get_argument_count() const override { return 1; }
 	virtual PropertyInfo get_input_value_port_info(int p_idx) const override;
 

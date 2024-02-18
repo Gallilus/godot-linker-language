@@ -617,11 +617,11 @@ void LinkerScript::for_every_link(const Callable &p_callable) const {
 	}
 }
 
-void LinkerScript::for_every_source(const Callable &p_callable) const {
+void LinkerScript::for_every_object_ref(const Callable &p_callable) const {
 	for (int i = 0; i < links.size(); i++) {
 		if (links[i].is_valid()) {
-			if (links[i]->get_source().is_valid()) {
-				p_callable.call(links[i]->get_source(), links[i]);
+			if (links[i]->get_object().is_valid()) {
+				p_callable.call(links[i]->get_object(), links[i]);
 			}
 		}
 	}

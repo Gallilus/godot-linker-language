@@ -85,17 +85,17 @@ public:
 	virtual bool can_drop_data(const Point2 &p_point, const Variant &p_data) const override;
 	virtual void drop_data(const Point2 &p_point, const Variant &p_data) override;
 
-	LinkControler *get_link_source_controler(Ref<LinkerLink> p_link);
+	LinkControler *get_link_object_controler(Ref<LinkerLink> p_link);
 	LinkControler *get_link_controler(Ref<LinkerLink> p_link);
-	LinkConnection *get_link_connection(Ref<LinkerLink> source_link, Ref<LinkerLink> destination_link, int p_connection_type);
+	LinkConnection *get_link_connection(Ref<LinkerLink> object_link, Ref<LinkerLink> destination_link, int p_connection_type);
 
 	void clear_layout();
 	void update_graph();
 	void position_controlers();
 	void add_link(Ref<LinkerLink> p_link);
-	void add_source_connection(Ref<LinkerLink> source_link, Ref<LinkerLink> owner_link);
+	void add_object_connection(Ref<LinkerLink> object_link, Ref<LinkerLink> owner_link);
 	void add_arg_connection(Ref<LinkerLink> arg_link, Ref<LinkerLink> owner_link);
-	void add_sequence_connection(Ref<LinkerLink> source_link, Ref<LinkerLink> destination_link);
+	void add_sequence_connection(Ref<LinkerLink> object_link, Ref<LinkerLink> destination_link);
 
 	static Ref<LinkerLink> create_scenerefrence(Node *to_node, Node *p_scripted_node = nullptr);
 	static Ref<LinkerLink> create_index_get(const String &index);
@@ -186,7 +186,7 @@ class ConnectNext : public VBoxContainer {
 
 	Ref<LinkerLink> dropped_link;
 	Ref<LinkerScript> dropped_script;
-	Ref<LinkerLink> source_link;
+	Ref<LinkerLink> object_link;
 	Vector<Ref<LinkerLink>> argument_links;
 	PropertyInfo source_info;
 	Vector<PropertyInfo> arguments_info;

@@ -16,7 +16,7 @@ class LinkerLink : public Resource {
 private:
 	int saved_links_idx = -1; // used temporarily for loading from file
 
-	int source_link_idx = -1;
+	int object_link_idx = -1; // the object may be the source or the destination object to be edited
 	Array arg_links_idx;
 	Array push_links_idx;
 	int owner_links_idx = -1;
@@ -29,7 +29,7 @@ protected:
 
 	HashMap<int, LinkerLinkInstance *> link_instances;
 
-	Ref<LinkerLink> source_link;
+	Ref<LinkerLink> object_link;
 	Vector<Ref<LinkerLink>> arg_links;
 	Vector<Ref<LinkerLink>> push_links;
 
@@ -42,9 +42,9 @@ protected:
 public:
 	void set_host(LinkerScript *p_host);
 	LinkerScript *get_host() const { return host; }
-	virtual void set_source(Ref<LinkerLink> p_source);
-	Ref<LinkerLink> get_source() const;
-	bool has_source() const { return !arg_links.is_empty(); }
+	virtual void set_object(Ref<LinkerLink> p_object);
+	Ref<LinkerLink> get_object() const;
+	bool has_object() const { return object_link.is_valid(); }
 	virtual void set_index(StringName p_index) { index = p_index; }
 	StringName get_index() const { return index; }
 	void set_owner(LinkerLink *p_link);
@@ -59,8 +59,8 @@ public:
 	void add_arg_link_ref(Ref<LinkerLink> p_link);
 	void set_arg_link_ref(Ref<LinkerLink> p_link, int p_arg_idx);
 	void set_arg_links(Array p_links) { arg_links_idx = p_links; }
-	int get_source_idx() const;
-	void set_source_idx(int p_idx) { source_link_idx = p_idx; }
+	int get_object_idx() const;
+	void set_object_idx(int p_idx) { object_link_idx = p_idx; }
 	Array get_push_links() const;
 	Vector<Ref<LinkerLink>> get_push_link_refs() const { return push_links; }
 	void add_push_link_ref(Ref<LinkerLink> p_link);
@@ -74,15 +74,15 @@ public:
 	virtual Dictionary get_placeholder_info() const = 0;
 	PropertyInfo get_output_info();
 	virtual String get_graph_category() const { return "graph_data"; }
-	virtual bool controler_at_source() const = 0;
+	virtual bool controler_at_object() const = 0;
 	virtual Variant get_drag_data() const;
 	virtual bool can_drop_on_link(Ref<LinkerLink> drag_link) const;
 	virtual bool can_drop_on_arg(Ref<LinkerLink> drag_link) const;
-	virtual bool can_drop_on_source(Ref<LinkerLink> drag_link) const;
+	virtual bool can_drop_on_object(Ref<LinkerLink> drag_link) const;
 	virtual bool can_drop_on_value(Ref<LinkerLink> drag_link) const;
 	virtual int get_argument_count() const;
 	virtual PropertyInfo get_input_value_port_info(int p_idx) const;
-	virtual bool use_source() const;
+	virtual bool use_object() const;
 
 	virtual LinkerLinkInstance *get_instance(LinkerScriptInstance *p_host, int p_stack_size) = 0;
 	virtual void remove_instance(LinkerScriptInstance *p_host, int p_stack_size) = 0;
@@ -114,7 +114,7 @@ protected:
 	LinkerScriptInstance *host = nullptr;
 	StringName index;
 
-	LinkerLinkInstance *source_link = nullptr;
+	LinkerLinkInstance *object_link = nullptr;
 	Vector<LinkerLinkInstance *> arg_links;
 	Vector<LinkerLinkInstance *> push_links;
 

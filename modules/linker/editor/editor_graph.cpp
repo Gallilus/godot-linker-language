@@ -65,8 +65,8 @@ void EditorGraph::add_arg_edge(Ref<LinkerLink> arg_link, Ref<LinkerLink> owner_l
 	add_edge(arg_link, owner_link, "edge_data");
 }
 
-void EditorGraph::add_sequence_edge(Ref<LinkerLink> source_link, Ref<LinkerLink> destination_link) {
-	add_edge(source_link, destination_link, "edge_sequence");
+void EditorGraph::add_sequence_edge(Ref<LinkerLink> object_link, Ref<LinkerLink> destination_link) {
+	add_edge(object_link, destination_link, "edge_sequence");
 }
 
 EditorGraph::EditorGraph() {

@@ -112,14 +112,14 @@ public:
 	virtual Variant get_placeholder_value() const override;
 	virtual Dictionary get_placeholder_info() const override;
 	virtual String get_graph_category() const override { return "graph_output"; }
-	virtual bool controler_at_source() const override { return false; }
-	virtual bool use_source() const override { return false; }
+	virtual bool controler_at_object() const override { return false; }
+	virtual bool use_object() const override { return false; }
 
 	virtual int get_argument_count() const override;
 	virtual PropertyInfo get_input_value_port_info(int p_idx) const override;
 
 	virtual bool can_drop_on_link(Ref<LinkerLink> drag_link) const override;
-	virtual bool can_drop_on_source(Ref<LinkerLink> drag_link) const override;
+	virtual bool can_drop_on_object(Ref<LinkerLink> drag_link) const override;
 
 	virtual LinkerLinkInstance *get_instance(LinkerScriptInstance *p_host, int p_stack_size) override;
 	virtual void remove_instance(LinkerScriptInstance *p_host, int p_stack_size) override;

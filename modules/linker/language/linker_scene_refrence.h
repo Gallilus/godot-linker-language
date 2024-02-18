@@ -29,7 +29,7 @@ public:
 	virtual Variant get_placeholder_value() const override;
 	virtual Dictionary get_placeholder_info() const override;
 	virtual String get_graph_category() const override { return "graph_input"; }
-	virtual bool controler_at_source() const override { return false; }
+	virtual bool controler_at_object() const override { return false; }
 
 	void set_refrence(Node *p_ref_node, Node *p_scripted_node);
 
@@ -45,7 +45,7 @@ public:
 	StringName get_node_scene_relative_path() const { return node_scene_relative_path; }
 
 	virtual bool can_drop_on_value(Ref<LinkerLink> drag_link) const override;
-	virtual bool use_source() const override { return false; }
+	virtual bool use_object() const override { return false; }
 
 	virtual LinkerLinkInstance *get_instance(LinkerScriptInstance *p_host, int p_stack_size) override;
 	virtual void remove_instance(LinkerScriptInstance *p_host, int p_stack_size) override {}

@@ -11,8 +11,8 @@ Rect2 LinkControler::rect_this() const {
 	return r;
 }
 
-Rect2 LinkControler::rect_source() const {
-	if (!source_rect->is_visible()) {
+Rect2 LinkControler::rect_object() const {
+	if (!object_rect->is_visible()) {
 		return Rect2();
 	}
 	Rect2 r;
@@ -184,10 +184,10 @@ void LinkControler::set_component_visibility() {
 	push_rect->set_custom_minimum_size(CELL_SIZE_X);
 	value_rect_1->set_custom_minimum_size(CELL_SIZE_SMALL_Y);
 
-	if (link->use_source()) {
-		source_rect->set_custom_minimum_size(CELL_SIZE_SMALL);
+	if (link->use_object()) {
+		object_rect->set_custom_minimum_size(CELL_SIZE_SMALL);
 	} else {
-		source_rect->set_custom_minimum_size(CELL_SIZE_HIDDEN);
+		object_rect->set_custom_minimum_size(CELL_SIZE_HIDDEN);
 	}
 	push_rect->set_custom_minimum_size(CELL_SIZE_SMALL);
 }
@@ -258,7 +258,7 @@ void LinkControler::_draw_debug() {
 	if (dragging_from || edit_mode) {
 		Point2 mouse_pos = get_local_mouse_position();
 		draw_rect(rect_this(), Color(0.1, 0.9, 0.9, 0.3), false); //rect_this().has_point(mouse_pos));
-		draw_rect(rect_source(), Color(0.9, 0.1, 0.1, 0.3), rect_source().has_point(mouse_pos));
+		draw_rect(rect_object(), Color(0.9, 0.1, 0.1, 0.3), rect_object().has_point(mouse_pos));
 		draw_rect(rect_arg(), Color(0.1, 0.9, 0.1, 0.3), rect_arg().has_point(mouse_pos));
 		draw_rect(rect_value_1(), Color(0.1, 0.1, 0.9, 0.3), rect_value_1().has_point(mouse_pos));
 		draw_rect(rect_index(), Color(0.1, 0.9, 0.1, 0.3), rect_index().has_point(mouse_pos));
@@ -316,8 +316,8 @@ void LinkControler::gui_input(const Ref<InputEvent> &p_event) {
 void LinkControler::prep_drag_data() {
 	// prep on mouse down as start drag data has no acurate mouseposition and the layout may be changed as well.
 	Point2 mouse_pos = get_local_mouse_position();
-	if (rect_source().has_point(mouse_pos)) {
-		drag_data = link->get_source()->get_drag_data();
+	if (rect_object().has_point(mouse_pos)) {
+		drag_data = link->get_object()->get_drag_data();
 	} else if (rect_arg().has_point(mouse_pos)) {
 		Vector2 arg_pos = mouse_pos - rect_arg().position;
 		int arg_count = link->get_argument_count();
@@ -363,7 +363,7 @@ bool LinkControler::can_drop_data(const Point2 &p_point, const Variant &p_data) 
 		return false;
 	}
 	Point2 mouse_pos = get_local_mouse_position();
-	if (rect_source().has_point(mouse_pos)) {
+	if (rect_object().has_point(mouse_pos)) {
 		// use the drop link as a new source
 		if (d_data.has("link_request")) {
 			return (
@@ -409,10 +409,10 @@ void LinkControler::drop_data(const Point2 &p_point, const Variant &p_data) {
 	Ref<LinkerLink> drag_link = link->get_host()->get_link(d_data["link_idx"]);
 
 	Point2 mouse_pos = get_local_mouse_position();
-	if (rect_source().has_point(mouse_pos)) {
+	if (rect_object().has_point(mouse_pos)) {
 		if (d_data.has("link_request")) {
 			if (d_data["link_request"] == "use_output") {
-				link->set_source(drag_link);
+				link->set_object(drag_link);
 			} else if (d_data["link_request"] == "get_arg") {
 				ERR_PRINT("not able to set arguments");
 			} else if (d_data["link_request"] == "push_next_command") {
@@ -464,7 +464,7 @@ void LinkControler::drop_data(const Point2 &p_point, const Variant &p_data) {
 	} else if (rect_this().has_point(mouse_pos)) {
 		if (d_data.has("link_request")) {
 			if (d_data["link_request"] == "use_output") {
-				link->set_source(drag_link);
+				link->set_object(drag_link);
 			} else if (d_data["link_request"] == "get_arg") {
 				drag_link->set_arg_link_ref(link, d_data["link_arg_index"]);
 			} else if (d_data["link_request"] == "push_next_command") {
@@ -478,7 +478,7 @@ void LinkControler::drop_data(const Point2 &p_point, const Variant &p_data) {
 
 void LinkControler::edit_property(const String &p_property) {
 	Ref<LinkerIndexSet> index_set = create_index_set(p_property);
-	index_set->set_source(link->get_source());
+	index_set->set_object(link->get_object());
 	link->get_host()->add_link(index_set);
 	// if (link->get_placeholder_value().has_member(p_property)) {
 	// } else {
@@ -562,8 +562,8 @@ void LinkControler::update_edit_mode() {
 		value_rect_2->set_custom_minimum_size(CELL_SIZE_HIDDEN);
 	}
 	Point2 mouse_pos = get_local_mouse_position();
-	if (rect_source().has_point(mouse_pos)) {
-		source_rect->set_custom_minimum_size(CELL_SIZE);
+	if (rect_object().has_point(mouse_pos)) {
+		object_rect->set_custom_minimum_size(CELL_SIZE);
 	} else if (rect_push().has_point(mouse_pos)) {
 		push_rect->set_custom_minimum_size(CELL_SIZE);
 	}
@@ -586,8 +586,8 @@ LinkControler::LinkControler() {
 	components = memnew(HBoxContainer);
 	add_child(components);
 
-	source_rect = memnew(Control);
-	banner->add_child(source_rect);
+	object_rect = memnew(Control);
+	banner->add_child(object_rect);
 	label = memnew(Label);
 	banner->add_child(label);
 	edit_index = memnew(LineEdit);
@@ -608,13 +608,13 @@ LinkControler::LinkControler() {
 	label->set_mouse_filter(Control::MOUSE_FILTER_PASS);
 	// edit_index->set_mouse_filter(Control::MOUSE_FILTER_PASS);
 	icon->set_mouse_filter(Control::MOUSE_FILTER_PASS);
-	source_rect->set_mouse_filter(Control::MOUSE_FILTER_PASS);
+	object_rect->set_mouse_filter(Control::MOUSE_FILTER_PASS);
 	arguments->set_mouse_filter(Control::MOUSE_FILTER_PASS);
 	value_rect_1->set_mouse_filter(Control::MOUSE_FILTER_PASS);
 	push_rect->set_mouse_filter(Control::MOUSE_FILTER_PASS);
 	value_rect_2->set_mouse_filter(Control::MOUSE_FILTER_PASS);
 
-	source_rect->set_tooltip_text("source");
+	object_rect->set_tooltip_text("object reference");
 	arguments->set_tooltip_text("argument");
 	value_rect_1->set_tooltip_text("set_memeber");
 	push_rect->set_tooltip_text("drag to push new commands");

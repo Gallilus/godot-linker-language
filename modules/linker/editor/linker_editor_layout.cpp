@@ -157,7 +157,7 @@ void LinkerEditorLayout::drop_data(const Point2 &p_point, const Variant &p_data)
 			} else {
 				link = LinkerEditorLayout::create_index_get(String(drop_data.property_name));
 			}
-			link->set_source(scene_ref);
+			link->set_object(scene_ref);
 			script->add_link(link);
 		}
 	}
@@ -195,12 +195,12 @@ void LinkerEditorLayout::drop_data(const Point2 &p_point, const Variant &p_data)
 	}
 }
 
-LinkControler *LinkerEditorLayout::get_link_source_controler(Ref<LinkerLink> p_link) {
+LinkControler *LinkerEditorLayout::get_link_object_controler(Ref<LinkerLink> p_link) {
 	if (!p_link.is_valid()) {
 		return nullptr;
 	}
-	if (p_link->has_source()) {
-		return get_link_controler(p_link->get_source());
+	if (p_link->has_object()) {
+		return get_link_controler(p_link->get_object());
 	}
 	return nullptr;
 }
@@ -214,7 +214,7 @@ LinkControler *LinkerEditorLayout::get_link_controler(Ref<LinkerLink> p_link) {
 			return link_contorlers[p_link];
 		}
 	}
-	if (p_link->controler_at_source()) {
+	if (p_link->controler_at_object()) {
 		for (const KeyValue<Ref<LinkerLink>, LinkControler *> &E : link_contorlers) {
 			if (E.key.is_valid() && E.key.ptr() == p_link.ptr()) {
 				if (VariantUtilityFunctions::is_instance_valid(E.value)) {
@@ -302,7 +302,7 @@ void LinkerEditorLayout::update_graph() {
 	}
 
 	script->for_every_link(callable_mp(this, &LinkerEditorLayout::add_link));
-	script->for_every_source(callable_mp(this, &LinkerEditorLayout::add_source_connection));
+	script->for_every_object_ref(callable_mp(this, &LinkerEditorLayout::add_object_connection));
 	script->for_every_argument(callable_mp(this, &LinkerEditorLayout::add_arg_connection));
 	script->for_every_sequenced(callable_mp(this, &LinkerEditorLayout::add_sequence_connection));
 
@@ -341,19 +341,19 @@ void LinkerEditorLayout::add_link(Ref<LinkerLink> p_link) {
 	get_link_controler(p_link); // create the controler
 }
 
-void LinkerEditorLayout::add_source_connection(Ref<LinkerLink> source_link, Ref<LinkerLink> owner_link) {
-	graph.add_arg_edge(source_link, owner_link);
-	get_link_connection(source_link, owner_link, LinkConnection::CONNECTION_TYPE_SOURCE); // create the connection
+void LinkerEditorLayout::add_object_connection(Ref<LinkerLink> object_link, Ref<LinkerLink> owner_link) {
+	graph.add_arg_edge(object_link, owner_link);
+	get_link_connection(object_link, owner_link, LinkConnection::CONNECTION_TYPE_OBJECT_REF); // create the connection
 }
 
-void LinkerEditorLayout::add_arg_connection(Ref<LinkerLink> source_link, Ref<LinkerLink> owner_link) {
-	graph.add_arg_edge(source_link, owner_link);
-	get_link_connection(source_link, owner_link, LinkConnection::CONNECTION_TYPE_REFRENCE); // create the connection
+void LinkerEditorLayout::add_arg_connection(Ref<LinkerLink> object_link, Ref<LinkerLink> owner_link) {
+	graph.add_arg_edge(object_link, owner_link);
+	get_link_connection(object_link, owner_link, LinkConnection::CONNECTION_TYPE_REFRENCE); // create the connection
 }
 
-void LinkerEditorLayout::add_sequence_connection(Ref<LinkerLink> source_link, Ref<LinkerLink> destination_link) {
-	graph.add_sequence_edge(source_link, destination_link);
-	get_link_connection(source_link, destination_link, LinkConnection::CONNECTION_TYPE_SEQUENCE); // create the connection
+void LinkerEditorLayout::add_sequence_connection(Ref<LinkerLink> object_link, Ref<LinkerLink> destination_link) {
+	graph.add_sequence_edge(object_link, destination_link);
+	get_link_connection(object_link, destination_link, LinkConnection::CONNECTION_TYPE_SEQUENCE); // create the connection
 }
 
 Ref<LinkerLink> LinkerEditorLayout::create_scenerefrence(Node *to_node, Node *p_scripted_node) {
@@ -390,7 +390,7 @@ Ref<LinkerLink> LinkerEditorLayout::create_index_call(const String &index, const
 	Ref<LinkerIndexCall> index_call;
 	index_call.instantiate();
 	index_call->set_index(index);
-	index_call->set_source(p_source_link);
+	index_call->set_object(p_source_link);
 	// add arguments
 	return index_call;
 }
@@ -768,10 +768,10 @@ void ConnectNext::_tree_confirmed() {
 
 void ConnectNext::_method_info_confirmed(Dictionary p_info) {
 	MethodInfo mi = MethodInfo::from_dict(p_info);
-	if (source_link.is_valid()) { // scope link
-		StringName source_class = source_link->get_output_info().class_name;
+	if (object_link.is_valid()) { // scope link
+		StringName source_class = object_link->get_output_info().class_name;
 		if (ClassDB::has_method(source_class, mi.name)) {
-			Ref<LinkerLink> link = LinkerEditorLayout::create_index_call(mi.name, source_link, argument_links);
+			Ref<LinkerLink> link = LinkerEditorLayout::create_index_call(mi.name, object_link, argument_links);
 			dropped_link->get_host()->add_link(link);
 			return;
 		}
@@ -800,8 +800,8 @@ void ConnectNext::_property_info_confirmed(Dictionary p_info) {
 
 	bool ctrl = Input::get_singleton()->is_key_pressed(Key::CTRL);
 
-	if (source_link.is_valid()) { // scope link
-		StringName source_class = source_link->get_output_info().class_name;
+	if (object_link.is_valid()) { // scope link
+		StringName source_class = object_link->get_output_info().class_name;
 		if (ClassDB::has_property(source_class, pi.name)) {
 			Ref<LinkerLink> link;
 			if (ctrl) {
@@ -809,7 +809,7 @@ void ConnectNext::_property_info_confirmed(Dictionary p_info) {
 			} else {
 				link = LinkerEditorLayout::create_index_get(pi.name);
 			}
-			link->set_source(source_link);
+			link->set_object(object_link);
 			dropped_link->get_host()->add_link(link);
 			return;
 		}
@@ -845,16 +845,16 @@ void ConnectNext::_registered_link_confirmed(String p_name) {
 }
 
 void ConnectNext::_move_source_to_argument() {
-	if (source_link.is_valid()) {
-		argument_links.insert(0, source_link);
-		source_link = nullptr;
+	if (object_link.is_valid()) {
+		argument_links.insert(0, object_link);
+		object_link = nullptr;
 		_update_link_infos();
 	}
 }
 
 void ConnectNext::_update_link_infos() {
-	if (source_link.is_valid()) {
-		source_info = source_link->get_output_info();
+	if (object_link.is_valid()) {
+		source_info = object_link->get_output_info();
 	} else {
 		source_info = PropertyInfo();
 	}
@@ -878,7 +878,7 @@ void ConnectNext::dropped(Ref<LinkerScript> p_script, const Point2 &p_point) {
 void ConnectNext::dropped(Ref<LinkerLink> p_link, const Point2 &p_point) {
 	// source_flag_pressed(SOURCE_LINK);
 	dropped_link = p_link;
-	source_link = p_link;
+	object_link = p_link;
 	_update_link_infos();
 	results_tree->class_name = source_info.class_name;
 	results_tree->hint_string = source_info.hint_string;

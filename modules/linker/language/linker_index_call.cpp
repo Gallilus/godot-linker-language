@@ -9,8 +9,8 @@ void LinkerIndexCall::_initialize_instance(LinkerLinkInstance *link, LinkerScrip
 	instance->arg_count = arg_links.size();
 	instance->push_count = push_links.size();
 
-	if (source_link.is_valid()) {
-		instance->source_link = source_link->get_instance(p_host, p_stack_size);
+	if (object_link.is_valid()) {
+		instance->object_link = object_link->get_instance(p_host, p_stack_size);
 	}
 
 	for (int i = 0; i < instance->arg_count; i++) {
@@ -35,10 +35,10 @@ void LinkerIndexCall::_initialize_instance(LinkerLinkInstance *link, LinkerScrip
 MethodInfo LinkerIndexCall::get_method_info() const {
 	MethodInfo mi;
 	PropertyInfo pi;
-	if (!get_source().is_valid()) {
+	if (!get_object().is_valid()) {
 		return mi;
 	}
-	pi = get_source()->get_output_info();
+	pi = get_object()->get_output_info();
 
 	ClassDB::get_method_info(pi.class_name, index, &mi);
 	return mi;
@@ -112,12 +112,12 @@ int LinkerIndexCallInstance::_step(StartMode p_start_mode, Callable::CallError &
 	MethodInfo mi;
 	Object *object = nullptr;
 
-	// Check the argument and source conditions
-	if (source_link != nullptr) {
-		object = Object::cast_to<Object>(source_link->get_value());
-		if (!source_link->get_value().has_method(index)) {
+	// Check the argument and object conditions
+	if (object_link != nullptr) {
+		object = Object::cast_to<Object>(object_link->get_value());
+		if (!object_link->get_value().has_method(index)) {
 			r_error.error = Callable::CallError::CALL_ERROR_INVALID_METHOD;
-			r_error_str = "LinkerIndexCall source " + index + "not found in class " + String(object->get_class_name());
+			r_error_str = "LinkerIndexCall object " + index + "not found in class " + String(object->get_class_name());
 			return STEP_ERROR;
 		}
 		ERR_PRINT(String(object->get_class_name()));
@@ -129,7 +129,7 @@ int LinkerIndexCallInstance::_step(StartMode p_start_mode, Callable::CallError &
 	} else {
 		ERR_PRINT("String(object->get_class_name())");
 		r_error.error = Callable::CallError::CALL_ERROR_INVALID_METHOD;
-		r_error_str = "LinkerIndexCall " + index + "no source found";
+		r_error_str = "LinkerIndexCall " + index + "no object found";
 		return STEP_ERROR;
 	}
 

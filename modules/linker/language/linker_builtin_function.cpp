@@ -19,8 +19,8 @@ void LinkerBuiltinFunction::_initialize_instance(LinkerLinkInstance *link, Linke
 	instance->arg_count = arg_links.size();
 	instance->push_count = push_links.size();
 
-	if (source_link.is_valid()) {
-		instance->source_link = source_link->get_instance(p_host, p_stack_size);
+	if (object_link.is_valid()) {
+		instance->object_link = object_link->get_instance(p_host, p_stack_size);
 	}
 
 	for (int i = 0; i < instance->arg_count; i++) {
@@ -994,7 +994,7 @@ bool LinkerBuiltinFunction::can_drop_on_link(Ref<LinkerLink> drag_link) const {
 	return false;
 }
 
-bool LinkerBuiltinFunction::can_drop_on_source(Ref<LinkerLink> drag_link) const {
+bool LinkerBuiltinFunction::can_drop_on_object(Ref<LinkerLink> drag_link) const {
 	return drag_link.is_valid();
 }
 

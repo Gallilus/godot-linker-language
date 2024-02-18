@@ -39,7 +39,7 @@ class LinkControler : public VBoxContainer {
 	bool dragging = false;
 
 	Rect2 rect_this() const;
-	Rect2 rect_source() const;
+	Rect2 rect_object() const;
 	Rect2 rect_arg() const;
 	Rect2 rect_value_1() const;
 	Rect2 rect_index() const;
@@ -55,7 +55,7 @@ class LinkControler : public VBoxContainer {
 	Label *label = nullptr;
 	LineEdit *edit_index = nullptr;
 	TextureRect *icon = nullptr;
-	Control *source_rect = nullptr;
+	Control *object_rect = nullptr;
 	Control *value_rect_1 = nullptr;
 	Control *push_rect = nullptr;
 	Control *value_rect_2 = nullptr; // if value rect is to small

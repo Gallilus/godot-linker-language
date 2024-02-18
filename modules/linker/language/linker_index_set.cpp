@@ -12,8 +12,8 @@ void LinkerIndexSet::_initialize_instance(LinkerLinkInstance *link, LinkerScript
 	instance->arg_count = arg_links.size();
 	instance->push_count = push_links.size();
 
-	if (source_link.is_valid()) {
-		instance->source_link = source_link->get_instance(p_host, p_stack_size);
+	if (object_link.is_valid()) {
+		instance->object_link = object_link->get_instance(p_host, p_stack_size);
 	}
 
 	for (int i = 0; i < instance->arg_count; i++) {
@@ -41,10 +41,10 @@ Variant LinkerIndexSet::get_placeholder_value() const {
 
 Dictionary LinkerIndexSet::get_placeholder_info() const {
 	PropertyInfo pi;
-	if (!get_source().is_valid()) {
+	if (!get_object().is_valid()) {
 		return Dictionary();
 	}
-	pi = get_source()->get_output_info();
+	pi = get_object()->get_output_info();
 	ClassDB::get_property_info(pi.class_name, index, &pi);
 	Dictionary d;
 	d["type"] = "PropertyInfo";
@@ -90,8 +90,8 @@ int LinkerIndexSetInstance::_step(StartMode p_start_mode, Callable::CallError &r
 	}
 
 	// check and use source link
-	if (source_link != nullptr) {
-		source_link->get_value().set(index, set_value);
+	if (object_link != nullptr) {
+		object_link->get_value().set(index, set_value);
 		return STEP_COMPLETE;
 	}
 

@@ -11,8 +11,8 @@ void LinkerIndexGet::_initialize_instance(LinkerLinkInstance *link, LinkerScript
 	instance->arg_count = arg_links.size();
 	instance->push_count = push_links.size();
 
-	if (source_link.is_valid()) {
-		instance->source_link = source_link->get_instance(p_host, p_stack_size);
+	if (object_link.is_valid()) {
+		instance->object_link = object_link->get_instance(p_host, p_stack_size);
 	}
 
 	for (int i = 0; i < instance->arg_count; i++) {
@@ -35,18 +35,18 @@ void LinkerIndexGet::_initialize_instance(LinkerLinkInstance *link, LinkerScript
 }
 
 Variant LinkerIndexGet::get_placeholder_value() const {
-	if (source_link != nullptr) {
-		return source_link->get_placeholder_value().get(index);
+	if (object_link != nullptr) {
+		return object_link->get_placeholder_value().get(index);
 	}
 	return Variant();
 }
 
 Dictionary LinkerIndexGet::get_placeholder_info() const {
 	PropertyInfo pi;
-	if (!get_source().is_valid()) {
+	if (!get_object().is_valid()) {
 		return Dictionary();
 	}
-	pi = get_source()->get_output_info();
+	pi = get_object()->get_output_info();
 	ClassDB::get_property_info(pi.class_name, index, &pi);
 	Dictionary d;
 	d["type"] = "PropertyInfo";
@@ -89,9 +89,9 @@ void LinkerIndexGet::remove_instance(LinkerScriptInstance *p_host, int p_stack_s
 ////////////////////////////////////////////////////////////////////////
 
 int LinkerIndexGetInstance::_step(StartMode p_start_mode, Callable::CallError &r_error, String &r_error_str) {
-	// check and use source link
-	if (source_link != nullptr) {
-		value = source_link->get_value().get(index);
+	// check and use object link
+	if (object_link != nullptr) {
+		value = object_link->get_value().get(index);
 		return STEP_COMPLETE;
 	}
 
@@ -104,7 +104,7 @@ int LinkerIndexGetInstance::_step(StartMode p_start_mode, Callable::CallError &r
 		return STEP_COMPLETE;
 	} else {
 		r_error.error = Callable::CallError::CALL_ERROR_INSTANCE_IS_NULL;
-		r_error_str = "LinkerIndexGet " + String(index) + "expects a source link or valid script property";
+		r_error_str = "LinkerIndexGet " + String(index) + "expects a object link or valid script property";
 		return STEP_ERROR;
 	}
 }

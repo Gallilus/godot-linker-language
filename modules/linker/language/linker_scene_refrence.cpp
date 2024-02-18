@@ -28,8 +28,8 @@ void LinkerSceneRefrence::_initialize_instance(LinkerLinkInstance *link, LinkerS
 	instance->arg_count = arg_links.size();
 	instance->push_count = push_links.size();
 
-	if (source_link.is_valid()) {
-		instance->source_link = source_link->get_instance(p_host, p_stack_size);
+	if (object_link.is_valid()) {
+		instance->object_link = object_link->get_instance(p_host, p_stack_size);
 	}
 
 	for (int i = 0; i < instance->arg_count; i++) {

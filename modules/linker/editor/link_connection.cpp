@@ -11,7 +11,7 @@ void LinkConnection::_update_connection() {
 	}
 	Color connection_color;
 	switch (connection_type) {
-		case CONNECTION_TYPE_SOURCE: {
+		case CONNECTION_TYPE_OBJECT_REF: {
 			curve.clear_points();
 			Vector2 start_pos = start->get_connection_point_right();
 			Vector2 end_pos = end->get_connection_point_left();
@@ -113,8 +113,8 @@ void LinkConnection::check_validity() {
 	}
 
 	switch (connection_type) {
-		case CONNECTION_TYPE_SOURCE: {
-			Ref<LinkerLink> source_link = end->get_link()->get_source();
+		case CONNECTION_TYPE_OBJECT_REF: {
+			Ref<LinkerLink> source_link = end->get_link()->get_object();
 			if (source_link.ptr() == start->get_link()) {
 				valid = true;
 				return;
