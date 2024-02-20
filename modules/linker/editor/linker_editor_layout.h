@@ -50,7 +50,7 @@ class LinkerEditorLayout : public Container {
 	};
 
 	Ref<LinkerScript> script;
-	EditorGraph graph;
+	Ref<EditorGraph> graph;
 
 	HashMap<Ref<LinkerLink>, LinkControler *> link_contorlers;
 	HashMap<Ref<LinkerLink>, HashMap<Ref<LinkerLink>, Vector<LinkConnection *>>> connections_map;
@@ -61,9 +61,13 @@ class LinkerEditorLayout : public Container {
 	ConnectNext *connect_next = nullptr;
 	void _update_members();
 
+	PackedVector2Array dummy_positions;
+	Vector<PackedVector2Array> dummy_routs;
+
 protected:
 	static void _bind_methods();
 	void _notification(int p_what);
+	void _draw_debug();
 
 	LinkControler *make_link_controler(Ref<LinkerLink> p_link);
 

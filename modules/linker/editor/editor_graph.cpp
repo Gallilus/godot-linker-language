@@ -15,21 +15,29 @@ int EditorGraph::get_vertex_id(Ref<LinkerLink> p_linker_link) const {
 	return -1;
 }
 
-HashMap<Ref<LinkerLink>, Vector2> EditorGraph::get_linker_link_positions() {
-	HashMap<Ref<LinkerLink>, Vector2> positions;
+HashMap<Ref<LinkerLink>, PackedVector2Array> EditorGraph::get_linker_link_positions() {
+	HashMap<Ref<LinkerLink>, PackedVector2Array> positions;
 	igraph_matrix_t pos_matrix;
 	igraph_matrix_init(&pos_matrix, 0, 0);
-	//	igraph_layout_sugiyama(&graph, &pos_matrix, NULL, NULL, NULL, 30.0, 150.0, 100, NULL);
+	igraph_t extended_graph;
+	igraph_vector_int_t extd_to_orig_eids;
+	igraph_vector_int_init(&extd_to_orig_eids, 0);
 
-	igraph_layout_sugiyama(&graph, &pos_matrix, NULL, NULL, NULL, 1.0, 1.0, 100, NULL);
+	igraph_layout_sugiyama(&graph, &pos_matrix, &extended_graph, &extd_to_orig_eids, NULL, 1.0, 1.0, 100, NULL);
 
-	for (igraph_integer_t i = 0; i < igraph_matrix_nrow(&pos_matrix); i++) {
+	for (igraph_integer_t i = 0; i < igraph_matrix_size(&pos_matrix); i++) {
 		igraph_real_t y = igraph_matrix_get(&pos_matrix, i, 0);
 		igraph_real_t x = igraph_matrix_get(&pos_matrix, i, 1);
-		positions[links[i]] = Vector2(x, y);
+		if (links.has(i)) {
+			positions[links[i]].push_back(Vector2(x, y));
+		} else {
+			positions[links[VECTOR(extd_to_orig_eids)[i]]].push_back(Vector2(x, y)); // create the dummy routs
+		}
 	}
 
 	igraph_matrix_destroy(&pos_matrix);
+	igraph_destroy(&extended_graph);
+	igraph_vector_int_destroy(&extd_to_orig_eids);
 	return positions;
 }
 

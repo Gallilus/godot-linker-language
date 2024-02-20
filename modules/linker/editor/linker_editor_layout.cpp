@@ -33,6 +33,20 @@ void LinkerEditorLayout::_notification(int p_what) {
 		case NOTIFICATION_SORT_CHILDREN: {
 			position_controlers();
 		} break;
+		case NOTIFICATION_DRAW: {
+			_draw_debug();
+		} break;
+	}
+}
+
+void LinkerEditorLayout::_draw_debug() {
+	for (const Vector2 &E : dummy_positions) {
+		draw_circle(E, 3, Color(1, 0, 0, 1));
+	}
+	for (const PackedVector2Array &E : dummy_routs) {
+		for (int i = 0; i < E.size(); i++) {
+			draw_line(E[0], E[1], Color(1, 0, 0, 1));
+		}
 	}
 }
 
@@ -286,7 +300,8 @@ void LinkerEditorLayout::update_graph() {
 		return;
 	}
 
-	graph = EditorGraph();
+	graph = Ref<EditorGraph>();
+	graph.instantiate();
 
 	{ // clear layout
 		for (int i = 0; i < get_child_count(); i++) {
@@ -311,48 +326,63 @@ void LinkerEditorLayout::update_graph() {
 
 void LinkerEditorLayout::position_controlers() {
 	PointRemapper point_map;
-	HashMap<LinkControler *, Vector2> controler_normalised_map;
+	HashMap<LinkControler *, PackedVector2Array> controler_normalised_map;
+
 	// fill size with base values
-	for (const KeyValue<Ref<LinkerLink>, Vector2> &E : graph.get_linker_link_positions()) {
+	for (const KeyValue<Ref<LinkerLink>, PackedVector2Array> &E : graph->get_linker_link_positions()) {
 		Ref<LinkerLink> link = E.key;
 		if (link.is_valid()) {
 			LinkControler *controler = get_link_controler(link);
 			controler_normalised_map[controler] = E.value;
-			point_map.add_point(E.value, controler->get_size(), controler->to_string(), link->get_link_idx());
-		} else {
-			point_map.add_point(E.value);
+			point_map.add_point(E.value[0], controler->get_size(), controler->to_string(), link->get_link_idx());
+			for (int i = 1; i < E.value.size(); i++) {
+				point_map.add_point(E.value[i], Vector2(0, 0), controler->to_string()); // size 0,0 to hide dummy points
+			}
 		}
 	}
 
+	dummy_routs.clear();
 	HashMap<Vector2, Vector2> size_map = point_map.get_point_map();
 
 	// apply real position size
-	for (const KeyValue<LinkControler *, Vector2> &E : controler_normalised_map) {
+	for (const KeyValue<LinkControler *, PackedVector2Array> &E : controler_normalised_map) {
 		LinkControler *controler = E.key;
-		Vector2 norm_pos = E.value;
+		Vector2 norm_pos = E.value[0];
 		controler->set_visible(true);
 		Ref<Tween> tween = create_tween();
 		tween->tween_property(controler, NodePath("position"), size_map[norm_pos], 0.5);
+
+		for (int i = 1; i < E.value.size(); i++) {
+			PackedVector2Array path;
+			path.push_back(size_map[E.value[i - 1]]);
+			path.push_back(size_map[E.value[i]]);
+			// dummy_routs.push_back(path);
+		}
 	}
 }
 
 void LinkerEditorLayout::add_link(Ref<LinkerLink> p_link) {
-	graph.add_vertex(p_link);
+	graph->add_vertex(p_link);
 	get_link_controler(p_link); // create the controler
 }
 
 void LinkerEditorLayout::add_object_connection(Ref<LinkerLink> object_link, Ref<LinkerLink> owner_link) {
-	graph.add_arg_edge(object_link, owner_link);
-	get_link_connection(object_link, owner_link, LinkConnection::CONNECTION_TYPE_OBJECT_REF); // create the connection
+	if (owner_link->get_class_name() == "LinkerIndexSet") {
+		graph->add_arg_edge(owner_link, object_link);
+		get_link_connection(owner_link, object_link, LinkConnection::CONNECTION_TYPE_OBJECT_REF); // create the connection
+	} else {
+		graph->add_arg_edge(object_link, owner_link);
+		get_link_connection(object_link, owner_link, LinkConnection::CONNECTION_TYPE_OBJECT_REF); // create the connection
+	}
 }
 
 void LinkerEditorLayout::add_arg_connection(Ref<LinkerLink> object_link, Ref<LinkerLink> owner_link) {
-	graph.add_arg_edge(object_link, owner_link);
+	graph->add_arg_edge(object_link, owner_link);
 	get_link_connection(object_link, owner_link, LinkConnection::CONNECTION_TYPE_REFRENCE); // create the connection
 }
 
 void LinkerEditorLayout::add_sequence_connection(Ref<LinkerLink> object_link, Ref<LinkerLink> destination_link) {
-	graph.add_sequence_edge(object_link, destination_link);
+	graph->add_sequence_edge(object_link, destination_link);
 	get_link_connection(object_link, destination_link, LinkConnection::CONNECTION_TYPE_SEQUENCE); // create the connection
 }
 

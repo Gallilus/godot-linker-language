@@ -13,6 +13,7 @@ class EditorGraph : public RefCounted {
 	igraph_t graph;
 
 	HashMap<int, Ref<LinkerLink>> links; // key: igraph vertex id
+	Vector<Vector2> sizes;
 
 protected:
 	static void _bind_methods();
@@ -20,7 +21,7 @@ protected:
 	int get_vertex_id(Ref<LinkerLink> p_linker_link) const;
 
 public:
-	HashMap<Ref<LinkerLink>, Vector2> get_linker_link_positions();
+	HashMap<Ref<LinkerLink>, PackedVector2Array> get_linker_link_positions();
 	void add_vertex(Ref<LinkerLink> p_link);
 	void add_edge(Ref<LinkerLink> p_link_from, Ref<LinkerLink> p_link_to, String p_edge_category);
 	void add_arg_edge(Ref<LinkerLink> arg_link, Ref<LinkerLink> owner_link);
