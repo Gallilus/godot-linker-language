@@ -121,6 +121,7 @@ class ResultTree : public Tree {
 	String search_term = "";
 	String class_name = "";
 	String hint_string = "";
+	int variant_type = Variant::VARIANT_MAX;
 
 	List<StringName> selectable_enums;
 	List<MethodInfo> selectable_methods;

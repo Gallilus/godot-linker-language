@@ -462,19 +462,47 @@ void ResultTree::set_show_setters_getters(bool p_show_setters_getters) {
 }
 
 void ResultTree::update_result_lists() {
-	if (ClassDB::class_exists(class_name)) {
-		ClassDB::get_enum_list(class_name, &selectable_enums, true);
-		ClassDB::get_method_list(class_name, &selectable_methods, true, true);
-		ClassDB::get_signal_list(class_name, &selectable_signals, true);
-		ClassDB::get_property_list(class_name, &selectable_properties, true);
-		ClassDB::get_integer_constant_list(class_name, &selectable_integer_constants, true);
-	}
-	if (hint_string.is_absolute_path()) {
-		Ref<Script> _script = ResourceLoader::load(hint_string);
-		if (_script.is_valid()) {
-			_script->get_script_method_list(&selectable_methods);
-			_script->get_script_signal_list(&selectable_signals);
-			_script->get_script_property_list(&selectable_properties);
+	selectable_enums.clear();
+	selectable_methods.clear();
+	selectable_signals.clear();
+	selectable_properties.clear();
+	selectable_integer_constants.clear();
+	if (variant_type == Variant::OBJECT) {
+		if (ClassDB::class_exists(class_name)) {
+			ClassDB::get_enum_list(class_name, &selectable_enums, true);
+			ClassDB::get_method_list(class_name, &selectable_methods, true, true);
+			ClassDB::get_signal_list(class_name, &selectable_signals, true);
+			ClassDB::get_property_list(class_name, &selectable_properties, true);
+			ClassDB::get_integer_constant_list(class_name, &selectable_integer_constants, true);
+		}
+		if (hint_string.is_absolute_path()) {
+			Ref<Script> _script = ResourceLoader::load(hint_string);
+			if (_script.is_valid()) {
+				_script->get_script_method_list(&selectable_methods);
+				_script->get_script_signal_list(&selectable_signals);
+				_script->get_script_property_list(&selectable_properties);
+			}
+		}
+	} else if (variant_type != Variant::VARIANT_MAX) {
+		Variant::Type vt = static_cast<Variant::Type>(variant_type);
+		List<StringName> enum_types;
+		List<StringName> methods;
+		Variant::get_builtin_method_list(vt, &methods);
+		for (const StringName &E : methods) {
+			selectable_methods.push_back(Variant::get_builtin_method_info(vt, E));
+		}
+		List<StringName> properties;
+		Variant::get_member_list(vt, &properties);
+		for (const StringName &E : properties) {
+			PropertyInfo prop_info;
+			prop_info.name = E;
+			prop_info.type = Variant::get_member_type(vt, E);
+			selectable_properties.push_back(prop_info);
+		}
+		List<StringName> names;
+		Variant::get_constants_for_type(vt, &names);
+		for (const String &E : names) {
+			selectable_integer_constants.push_back(String(E));
 		}
 	}
 }
@@ -485,7 +513,8 @@ void ResultTree::update_results(const String &p_search_term) {
 }
 
 void ResultTree::update_results() {
-	get_root()->clear_children();
+	clear();
+	create_item(); // create root
 
 	Ref<Texture2D> icon = Control::get_theme_icon(SNAME("Enum"), EditorStringName(EditorIcons));
 	for (List<StringName>::Element *E = selectable_enums.front(); E; E = E->next()) {
@@ -579,7 +608,6 @@ void ResultTree::update_results() {
 }
 
 ResultTree::ResultTree() {
-	create_item(); // create root
 }
 
 void ConnectNext::source_flag_pressed(int p_flag) {
@@ -884,9 +912,10 @@ void ConnectNext::_move_source_to_argument() {
 
 void ConnectNext::_update_link_infos() {
 	if (object_link.is_valid()) {
-		source_info = object_link->get_output_info();
+		// source_info = object_link->get_output_info(); // only when dragging from left of controler?
+		source_info = dropped_link->get_output_info();
 	} else {
-		source_info = PropertyInfo();
+		source_info = dropped_link->get_output_info();
 	}
 	arguments_info.clear();
 	for (int i = 0; i < argument_links.size(); i++) {
@@ -908,10 +937,16 @@ void ConnectNext::dropped(Ref<LinkerScript> p_script, const Point2 &p_point) {
 void ConnectNext::dropped(Ref<LinkerLink> p_link, const Point2 &p_point) {
 	// source_flag_pressed(SOURCE_LINK);
 	dropped_link = p_link;
-	object_link = p_link;
+	object_link = p_link->get_object();
 	_update_link_infos();
-	results_tree->class_name = source_info.class_name;
-	results_tree->hint_string = source_info.hint_string;
+	if (source_info.type == Variant::OBJECT) {
+		results_tree->class_name = source_info.class_name;
+		results_tree->hint_string = source_info.hint_string;
+		results_tree->class_name = Variant::get_type_name(source_info.type);
+	} else {
+		results_tree->variant_type = source_info.type;
+		results_tree->class_name = Variant::get_type_name(source_info.type);
+	}
 	search_text->set_text("");
 	popup(p_point);
 	results_tree->update_result_lists();
