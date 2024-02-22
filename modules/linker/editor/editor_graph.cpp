@@ -25,7 +25,7 @@ HashMap<Ref<LinkerLink>, PackedVector2Array> EditorGraph::get_linker_link_positi
 
 	igraph_layout_sugiyama(&graph, &pos_matrix, &extended_graph, &extd_to_orig_eids, NULL, 1.0, 1.0, 100, NULL);
 
-	for (igraph_integer_t i = 0; i < igraph_matrix_size(&pos_matrix); i++) {
+	for (igraph_integer_t i = 0; i < igraph_matrix_nrow(&pos_matrix); i++) {
 		igraph_real_t y = igraph_matrix_get(&pos_matrix, i, 0);
 		igraph_real_t x = igraph_matrix_get(&pos_matrix, i, 1);
 		if (links.has(i)) {
