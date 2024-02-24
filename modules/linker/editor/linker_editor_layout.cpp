@@ -467,6 +467,7 @@ void ResultTree::update_result_lists() {
 	selectable_signals.clear();
 	selectable_properties.clear();
 	selectable_integer_constants.clear();
+	selectable_operators.clear();
 	if (variant_type == Variant::OBJECT) {
 		if (ClassDB::class_exists(class_name)) {
 			ClassDB::get_enum_list(class_name, &selectable_enums, true);
@@ -503,6 +504,13 @@ void ResultTree::update_result_lists() {
 		Variant::get_constants_for_type(vt, &names);
 		for (const String &E : names) {
 			selectable_integer_constants.push_back(String(E));
+		}
+	}
+	for (int i = 0; i < Variant::OP_MAX; i++) {
+		Variant::Operator optr = static_cast<Variant::Operator>(i);
+		Variant::ValidatedOperatorEvaluator ev = Variant::get_validated_operator_evaluator(optr, static_cast<Variant::Type>(variant_type), static_cast<Variant::Type>(variant_type));
+		if (ev) {
+			selectable_operators.push_back(optr);
 		}
 	}
 }
@@ -581,6 +589,17 @@ void ResultTree::update_results() {
 		ti->set_meta("integer_constant", E->get());
 	}
 
+	icon = Control::get_theme_icon(SNAME("Add"), EditorStringName(EditorIcons));
+	for (const Variant::Operator &E : selectable_operators) {
+		TreeItem *ti = get_root()->create_child();
+		ti->set_text(1, Variant::get_operator_name(E));
+		ti->set_tooltip_text(1, Variant::get_operator_name(E));
+		ti->set_icon(1, icon);
+		ti->set_meta("type", "operator");
+		ti->set_meta("operator", E);
+	}
+
+	icon = Control::get_theme_icon(SNAME("MemberConstant"), EditorStringName(EditorIcons));
 	List<String> ls_registered_links;
 	LinkerLanguage::get_singleton()->get_registered_link_names(&ls_registered_links);
 	while (!ls_registered_links.is_empty()) {

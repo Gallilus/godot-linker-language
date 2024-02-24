@@ -128,6 +128,7 @@ class ResultTree : public Tree {
 	List<MethodInfo> selectable_signals;
 	List<PropertyInfo> selectable_properties;
 	List<String> selectable_integer_constants;
+	List<Variant::Operator> selectable_operators;
 
 protected:
 	static void _bind_methods() {}
