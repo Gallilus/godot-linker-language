@@ -133,7 +133,6 @@ void LinkerLink::add_arg_link_ref(Ref<LinkerLink> p_link) {
 void LinkerLink::set_arg_link_ref(Ref<LinkerLink> p_link, int p_arg_idx) {
 	if (arg_links.size() <= p_arg_idx) {
 		arg_links.resize(p_arg_idx + 1);
-		ERR_PRINT("resize push_links to " + itos(p_arg_idx + 1));
 	}
 	arg_links.set(p_arg_idx, p_link);
 	host->emit_signal("changed");
