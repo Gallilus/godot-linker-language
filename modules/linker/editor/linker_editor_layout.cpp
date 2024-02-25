@@ -514,7 +514,7 @@ void ResultTree::update_result_lists() {
 			selectable_integer_constants.push_back(String(E));
 		}
 	}
-	for (int i = 0; i < Variant::OP_MAX; i++) {
+	for (int i = 0; i < Variant::OP_MAX - 1; i++) {
 		Variant::Operator optr = static_cast<Variant::Operator>(i);
 		Variant::ValidatedOperatorEvaluator ev = Variant::get_validated_operator_evaluator(optr, static_cast<Variant::Type>(variant_type), static_cast<Variant::Type>(variant_type));
 		if (ev) {
