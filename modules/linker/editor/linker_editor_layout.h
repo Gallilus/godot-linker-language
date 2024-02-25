@@ -7,6 +7,7 @@
 #include "../language/linker_language.h"
 #include "../language/linker_scene_refrence.h"
 #include "../language/linker_script.h"
+#include "../language/linker_variant_operator.h"
 #include "editor_graph.h"
 
 #include "core/variant/variant_utility.h"
@@ -104,6 +105,7 @@ public:
 	static Ref<LinkerLink> create_scenerefrence(Node *to_node, Node *p_scripted_node = nullptr);
 	static Ref<LinkerLink> create_index_get(const String &index);
 	static Ref<LinkerLink> create_index_set(const String &index);
+	static Ref<LinkerLink> create_variant_operator(const Variant::Operator &p_optr);
 	static Ref<LinkerLink> create_index_call(const String &index, const Ref<LinkerLink> &p_source_link, const Vector<Ref<LinkerLink>> &p_arguments);
 
 	LinkerEditorLayout();
@@ -228,6 +230,7 @@ protected:
 	void _tree_confirmed();
 	void _method_info_confirmed(Dictionary p_info);
 	void _property_info_confirmed(Dictionary p_info);
+	void _operator_confirmed(Variant::Operator p_optr);
 	void _registered_link_confirmed(String p_name);
 	void _move_source_to_argument();
 	void _update_link_infos();

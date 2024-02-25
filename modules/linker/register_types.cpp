@@ -19,7 +19,7 @@
 #include "language/linker_saver.h"
 #include "language/linker_scene_refrence.h"
 #include "language/linker_script.h"
-
+#include "language/linker_variant_operator.h"
 
 using namespace godot;
 
@@ -46,6 +46,7 @@ void initialize_linker_module(ModuleInitializationLevel p_level) {
 		GDREGISTER_CLASS(LinkerIndexSet);
 		GDREGISTER_CLASS(LinkerFunction);
 		GDREGISTER_CLASS(LinkerBuiltinFunction);
+		GDREGISTER_CLASS(LinkerVariantOperator);
 
 		linker_loader.instantiate();
 		ResourceLoader::add_resource_format_loader(linker_loader);

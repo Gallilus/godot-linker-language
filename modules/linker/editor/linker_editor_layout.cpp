@@ -31,7 +31,8 @@ void LinkerEditorLayout::_bind_methods() {
 void LinkerEditorLayout::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_SORT_CHILDREN: {
-			position_controlers();
+			// update_graph();
+			// position_controlers();
 		} break;
 		case NOTIFICATION_DRAW: {
 			_draw_debug();
@@ -416,6 +417,13 @@ Ref<LinkerLink> LinkerEditorLayout::create_index_set(const String &index) {
 	return index_set;
 }
 
+Ref<LinkerLink> LinkerEditorLayout::create_variant_operator(const Variant::Operator &p_optr) {
+	Ref<LinkerVariantOperator> variant_operator;
+	variant_operator.instantiate();
+	variant_operator->set_operator(p_optr);
+	return variant_operator;
+}
+
 Ref<LinkerLink> LinkerEditorLayout::create_index_call(const String &index, const Ref<LinkerLink> &p_source_link, const Vector<Ref<LinkerLink>> &p_arguments) {
 	Ref<LinkerIndexCall> index_call;
 	index_call.instantiate();
@@ -595,8 +603,8 @@ void ResultTree::update_results() {
 		ti->set_text(1, Variant::get_operator_name(E));
 		ti->set_tooltip_text(1, Variant::get_operator_name(E));
 		ti->set_icon(1, icon);
-		ti->set_meta("type", "operator");
-		ti->set_meta("operator", E);
+		ti->set_meta("type", "Operator");
+		ti->set_meta("Operator", E);
 	}
 
 	icon = Control::get_theme_icon(SNAME("MemberConstant"), EditorStringName(EditorIcons));
@@ -833,6 +841,9 @@ void ConnectNext::_tree_confirmed() {
 		_method_info_confirmed(ti->get_meta("MethodInfo"));
 	} else if (ti->get_meta("type") == "PropertyInfo") {
 		_property_info_confirmed(ti->get_meta("PropertyInfo"));
+	} else if (ti->get_meta("type") == "Operator") {
+		int optr = ti->get_meta("Operator");
+		_operator_confirmed(static_cast<Variant::Operator>(optr));
 	} else {
 		List<StringName> keys;
 		ti->get_meta_list(&keys);
@@ -912,6 +923,15 @@ void ConnectNext::_property_info_confirmed(Dictionary p_info) {
 		// 	dropped_script->add_link(link);
 		// 	return;
 		// }
+	}
+}
+
+void ConnectNext::_operator_confirmed(Variant::Operator p_optr) {
+	Ref<LinkerLink> link = LinkerEditorLayout::create_variant_operator(p_optr);
+	if (dropped_script.is_valid()) {
+		dropped_script->add_link(link);
+	} else if (dropped_link.is_valid()) {
+		dropped_link->get_host()->add_link(link);
 	}
 }
 
