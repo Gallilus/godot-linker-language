@@ -89,6 +89,10 @@ int LinkerIndexSetInstance::_step(StartMode p_start_mode, Callable::CallError &r
 		return STEP_ERROR;
 	}
 
+	if (Engine::get_singleton()->is_editor_hint()) {
+		return STEP_COMPLETE; // do not set a value in the editor until PlaceHolder is implemented
+	}
+
 	// check and use source link
 	if (object_link != nullptr) {
 		object_link->get_value().set(index, set_value);
