@@ -698,10 +698,11 @@ bool LinkerScriptInstance::property_get_revert(const StringName &p_name, Variant
 }
 
 void LinkerScriptInstance::get_method_list(List<MethodInfo> *p_list) const {
+	return script->get_script_method_list(p_list);
 }
 
 bool LinkerScriptInstance::has_method(const StringName &p_method) const {
-	return false;
+	return script->has_method(p_method);
 }
 
 Variant LinkerScriptInstance::callp(const StringName &p_method, const Variant **p_args, int p_argcount, Callable::CallError &r_error) {
@@ -714,8 +715,11 @@ Variant LinkerScriptInstance::callp(const StringName &p_method, const Variant **
 	}
 	int total_stack_size = 0;
 
+	if (Engine::get_singleton()->is_editor_hint() && !script->is_tool()) {
+		return Variant(); // do not _call_internal on toolles scripts in the editor
+	}
+
 	return _call_internal(p_method, total_stack_size, 0, 0, false, r_error);
-	//return Variant();
 }
 
 Variant LinkerScriptInstance::_call_internal(const StringName &p_method, int p_stack_size, int p_flow_stack_pos, int p_pass, bool p_resuming_yield, Callable::CallError &r_error) {
@@ -731,7 +735,7 @@ Variant LinkerScriptInstance::_call_internal(const StringName &p_method, int p_s
 
 		current_node_id = script->function_refrences[p_method]->get_link_idx();
 
-		LinkerLinkInstance::StartMode start_mode;
+		LinkerLinkInstance::StartMode start_mode = LinkerLinkInstance::START_MODE_BEGIN;
 		{
 			if (p_resuming_yield) {
 				start_mode = LinkerLinkInstance::START_MODE_RESUME_YIELD;
@@ -744,6 +748,7 @@ Variant LinkerScriptInstance::_call_internal(const StringName &p_method, int p_s
 
 		LinkerLinkInstance *link = script->function_refrences[p_method]->get_instance(this, p_stack_size);
 		call_stack.push_back(link);
+		//		ERR_PRINT("LinkerScriptInstance::_call_internal: " + String(p_method));
 		LinkerFunctionInstance *function_instance = static_cast<LinkerFunctionInstance *>(link);
 		if (function_instance == nullptr) {
 			error_str = "LinkerScriptInstance::_call_internal: instance is not a LinkerFunctionInstance";
