@@ -267,8 +267,9 @@ int LinkerLinkInstance::step(StartMode p_start_mode, Callable::CallError &r_erro
 	int step_state;
 	int object_count = 0;
 
-	if (stepped && StartMode::START_MODE_BEGIN == p_start_mode) {
-		return STEP_COMPLETE;
+	if (StartMode::START_MODE_BEGIN == p_start_mode) {
+		step_count = 0;
+		stepped = false;
 	}
 
 	if (running && StartMode::START_MODE_BEGIN == p_start_mode) {
