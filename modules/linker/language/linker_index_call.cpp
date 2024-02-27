@@ -165,7 +165,3 @@ int LinkerIndexCallInstance::_step(StartMode p_start_mode, Callable::CallError &
 
 LinkerIndexCallInstance::~LinkerIndexCallInstance() {
 }
-
-// if (!Engine::get_singleton()->is_editor_hint()) { //only update cache if editor exists, it's pointless otherwise
-// 	return;
-// }
